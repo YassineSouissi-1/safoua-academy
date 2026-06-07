@@ -237,104 +237,81 @@ const VOCABULARY_CATEGORIES = [
   },
 ];
 
-// ─── Audio: ElevenLabs via backend proxy ─────────────────────────────────────
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// ─── Audio: single source of truth ───────────────────────────────────────────
+const GT_TTS = (text) =>
+  `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(text)}`;
 
-// Global state — one audio at a time, tracks which button is "playing"
-let _currentAudio  = null;
-let _currentBlobUrl = null;
-let _playingSetters = new Set(); // Set of React setState fns from AudioButton
-
-function notifyAllButtons() {
-  _playingSetters.forEach(fn => fn(_currentAudio?.dataset?.id));
-}
-
+// Global audio instance — ensures only ONE audio plays at a time, no doubles
+let _currentAudio = null;
 function stopAllAudio() {
   if (_currentAudio) {
     try { _currentAudio.pause(); _currentAudio.currentTime = 0; } catch (_) {}
     _currentAudio = null;
   }
-  if (_currentBlobUrl) {
-    URL.revokeObjectURL(_currentBlobUrl);
-    _currentBlobUrl = null;
-  }
-  try { window.speechSynthesis?.cancel(); } catch (_) {}
+  try { window.speechSynthesis.cancel(); } catch (_) {}
   notifyAllButtons();
 }
 
-async function playArabicAudio(text, buttonId) {
+function playArabicAudio(text, buttonId) {
   stopAllAudio();
 
-  // Mark the button as "loading" immediately
-  const loadingAudio = { dataset: { id: buttonId } };
-  _currentAudio = loadingAudio;
+  const url = GT_TTS(text);
+  const audio = new Audio(url);
+  audio.crossOrigin = "anonymous";
+  audio.dataset.id = buttonId;
+  _currentAudio = audio;
   notifyAllButtons();
 
-  try {
-    const res = await fetch(`${API_BASE}/api/tts`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ text }),
-    });
+  const MIN_DISPLAY_MS = 2000; // "En cours" shows for at least 2s
+  const startTime = Date.now();
 
-    // If another audio was triggered while we were loading, abort
-    if (_currentAudio !== loadingAudio) return;
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const blob   = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    _currentBlobUrl = blobUrl;
-
-    const audio = new Audio(blobUrl);
-    audio.dataset.id = buttonId;
-    _currentAudio = audio;
-    notifyAllButtons();
-
-    const MIN_DISPLAY_MS = 1500;
-    const startTime = Date.now();
-
-    const finish = () => {
-      URL.revokeObjectURL(blobUrl);
-      _currentBlobUrl = null;
-      _currentAudio = null;
-      const elapsed = Date.now() - startTime;
-      const remaining = MIN_DISPLAY_MS - elapsed;
-      if (remaining > 0) setTimeout(notifyAllButtons, remaining);
-      else notifyAllButtons();
-    };
-
-    audio.onended = finish;
-    audio.onerror = () => { finish(); _fallbackWebSpeech(text); };
-    await audio.play();
-
-  } catch (err) {
-    console.warn("[AlphabetArabe] ElevenLabs TTS failed, using fallback:", err.message);
-    if (_currentAudio === null || _currentAudio?.dataset?.id === buttonId) {
-      _currentAudio = null;
+  const finish = () => {
+    _currentAudio = null;
+    const elapsed = Date.now() - startTime;
+    const remaining = MIN_DISPLAY_MS - elapsed;
+    if (remaining > 0) {
+      setTimeout(() => notifyAllButtons(), remaining);
+    } else {
       notifyAllButtons();
     }
-    _fallbackWebSpeech(text);
-  }
+  };
+
+  audio.onended = finish;
+  audio.onerror = () => {
+    _currentAudio = null;
+    notifyAllButtons();
+    speakTextFallback(text, buttonId);
+  };
+
+  audio.play().catch(() => {
+    _currentAudio = null;
+    notifyAllButtons();
+    speakTextFallback(text, buttonId);
+  });
+}
+let _playingSetters = new Set(); // tracks all AudioButton setState fns
+
+function notifyAllButtons() {
+  _playingSetters.forEach(fn => fn(_currentAudio?.dataset?.id));
 }
 
-function _fallbackWebSpeech(text) {
+function speakTextFallback(text, buttonId) {
   const synth = window.speechSynthesis;
-  if (!synth) return;
   synth.cancel();
   const doSpeak = () => {
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "ar-SA"; u.rate = 0.75; u.pitch = 1.0;
+    u.lang = "ar-SA"; u.rate = 0.65; u.pitch = 1.0;
     const arVoice = synth.getVoices().find(v => v.lang.startsWith("ar"));
     if (arVoice) u.voice = arVoice;
+    u.onend = u.onerror = () => { _currentAudio = null; notifyAllButtons(); };
     synth.speak(u);
   };
   if (synth.getVoices().length > 0) doSpeak();
-  else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; setTimeout(doSpeak, 800); }
+  else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; setTimeout(doSpeak, 1000); }
 }
 
-// Backward-compat alias
-function playLetterAudio(audioKey, ttsText) {
+// Kept for backward-compat with call sites that pass audioKey (ignored now — all use GT_TTS)
+function playLetterAudio(audioKey, ttsText, onStart, onEnd) {
   playArabicAudio(ttsText, audioKey);
 }
 
@@ -348,45 +325,34 @@ function AudioButton({ audioKey, tts, display, color, label = "Écouter la lettr
     return () => _playingSetters.delete(setActiveId);
   }, []);
 
-  const isActive  = activeId === buttonId;
-  // _currentAudio is a plain object {dataset:{id}} while loading, or a real Audio while playing
-  const isLoading = isActive && _currentAudio && !(_currentAudio instanceof Audio);
-  const isPlaying = isActive && _currentAudio instanceof Audio;
+  const playing = activeId === buttonId;
 
   const handleClick = () => {
-    if (isActive) { stopAllAudio(); return; }
+    if (playing) { stopAllAudio(); return; }
     playArabicAudio(tts || display, buttonId);
   };
 
-  const bgColor  = isActive ? `${color}44` : `${color}18`;
-  const bdrColor = isActive ? color : `${color}44`;
-
   return (
-    <button onClick={handleClick} disabled={isLoading} style={{
+    <button onClick={handleClick} style={{
       width: "100%",
-      background: bgColor,
-      border: `1.5px solid ${bdrColor}`,
+      background: playing ? `${color}44` : `${color}18`,
+      border: `1.5px solid ${playing ? color : color + "44"}`,
       color,
       borderRadius: 14,
       padding: "12px",
       fontSize: 15,
       fontWeight: 700,
-      cursor: isLoading ? "wait" : "pointer",
+      cursor: "pointer",
       marginBottom: 12,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
       transition: "all 0.2s ease",
-      transform: isPlaying ? "scale(0.97)" : "scale(1)",
-      opacity: isLoading ? 0.75 : 1,
+      transform: playing ? "scale(0.97)" : "scale(1)",
     }}>
-      {isLoading
-        ? <><span style={{ display:"inline-block", animation:"spin 0.8s linear infinite", fontSize:16 }}>⏳</span> Chargement…</>
-        : isPlaying
-          ? <><Volume2 size={18} style={{ animation:"soundWave 0.4s ease infinite alternate" }} /> 🔊 En cours… (cliquer pour stopper)</>
-          : <><Volume2 size={18} /> {label}</>
-      }
+      <Volume2 size={18} style={{ animation: playing ? "soundWave 0.4s ease infinite alternate" : "none" }} />
+      {playing ? "🔊 En cours… (cliquer pour stopper)" : label}
     </button>
   );
 }
@@ -1178,7 +1144,6 @@ function AlphabetArabe() {
         @keyframes fadeUp { 0%{opacity:1;transform:translateX(-50%) translateY(0)} 100%{opacity:0;transform:translateX(-50%) translateY(-20px)} }
         @keyframes soundWave { 0%{transform:scale(1)} 100%{transform:scale(1.2) rotate(-10deg)} }
         @keyframes micPulse { 0%{opacity:0.7;transform:scale(1)} 100%{opacity:0;transform:scale(1.2)} }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:3px}
       `}</style>
