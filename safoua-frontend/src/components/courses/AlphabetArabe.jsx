@@ -239,8 +239,7 @@ const VOCABULARY_CATEGORIES = [
 
 // ─── Audio: single source of truth ───────────────────────────────────────────
 const GT_TTS = (text) =>
-  `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(text)}`;
-
+  `https://corsproxy.io/?url=${encodeURIComponent(`https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(text)}`)}`;
 // Global audio instance — ensures only ONE audio plays at a time, no doubles
 let _currentAudio = null;
 function stopAllAudio() {
@@ -527,11 +526,10 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
 // ─── LetterCard ───────────────────────────────────────────────────────────────
 function LetterCard({ letterData, index, onSelect, isSelected, learned }) {
   const [playing, setPlaying] = useState(false);
-  const speak = (e) => {
-    e.stopPropagation();
-    if (playing) { stopAllAudio(); setPlaying(false); return; }
-    playArabicAudio(letterData.tts, () => setPlaying(true), () => setPlaying(false));
-  };
+ const speak = (e) => {
+  e.stopPropagation();
+  playArabicAudio(letterData.tts, letterData.audioKey);
+};
   return (
     <div onClick={() => onSelect(index)} style={{ background: isSelected ? `linear-gradient(135deg, ${letterData.color}22, ${letterData.color}44)` : "rgba(255,255,255,0.03)", border: `1.5px solid ${isSelected ? letterData.color : "rgba(255,255,255,0.08)"}`, borderRadius: 16, padding: "1rem", cursor: "pointer", transition: "all 0.2s", position: "relative", textAlign: "center" }}>
       {learned && <div style={{ position: "absolute", top: 8, right: 8, background: "#10b981", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}><CheckCircle size={12} color="white" /></div>}
@@ -550,9 +548,8 @@ function LetterCard({ letterData, index, onSelect, isSelected, learned }) {
 function VocabCard({ v }) {
   const [playing, setPlaying] = useState(false);
   const handleClick = () => {
-    if (playing) { stopAllAudio(); setPlaying(false); return; }
-    playArabicAudio(v.ar, () => setPlaying(true), () => setPlaying(false));
-  };
+  playArabicAudio(v.ar, v.ar);
+};
   return (
     <div onClick={handleClick} style={{ background: playing ? "rgba(139,92,246,0.08)" : "rgba(255,255,255,0.03)", border: `1px solid ${playing ? "rgba(139,92,246,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius: 16, padding: "1rem 1.25rem", cursor: "pointer", transition: "all 0.2s" }}>
       <div style={{ fontSize: 28, marginBottom: 6 }}>{v.emoji}</div>
