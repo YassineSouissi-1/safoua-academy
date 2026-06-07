@@ -2,6 +2,21 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Volume2, Globe, Search, RotateCcw, CheckCircle, Zap, Mic } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+// arabicTTS utility used by other components (Dictionary, Grammaire, Tajwid)
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const COURSE_TITLE = "Alphabet Arabe & Phonétique";
+
+// Saves a completed lesson key to MongoDB via /api/update-progress
+async function saveProgress(lessonKey) {
+  const email = localStorage.getItem("userEmail");
+  if (!email) return;
+  try {
+    await axios.post(`${API}/api/update-progress`, { email, lessonTitle: lessonKey });
+  } catch (err) {
+    console.error("Erreur de progression :", err);
+  }
+}
 
 const ARABIC_LETTERS = [
   { letter: "ا", name: "Alif", transcription: "aa", ar: "ألف", tts: "أَلِف", fr: "Alif", en: "Alif", forms: ["ا","ـا","ـا","ا"], tip: "Comme un 'A' long. La lettre la plus simple: un simple trait vertical.", color: "#10b981", audioKey: "alif" },
@@ -222,82 +237,104 @@ const VOCABULARY_CATEGORIES = [
   },
 ];
 
-// ─── Audio: single source of truth ───────────────────────────────────────────
-const GT_TTS = (text) =>
-  `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(text)}`;
+// ─── Audio: ElevenLabs via backend proxy ─────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-// Global audio instance — ensures only ONE audio plays at a time, no doubles
-let _currentAudio = null;
-function stopAllAudio() {
-  if (_currentAudio) {
-    try { _currentAudio.pause(); _currentAudio.currentTime = 0; } catch (_) {}
-    _currentAudio = null;
-  }
-  try { window.speechSynthesis.cancel(); } catch (_) {}
-    notifyAllButtons();
-
-}
-
-function playArabicAudio(text, buttonId) {
-  stopAllAudio();
-
-  const url = GT_TTS(text);
-  const audio = new Audio(url);
-  audio.crossOrigin = "anonymous";
-  audio.dataset.id = buttonId;
-  _currentAudio = audio;
-  notifyAllButtons();
-
-  const MIN_DISPLAY_MS = 2000; // "En cours" shows for at least 2s
-  const startTime = Date.now();
-
-  const finish = () => {
-    _currentAudio = null;
-    const elapsed = Date.now() - startTime;
-    const remaining = MIN_DISPLAY_MS - elapsed;
-    if (remaining > 0) {
-      setTimeout(() => notifyAllButtons(), remaining);
-    } else {
-      notifyAllButtons();
-    }
-  };
-
-  audio.onended = finish;
-  audio.onerror = () => {
-    _currentAudio = null;
-    notifyAllButtons();
-    speakTextFallback(text, buttonId);
-  };
-
-  audio.play().catch(() => {
-    _currentAudio = null;
-    notifyAllButtons();
-    speakTextFallback(text, buttonId);
-  });
-}
-let _playingSetters = new Set(); // tracks all AudioButton setState fns
+// Global state — one audio at a time, tracks which button is "playing"
+let _currentAudio  = null;
+let _currentBlobUrl = null;
+let _playingSetters = new Set(); // Set of React setState fns from AudioButton
 
 function notifyAllButtons() {
   _playingSetters.forEach(fn => fn(_currentAudio?.dataset?.id));
 }
 
-function speakTextFallback(text, buttonId) {
+function stopAllAudio() {
+  if (_currentAudio) {
+    try { _currentAudio.pause(); _currentAudio.currentTime = 0; } catch (_) {}
+    _currentAudio = null;
+  }
+  if (_currentBlobUrl) {
+    URL.revokeObjectURL(_currentBlobUrl);
+    _currentBlobUrl = null;
+  }
+  try { window.speechSynthesis?.cancel(); } catch (_) {}
+  notifyAllButtons();
+}
+
+async function playArabicAudio(text, buttonId) {
+  stopAllAudio();
+
+  // Mark the button as "loading" immediately
+  const loadingAudio = { dataset: { id: buttonId } };
+  _currentAudio = loadingAudio;
+  notifyAllButtons();
+
+  try {
+    const res = await fetch(`${API_BASE}/api/tts`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ text }),
+    });
+
+    // If another audio was triggered while we were loading, abort
+    if (_currentAudio !== loadingAudio) return;
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob   = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    _currentBlobUrl = blobUrl;
+
+    const audio = new Audio(blobUrl);
+    audio.dataset.id = buttonId;
+    _currentAudio = audio;
+    notifyAllButtons();
+
+    const MIN_DISPLAY_MS = 1500;
+    const startTime = Date.now();
+
+    const finish = () => {
+      URL.revokeObjectURL(blobUrl);
+      _currentBlobUrl = null;
+      _currentAudio = null;
+      const elapsed = Date.now() - startTime;
+      const remaining = MIN_DISPLAY_MS - elapsed;
+      if (remaining > 0) setTimeout(notifyAllButtons, remaining);
+      else notifyAllButtons();
+    };
+
+    audio.onended = finish;
+    audio.onerror = () => { finish(); _fallbackWebSpeech(text); };
+    await audio.play();
+
+  } catch (err) {
+    console.warn("[AlphabetArabe] ElevenLabs TTS failed, using fallback:", err.message);
+    if (_currentAudio === null || _currentAudio?.dataset?.id === buttonId) {
+      _currentAudio = null;
+      notifyAllButtons();
+    }
+    _fallbackWebSpeech(text);
+  }
+}
+
+function _fallbackWebSpeech(text) {
   const synth = window.speechSynthesis;
+  if (!synth) return;
   synth.cancel();
   const doSpeak = () => {
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "ar-SA"; u.rate = 0.65; u.pitch = 1.0;
+    u.lang = "ar-SA"; u.rate = 0.75; u.pitch = 1.0;
     const arVoice = synth.getVoices().find(v => v.lang.startsWith("ar"));
     if (arVoice) u.voice = arVoice;
-    u.onend = u.onerror = () => { _currentAudio = null; notifyAllButtons(); };
     synth.speak(u);
   };
   if (synth.getVoices().length > 0) doSpeak();
-  else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; setTimeout(doSpeak, 1000); }
+  else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; setTimeout(doSpeak, 800); }
 }
 
-// Kept for backward-compat with call sites that pass audioKey (ignored now — all use GT_TTS)
-function playLetterAudio(audioKey, ttsText, onStart, onEnd) {
+// Backward-compat alias
+function playLetterAudio(audioKey, ttsText) {
   playArabicAudio(ttsText, audioKey);
 }
 
@@ -311,34 +348,45 @@ function AudioButton({ audioKey, tts, display, color, label = "Écouter la lettr
     return () => _playingSetters.delete(setActiveId);
   }, []);
 
-  const playing = activeId === buttonId;
+  const isActive  = activeId === buttonId;
+  // _currentAudio is a plain object {dataset:{id}} while loading, or a real Audio while playing
+  const isLoading = isActive && _currentAudio && !(_currentAudio instanceof Audio);
+  const isPlaying = isActive && _currentAudio instanceof Audio;
 
   const handleClick = () => {
-    if (playing) { stopAllAudio(); return; }
+    if (isActive) { stopAllAudio(); return; }
     playArabicAudio(tts || display, buttonId);
   };
 
+  const bgColor  = isActive ? `${color}44` : `${color}18`;
+  const bdrColor = isActive ? color : `${color}44`;
+
   return (
-    <button onClick={handleClick} style={{
+    <button onClick={handleClick} disabled={isLoading} style={{
       width: "100%",
-      background: playing ? `${color}44` : `${color}18`,
-      border: `1.5px solid ${playing ? color : color + "44"}`,
+      background: bgColor,
+      border: `1.5px solid ${bdrColor}`,
       color,
       borderRadius: 14,
       padding: "12px",
       fontSize: 15,
       fontWeight: 700,
-      cursor: "pointer",
+      cursor: isLoading ? "wait" : "pointer",
       marginBottom: 12,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
       transition: "all 0.2s ease",
-      transform: playing ? "scale(0.97)" : "scale(1)",
+      transform: isPlaying ? "scale(0.97)" : "scale(1)",
+      opacity: isLoading ? 0.75 : 1,
     }}>
-      <Volume2 size={18} style={{ animation: playing ? "soundWave 0.4s ease infinite alternate" : "none" }} />
-      {playing ? "🔊 En cours… (cliquer pour stopper)" : label}
+      {isLoading
+        ? <><span style={{ display:"inline-block", animation:"spin 0.8s linear infinite", fontSize:16 }}>⏳</span> Chargement…</>
+        : isPlaying
+          ? <><Volume2 size={18} style={{ animation:"soundWave 0.4s ease infinite alternate" }} /> 🔊 En cours… (cliquer pour stopper)</>
+          : <><Volume2 size={18} /> {label}</>
+      }
     </button>
   );
 }
@@ -651,7 +699,7 @@ function AlphabetArabe() {
     if (!dictSearchTerm.trim()) { setDictError("Entrez un mot à chercher"); return; }
     setDictLoading(true); setDictError(""); setDictResults(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/dictionary/translate", { params: { word: dictSearchTerm.trim(), language: dictLanguage } });
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/dictionary/translate`, { params: { word: dictSearchTerm.trim(), language: dictLanguage } });
       if (response.data.success) { setDictResults(response.data); addXp(5); }
       else setDictError(response.data.message || "Mot introuvable.");
     } catch { setDictError("Erreur de connexion au serveur."); }
@@ -683,7 +731,11 @@ function AlphabetArabe() {
   };
 
   const advanceQuiz = () => {
-    if (quizStep + 1 >= quizzes.length) setQuizDone(true);
+    if (quizStep + 1 >= quizzes.length) {
+      setQuizDone(true);
+      // Save quiz completion as a lesson
+      saveProgress(`${COURSE_TITLE} — Quiz — Quiz Alphabet (${quizScore + 1}/${quizzes.length})`);
+    }
     else { setQuizStep(s => s + 1); setQuizAnswered(null); setQuizUserAnswer(""); setQuizDrawDone(false); }
   };
 
@@ -693,7 +745,15 @@ function AlphabetArabe() {
     setQuizDone(false); setQuizUserAnswer(""); setQuizDrawDone(false);
   };
 
-  const markLearned = (idx) => { if (!learnedLetters.has(idx)) { setLearnedLetters(prev => new Set([...prev, idx])); addXp(10); } };
+  const markLearned = (idx) => {
+    if (!learnedLetters.has(idx)) {
+      setLearnedLetters(prev => new Set([...prev, idx]));
+      addXp(10);
+      // Persist to MongoDB — key format matches Dashboard + CourseDetail
+      const letter = ARABIC_LETTERS[idx];
+      saveProgress(`${COURSE_TITLE} — Alphabet Arabe & Phonétique — Lettre ${letter.name} (${letter.letter})`);
+    }
+  };
 
   const tabs = [
     { id: "lettres", label: "Les 28 Lettres", icon: "📖" },
@@ -833,7 +893,14 @@ function AlphabetArabe() {
             </div>
             {drawingLetter !== null ? (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
-                <DrawingPad targetName={ARABIC_LETTERS[drawingLetter].fr} forms={ARABIC_LETTERS[drawingLetter].forms} onSuccess={() => { setPracticedLetters(prev => new Set([...prev, drawingLetter])); addXp(15); }} />
+                <DrawingPad targetName={ARABIC_LETTERS[drawingLetter].fr} forms={ARABIC_LETTERS[drawingLetter].forms} onSuccess={() => {
+                  if (!practicedLetters.has(drawingLetter)) {
+                    setPracticedLetters(prev => new Set([...prev, drawingLetter]));
+                    addXp(15);
+                    const letter = ARABIC_LETTERS[drawingLetter];
+                    saveProgress(`${COURSE_TITLE} — Atelier Écriture — Pratique ${letter.name} (${letter.letter})`);
+                  }
+                }} />
                 <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "1.5rem" }}>
                   <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
                     <div style={{ fontSize: 80, fontFamily: "'Amiri', serif" }}>{ARABIC_LETTERS[drawingLetter].letter}</div>
@@ -1111,6 +1178,7 @@ function AlphabetArabe() {
         @keyframes fadeUp { 0%{opacity:1;transform:translateX(-50%) translateY(0)} 100%{opacity:0;transform:translateX(-50%) translateY(-20px)} }
         @keyframes soundWave { 0%{transform:scale(1)} 100%{transform:scale(1.2) rotate(-10deg)} }
         @keyframes micPulse { 0%{opacity:0.7;transform:scale(1)} 100%{opacity:0;transform:scale(1.2)} }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:3px}
       `}</style>

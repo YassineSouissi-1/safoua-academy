@@ -1,117 +1,252 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
-import { MessageCircle, X, Send, Bot, User, Loader } from "lucide-react";
+import { MessageCircle, X, Send, Bot, Loader, Sparkles, ChevronDown } from "lucide-react";
+import { API_BASE } from "../config/api";
+
+const SUGGESTED = [
+  "Comment apprendre l'alphabet arabe ?",
+  "C'est quoi le Tajwid ?",
+  "Comment réserver une session ?",
+];
 
 function ChatBot() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState("");
+  const [isOpen,    setIsOpen]    = useState(false);
+  const [input,     setInput]     = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: "bot", text: "Bonjour ! Je suis l'IA de Safoua Academy. Comment puis-je t'aider aujourd'hui ?" }
+  const [messages,  setMessages]  = useState([
+    { role: "bot", text: "السلام عليكم 👋\nJe suis l'assistant IA de Safoua Academy. Je peux vous aider avec vos cours, le Tajwid, l'arabe, et bien plus !" }
   ]);
-  const messagesEndRef = useRef(null);
-
-  // Scroll automatique vers le bas
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const messagesEndRef  = useRef(null);
+  const messagesAreaRef = useRef(null);
+  const inputRef        = useRef(null);
 
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  useEffect(() => {
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 200);
+  }, [isOpen]);
 
-    const userMessage = { role: "user", text: input };
-    setMessages(prev => [...prev, userMessage]);
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener('open-chatbot', handler);
+    return () => window.removeEventListener('open-chatbot', handler);
+  }, []);
+
+  const handleScroll = () => {
+    const el = messagesAreaRef.current;
+    if (!el) return;
+    setShowScrollBtn(el.scrollHeight - el.scrollTop - el.clientHeight > 80);
+  };
+
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
+  const handleSend = async (text) => {
+    const msg = (text || input).trim();
+    if (!msg || isLoading) return;
+    setMessages(prev => [...prev, { role: "user", text: msg }]);
     setInput("");
     setIsLoading(true);
-
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, { message: input });
-      setMessages(prev => [...prev, { role: "bot", text: res.data.reply }]);
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || "Désolé, une erreur s'est produite. Réessaie ?";
-      setMessages(prev => [...prev, { role: "bot", text: errorMessage }]);
-      console.error("Chat Error:", err);
+      const res = await fetch(`${API_BASE}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: "bot", text: data.reply || "Désolé, une erreur s'est produite." }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "bot", text: "⚠️ Impossible de joindre le serveur. Vérifiez votre connexion." }]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const G = {
+    bg: "#080b0f",
+    surface: "rgba(13,17,23,0.97)",
+    card: "rgba(255,255,255,0.04)",
+    border: "rgba(255,255,255,0.08)",
+    gold: "#c9a84c",
+    teal: "#1db584",
+    text: "#f2ede6",
+    muted: "rgba(242,237,230,0.5)",
+    dim: "rgba(242,237,230,0.18)",
+  };
+
   return (
-    <div className="fixed bottom-6 right-6 z-[999]">
-      {/* Fenêtre de Chat */}
+    <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      {/* Chat window */}
       {isOpen && (
-        <div className="mb-4 w-[350px] h-[450px] bg-white rounded-[2rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div style={{
+          marginBottom: 12, width: 360, height: 520,
+          background: G.surface,
+          borderRadius: 24, border: `1px solid ${G.border}`,
+          boxShadow: "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.08)",
+          display: "flex", flexDirection: "column", overflow: "hidden",
+          backdropFilter: "blur(24px)",
+          animation: "chatSlideIn 0.28s cubic-bezier(.22,.68,0,1)",
+        }}>
           {/* Header */}
-          <div className="bg-emerald-600 p-5 text-white flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <Bot size={18} />
+          <div style={{
+            background: `linear-gradient(135deg, rgba(201,168,76,0.12), rgba(29,181,132,0.08))`,
+            borderBottom: `1px solid ${G.border}`,
+            padding: "16px 18px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 12,
+                background: `linear-gradient(135deg, ${G.gold}, ${G.teal})`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: `0 0 16px rgba(201,168,76,0.3)`,
+              }}>
+                <Bot size={18} color="#080b0f" />
               </div>
-              <span className="font-bold tracking-tight">Safoua AI</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: G.text, letterSpacing: "-0.01em" }}>Safoua AI</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: G.teal, fontWeight: 600 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: G.teal, display: "inline-block" }}/>
+                  En ligne · Prêt à aider
+                </div>
+              </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform">
-              <X size={20} />
+            <button onClick={() => setIsOpen(false)}
+              style={{ background: "none", border: "none", color: G.muted, cursor: "pointer", padding: 4,
+                       display: "flex", alignItems: "center", justifyContent: "center",
+                       borderRadius: 8, transition: "color 0.15s" }}
+              onMouseEnter={e => e.currentTarget.style.color = G.text}
+              onMouseLeave={e => e.currentTarget.style.color = G.muted}>
+              <X size={18} />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
+          <div ref={messagesAreaRef} onScroll={handleScroll}
+            style={{ flex: 1, padding: "14px 14px 6px", overflowY: "auto",
+                     display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] p-3 rounded-2xl text-sm shadow-sm ${
-                  m.role === "user" 
-                    ? "bg-emerald-600 text-white rounded-br-none" 
-                    : "bg-white text-slate-800 rounded-bl-none border border-slate-100"
-                }`}>
+              <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 7 }}>
+                {m.role === "bot" && (
+                  <div style={{ width: 24, height: 24, borderRadius: 8, background: `linear-gradient(135deg, ${G.gold}40, ${G.teal}30)`,
+                                border: `1px solid ${G.gold}30`, display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0, marginBottom: 2 }}>
+                    <Bot size={12} color={G.gold} />
+                  </div>
+                )}
+                <div style={{
+                  maxWidth: "78%", padding: "10px 14px", borderRadius: 16,
+                  fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap",
+                  ...(m.role === "user" ? {
+                    background: `linear-gradient(135deg, ${G.gold}22, ${G.teal}18)`,
+                    border: `1px solid ${G.gold}30`, color: G.text,
+                    borderBottomRightRadius: 4,
+                  } : {
+                    background: G.card, border: `1px solid ${G.border}`,
+                    color: "rgba(242,237,230,0.85)", borderBottomLeftRadius: 4,
+                  })
+                }}>
                   {m.text}
                 </div>
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white text-slate-800 rounded-2xl rounded-bl-none border border-slate-100 p-3 flex items-center gap-2">
-                  <Loader size={16} className="animate-spin" />
-                  <span className="text-sm font-medium">Réflexion en cours...</span>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 7 }}>
+                <div style={{ width: 24, height: 24, borderRadius: 8, background: `linear-gradient(135deg, ${G.gold}40, ${G.teal}30)`,
+                              border: `1px solid ${G.gold}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Bot size={12} color={G.gold} />
+                </div>
+                <div style={{ padding: "12px 16px", borderRadius: 16, borderBottomLeftRadius: 4, background: G.card, border: `1px solid ${G.border}`, display: "flex", gap: 4, alignItems: "center" }}>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: G.gold, opacity: 0.7,
+                                          animation: `dotBounce 1.2s ${i * 0.2}s ease-in-out infinite` }} />
+                  ))}
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Scroll-to-bottom */}
+          {showScrollBtn && (
+            <button onClick={scrollToBottom}
+              style={{ position: "absolute", bottom: 80, right: 20, width: 28, height: 28, borderRadius: "50%",
+                       background: G.gold, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                       boxShadow: `0 4px 12px rgba(201,168,76,0.4)` }}>
+              <ChevronDown size={14} color="#080b0f" />
+            </button>
+          )}
+
+          {/* Suggestions (only on first message) */}
+          {messages.length === 1 && (
+            <div style={{ padding: "4px 14px 8px", display: "flex", flexWrap: "wrap", gap: 5 }}>
+              {SUGGESTED.map((s, i) => (
+                <button key={i} onClick={() => handleSend(s)}
+                  style={{ padding: "5px 10px", borderRadius: 99, border: `1px solid ${G.gold}30`,
+                           background: `${G.gold}10`, color: G.gold, fontSize: 11, fontWeight: 600,
+                           cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
+                           transition: "all 0.15s" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = `${G.gold}20`; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = `${G.gold}10`; }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Input */}
-          <div className="p-4 bg-white border-t border-slate-100 flex gap-2">
-            <input 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSend()}
-              placeholder="Écris ton message..."
+          <div style={{ padding: "10px 12px 12px", borderTop: `1px solid ${G.border}`, display: "flex", gap: 8 }}>
+            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && !e.shiftKey && !isLoading && handleSend()}
+              placeholder="Posez votre question..."
               disabled={isLoading}
-              className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none disabled:opacity-50"
-            />
-            <button 
-              onClick={handleSend}
-              disabled={isLoading}
-              className="bg-emerald-600 text-white p-2 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Send size={18} />
+              style={{
+                flex: 1, background: G.card, border: `1.5px solid ${G.border}`,
+                borderRadius: 12, padding: "9px 13px", color: G.text, fontSize: 13,
+                outline: "none", fontFamily: "inherit", transition: "border-color 0.2s",
+                opacity: isLoading ? 0.6 : 1,
+              }}
+              onFocus={e => e.target.style.borderColor = G.gold}
+              onBlur={e => e.target.style.borderColor = G.border} />
+            <button onClick={() => handleSend()} disabled={isLoading || !input.trim()}
+              style={{
+                width: 38, height: 38, borderRadius: 11, border: "none", cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
+                background: input.trim() && !isLoading ? `linear-gradient(135deg, ${G.gold}, ${G.teal})` : G.card,
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                transition: "all 0.2s", opacity: !input.trim() || isLoading ? 0.5 : 1,
+                boxShadow: input.trim() && !isLoading ? `0 0 16px rgba(201,168,76,0.3)` : "none",
+              }}>
+              <Send size={15} color={input.trim() && !isLoading ? "#080b0f" : G.muted} />
             </button>
           </div>
         </div>
       )}
 
-      {/* Icône Flottante (Le bouton rond) */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`${
-          isOpen ? 'bg-slate-800 rotate-90' : 'bg-emerald-600'
-        } text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95`}
-      >
-        {isOpen ? <X size={28} /> : <MessageCircle size={28} />}
+      {/* Toggle button */}
+      <button onClick={() => setIsOpen(o => !o)}
+        style={{
+          width: 52, height: 52, borderRadius: 16, border: "none", cursor: "pointer",
+          background: isOpen ? "rgba(8,11,15,0.9)" : `linear-gradient(135deg, ${G.gold}, ${G.teal})`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: isOpen ? `0 4px 20px rgba(0,0,0,0.5)` : `0 0 28px rgba(201,168,76,0.45), 0 4px 20px rgba(0,0,0,0.4)`,
+          border: isOpen ? `1px solid ${G.border}` : "none",
+          transition: "all 0.28s cubic-bezier(.22,.68,0,1)",
+          transform: isOpen ? "rotate(0deg)" : "rotate(0deg)",
+        }}
+        onMouseEnter={e => { if (!isOpen) e.currentTarget.style.transform = "scale(1.08)"; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}>
+        {isOpen
+          ? <X size={22} color={G.muted} />
+          : <MessageCircle size={22} color="#080b0f" />
+        }
       </button>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap');
+        @keyframes chatSlideIn { from { opacity:0; transform: translateY(12px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        @keyframes dotBounce { 0%,80%,100% { transform: translateY(0); opacity:0.5; } 40% { transform: translateY(-5px); opacity:1; } }
+      `}</style>
     </div>
   );
 }

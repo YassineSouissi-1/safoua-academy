@@ -1,4 +1,19 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import axios from "axios";
+import { speakArabic } from "../../utils/arabicTTS";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const COURSE_TITLE = "Tajwid : Récitation Sacrée";
+
+async function saveProgress(lessonKey) {
+  const email = localStorage.getItem("userEmail");
+  if (!email) return;
+  try {
+    await axios.post(`${API}/api/update-progress`, { email, lessonTitle: lessonKey });
+  } catch (err) {
+    console.error("Erreur de progression :", err);
+  }
+}
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700;900&display=swap');`;
 
@@ -861,6 +876,12 @@ function VoiceTest({ rule, audio }) {
       {/* Word to pronounce */}
       <div style={{ textAlign: "center", background: C.surface, borderRadius: 12, padding: "14px 20px", marginBottom: 14 }}>
         <div style={{ fontFamily: "'Amiri',serif", fontSize: "2rem", color: rule.color, marginBottom: 4, lineHeight: 1.4 }}>{rule.testWord}</div>
+        <button
+          onClick={() => speakArabic(rule.testWord, { rate: 0.72 })}
+          style={{ background: rule.color + "22", border: "1.5px solid " + rule.color + "55", color: rule.color, borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 8 }}
+        >
+          🔊 Écouter la prononciation
+        </button>
         <div style={{ fontSize: 13, color: C.mutedLt, fontWeight: 700, marginBottom: 6, letterSpacing: 1, fontStyle: "italic" }}>{rule.testTranslit}</div>
         <div style={{ fontSize: 12, color: C.text, fontWeight: 600, lineHeight: 1.7 }}>{rule.testInstruction}</div>
         <div style={{ fontSize: 11, color: C.muted, marginTop: 6, fontStyle: "italic" }}>💡 {rule.testHint}</div>
@@ -939,7 +960,7 @@ function VoiceTest({ rule, audio }) {
 }
 
 // ─── RULE DETAIL PAGE ─────────────────────────────────────────────────────────
-function RuleDetail({ rule, onBack, audio }) {
+function RuleDetail({ rule, onBack, audio, isDone, onMarkDone }) {
   const [tab, setTab] = useState("learn");
 
   return (
@@ -1072,6 +1093,32 @@ function RuleDetail({ rule, onBack, audio }) {
       )}
 
       {tab === "test" && <VoiceTest rule={rule} audio={audio} />}
+
+      {/* ── Marquer fait ── */}
+      <div style={{ marginTop: 32, paddingTop: 20, borderTop: `1.5px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
+        <button
+          onClick={onMarkDone}
+          disabled={isDone}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "11px 24px", borderRadius: 14,
+            background: isDone ? `${rule.color}18` : rule.color,
+            color: isDone ? rule.color : C.bg,
+            border: `2px solid ${rule.color}`,
+            fontFamily: "'Cairo',sans-serif", fontWeight: 900, fontSize: 14,
+            cursor: isDone ? "not-allowed" : "pointer",
+            transition: "all 0.2s",
+            opacity: isDone ? 0.85 : 1,
+          }}
+        >
+          {isDone ? "✓ Règle complétée" : "✓ Marquer comme fait"}
+        </button>
+        {!isDone && (
+          <span style={{ fontSize: 12, color: C.muted, fontStyle: "italic" }}>
+            Cliquez après avoir compris et pratiqué la règle
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -1166,34 +1213,39 @@ function ReciterPlayer({ audio }) {
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
-function Home({ onSelectRule, audio }) {
+function Home({ onSelectRule, audio, completedRules = new Set() }) {
   return (
     <div style={{ animation: "fadeIn 0.3s ease" }}>
       <ReciterPlayer audio={audio} />
       <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: C.muted, marginBottom: 16 }}>
-        8 Règles du Tajwid
+        8 Règles du Tajwid — {completedRules.size}/8 complétées
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 14 }}>
-        {RULES.map((rule) => (
-          <button key={rule.id} onClick={() => onSelectRule(rule)} style={{ background: C.panel, border: `1.5px solid ${C.border}`, borderRadius: 18, padding: 20, textAlign: "right", cursor: "pointer", transition: "all 0.2s", fontFamily: "'Cairo',sans-serif" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = rule.color + "77"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 24px ${rule.color}18`; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-              <div style={{ width: 42, height: 42, borderRadius: 12, background: rule.bg, border: `1.5px solid ${rule.color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Amiri',serif", fontSize: "1.4rem", color: rule.color, flexShrink: 0 }}>{rule.icon}</div>
-              <div>
-                <div style={{ fontFamily: "'Amiri',serif", fontSize: "1.4rem", color: rule.color, lineHeight: 1.2 }}>{rule.ar}</div>
-                <div style={{ fontSize: 14, fontWeight: 900, color: C.cream }}>{rule.fr}</div>
+        {RULES.map((rule) => {
+          const done = completedRules.has(rule.fr);
+          return (
+            <button key={rule.id} onClick={() => onSelectRule(rule)}
+              style={{ background: done ? `${rule.color}0e` : C.panel, border: `1.5px solid ${done ? rule.color + "55" : C.border}`, borderRadius: 18, padding: 20, textAlign: "right", cursor: "pointer", transition: "all 0.2s", fontFamily: "'Cairo',sans-serif" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = rule.color + "77"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 24px ${rule.color}18`; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = done ? rule.color + "55" : C.border; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: rule.bg, border: `1.5px solid ${rule.color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Amiri',serif", fontSize: "1.4rem", color: rule.color, flexShrink: 0 }}>{rule.icon}</div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                  {done && <span style={{ fontSize: 10, fontWeight: 900, color: rule.color, background: `${rule.color}18`, border: `1px solid ${rule.color}44`, borderRadius: 10, padding: "2px 8px", letterSpacing: "0.05em" }}>✓ Complétée</span>}
+                  <div style={{ fontFamily: "'Amiri',serif", fontSize: "1.4rem", color: rule.color, lineHeight: 1.2 }}>{rule.ar}</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: C.cream }}>{rule.fr}</div>
+                </div>
               </div>
-            </div>
-            <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6, textAlign: "right" }}>{rule.shortDesc}</div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 14 }}>
-              {["📖", "🎧", "🎤"].map((ic, j) => (
-                <span key={j} style={{ width: 28, height: 28, borderRadius: 8, background: C.surface, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>{ic}</span>
-              ))}
-            </div>
-          </button>
-        ))}
+              <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6, textAlign: "right" }}>{rule.shortDesc}</div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 14 }}>
+                {["📖", "🎧", "🎤"].map((ic, j) => (
+                  <span key={j} style={{ width: 28, height: 28, borderRadius: 8, background: C.surface, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>{ic}</span>
+                ))}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1201,9 +1253,36 @@ function Home({ onSelectRule, audio }) {
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [activeRule, setActiveRule] = useState(null);
+  const [activeRule, setActiveRule]         = useState(null);
+  const [completedRules, setCompletedRules] = useState(new Set());
   const audio = useAudio();
   const handleBack = () => { audio.stop(); setActiveRule(null); };
+
+  // Load already-completed rules from backend on mount
+  useEffect(() => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) return;
+    axios.get(`${API}/api/user/${email}`)
+      .then(r => {
+        const done = new Set();
+        (r.data.completedLessons || []).forEach(key => {
+          const match = key.match(/^Tajwid.*— (.+)$/);
+          if (match) done.add(match[1]);
+        });
+        setCompletedRules(done);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleMarkDone = async (rule) => {
+    if (completedRules.has(rule.fr)) return;
+    setCompletedRules(prev => new Set([...prev, rule.fr]));
+    await saveProgress(`${COURSE_TITLE} — ${COURSE_TITLE} — ${rule.fr}`);
+  };
+
+  const handleSelectRule = (rule) => {
+    setActiveRule(rule);
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Cairo',sans-serif" }}>
@@ -1228,8 +1307,8 @@ export default function App() {
       </div>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 16px 60px" }}>
         {activeRule
-          ? <RuleDetail rule={activeRule} onBack={handleBack} audio={audio} />
-          : <Home onSelectRule={setActiveRule} audio={audio} />
+          ? <RuleDetail rule={activeRule} onBack={handleBack} audio={audio} isDone={completedRules.has(activeRule.fr)} onMarkDone={() => handleMarkDone(activeRule)} />
+          : <Home onSelectRule={handleSelectRule} audio={audio} completedRules={completedRules} />
         }
       </div>
     </div>

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import axios from "axios";
 import {
   BookOpen, Play, Pause, Eye, EyeOff, CheckCircle, XCircle,
   RotateCcw, Mic, MicOff, Volume2, ChevronRight, ChevronDown,
@@ -8,6 +9,19 @@ import {
 } from "lucide-react";
 
 /* ── PALETTE ─────────────────────────────────────────────────── */
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const COURSE_TITLE = "Mémorisation : Les 10 dernières Sourates";
+
+async function saveProgress(lessonKey) {
+  const email = localStorage.getItem("userEmail");
+  if (!email) return;
+  try {
+    await axios.post(`${API_URL}/api/update-progress`, { email, lessonTitle: lessonKey });
+  } catch (err) {
+    console.error("Erreur de progression :", err);
+  }
+}
+
 const D1 = "#080c10";
 const D2 = "#0d1520";
 const D3 = "#111e2e";
@@ -35,7 +49,7 @@ const PURPLE = "#a855f7";
 const PURPLE_DIM = "rgba(168,85,247,0.12)";
 
 /* ── API BASE ────────────────────────────────────────────────── */
-const API_BASE = "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 /* ── RECITERS ────────────────────────────────────────────────── */
 const reciters = [
@@ -984,14 +998,57 @@ function VoiceQuiz({ surahNumber, surahName, onClose, reciterId }) {
    — Uses API pronunciations for ALL surahs
 ══════════════════════════════════════════════════════════════ */
 function QuranBrowser({ onClose }) {
-  const [search,      setSearch]      = useState("");
-  const [selected,    setSelected]    = useState(null);
-  const [surahData,   setSurahData]   = useState(null);
-  const [loadingVers, setLoadingVers] = useState(false);
-  const [showTrans,   setShowTrans]   = useState(true);
-  const [showAllPron, setShowAllPron] = useState(false);
-  const [reciter,     setReciter]     = useState("mishari");
-  const [voiceSurah,  setVoiceSurah]  = useState(null);
+  const [search,        setSearch]        = useState("");
+  const [selected,      setSelected]      = useState(null);
+  const [surahData,     setSurahData]     = useState(null);
+  const [loadingVers,   setLoadingVers]   = useState(false);
+  const [showTrans,     setShowTrans]     = useState(true);
+  const [showAllPron,   setShowAllPron]   = useState(false);
+  const [reciter,       setReciter]       = useState("mishari");
+  const [voiceSurah,    setVoiceSurah]    = useState(null);
+  const [memorised,     setMemorised]     = useState(new Set()); // surah numbers memorised
+
+  const MEMO_MODULE = "Sourates";
+  const MEMO_COURSE = "Mémorisation : Les 10 dernières Sourates";
+  const surahKey = (s) => `${MEMO_COURSE} — ${MEMO_MODULE} — Sourate ${s.n} : ${s.en}`;
+
+  // Load existing memorised surahs from backend on mount
+  useEffect(() => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) return;
+    axios.get(`${API_URL}/api/user/${email}`)
+      .then(r => {
+        const completed = r.data.completedLessons || [];
+        const nums = new Set();
+        completed.forEach(key => {
+          const match = key.match(/^Mémorisation.*— Sourate (\d+) :/);
+          if (match) nums.add(parseInt(match[1]));
+        });
+        setMemorised(nums);
+      })
+      .catch(() => {});
+  }, []);
+
+  const toggleMemorised = async (surah) => {
+    const email = localStorage.getItem("userEmail");
+    if (!email) return;
+    const already = memorised.has(surah.n);
+    if (already) {
+      // optimistic remove (no delete-lesson endpoint needed, just toggle UI)
+      setMemorised(prev => { const s = new Set(prev); s.delete(surah.n); return s; });
+    } else {
+      setMemorised(prev => new Set([...prev, surah.n]));
+      try {
+        await axios.post(`${API_URL}/api/update-progress`, {
+          email,
+          lessonTitle: surahKey(surah),
+        });
+      } catch (err) {
+        console.error("Erreur sauvegarde mémorisation :", err);
+        setMemorised(prev => { const s = new Set(prev); s.delete(surah.n); return s; });
+      }
+    }
+  };
 
   // ── Fetch pronunciations from API whenever a surah is selected ──
   const { pronunciations: selectedProns, loadingPron } = usePronunciations(selected?.n);
@@ -1069,7 +1126,12 @@ function QuranBrowser({ onClose }) {
                       {s.meaning} · {s.verses}v
                     </div>
                   </div>
-                  <div style={{ fontSize: 14, color: TEXT2, fontFamily: "Georgia,serif", marginLeft: 6 }}>{s.ar}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 6 }}>
+                    {memorised.has(s.n) && (
+                      <span style={{ fontSize: 11, color: TEAL }} title="Mémorisée">✓</span>
+                    )}
+                    <div style={{ fontSize: 14, color: TEXT2, fontFamily: "Georgia,serif" }}>{s.ar}</div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -1110,6 +1172,9 @@ function QuranBrowser({ onClose }) {
                       )}
                       <button onClick={() => setVoiceSurah(selected)} style={{ padding: "5px 11px", borderRadius: 7, border: `1.5px solid ${TEAL}`, background: TEAL_DIM, color: TEAL, fontFamily: "system-ui", fontWeight: 700, fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                         <Mic size={10}/> Pratiquer
+                      </button>
+                      <button onClick={() => toggleMemorised(selected)} style={{ padding: "5px 11px", borderRadius: 7, border: `1.5px solid ${memorised.has(selected.n) ? "#f59e0b" : "rgba(245,158,11,0.3)"}`, background: memorised.has(selected.n) ? "rgba(245,158,11,0.15)" : "transparent", color: memorised.has(selected.n) ? "#f59e0b" : TEXT3, fontFamily: "system-ui", fontWeight: 700, fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                        <CheckCircle size={10}/> {memorised.has(selected.n) ? "Mémorisée ✓" : "Marquer mémorisée"}
                       </button>
                     </div>
                   </div>
@@ -1304,7 +1369,14 @@ function MemoPlan({ onClose }) {
                     <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, fontFamily: "Georgia,serif", color: TEXT1 }}>{dayView.items.map(it => it.surah.en).join(" + ")}</h3>
                     <p style={{ margin: "4px 0 0", fontSize: 13, color: TEXT3, fontFamily: "system-ui" }}>{dayView.items.reduce((a,it) => a+it.verses,0)} versets à mémoriser</p>
                   </div>
-                  <button onClick={() => setCompleted(c => ({...c,[dayView.day]:!c[dayView.day]}))} style={darkBtn(completed[dayView.day] ? TEAL : TEXT2, !!completed[dayView.day])}>
+                  <button onClick={() => {
+                    const nowDone = !completed[dayView.day];
+                    setCompleted(c => ({...c,[dayView.day]:nowDone}));
+                    if (nowDone) {
+                      const surahNames = dayView.items.map(it => it.surah.en).join(" + ");
+                      saveProgress(`${COURSE_TITLE} — ${COURSE_TITLE} — Jour ${dayView.day} : ${surahNames}`);
+                    }
+                  }} style={darkBtn(completed[dayView.day] ? TEAL : TEXT2, !!completed[dayView.day])}>
                     {completed[dayView.day] ? <><CheckCircle size={13}/> Terminé</> : <><Square size={13}/> Marquer fait</>}
                   </button>
                 </div>

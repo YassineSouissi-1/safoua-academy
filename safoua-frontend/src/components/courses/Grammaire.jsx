@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { speakArabic } from "../../utils/arabicTTS";
 
 // ─── Global Styles ────────────────────────────────────────────────────────────
 const GS = `
@@ -341,11 +342,7 @@ function scoreMatch(target, spoken) {
   return Math.min(100, Math.round(jaccard * 100 + subScore));
 }
 function speak(text) {
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "ar-SA"; u.rate = 0.72; u.pitch = 1;
-  window.speechSynthesis.speak(u);
+  speakArabic(text);
 }
 
 // ─── Hook: Speech Recognition ────────────────────────────────────────────────
