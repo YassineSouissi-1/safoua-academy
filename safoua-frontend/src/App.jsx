@@ -505,6 +505,7 @@ function Navbar() {
 /* ── APP ────────────────────────────────────────────────────────── */
 function AppInner() {
   const location = useLocation();
+  const isLoggedIn = !!localStorage.getItem("username");
   return (
     <div style={{ minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column" }}>
       <CursorSparks/>
@@ -514,8 +515,8 @@ function AppInner() {
           <Routes location={location} key={location.pathname}>
             <Route path="/"         element={<Home/>}/>
             <Route path="/courses"  element={<Courses/>}/>
-            <Route path="/login"    element={<Login/>}/>
-            <Route path="/register" element={<Register/>}/>
+            <Route path="/login"    element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Login/>}/>
+            <Route path="/register" element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Register/>}/>
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
             <Route path="/course-view/1" element={<ProtectedRoute><AlphabetArabe/></ProtectedRoute>}/>
             <Route path="/course-view/2" element={<ProtectedRoute><Tajwid/></ProtectedRoute>}/>
