@@ -7,6 +7,7 @@ import User from './models/User.js';
 import axios from "axios";
 import pronunciationsRouter from './routes/pronunciations.js';
 import ttsRouter from './routes/tts.js';
+import dictionaryRouter from './routes/dictionary.js';
 
 dotenv.config();
 
@@ -29,6 +30,9 @@ app.use('/api/pronunciations', pronunciationsRouter);
 
 // ── TTS (Microsoft Edge Neural — free, no key) ─────────────────
 app.use('/api/tts', ttsRouter);
+
+// ── DICTIONARY (Claude AI-powered) ─────────────────────────────
+app.use('/api/dictionary', dictionaryRouter);
 
 // ── SESSION MODEL ───────────────────────────────────────────────
 const SessionSchema = new mongoose.Schema({
@@ -268,47 +272,6 @@ app.post('/api/sessions/:id/cancel', async (req, res) => {
   }
 });
 
-// ── DICTIONARY / TRANSLATION ─────────────────────────────────────
-app.get('/api/dictionary/translate', async (req, res) => {
-  try {
-    const { word, language } = req.query;
-    if (!word || !language) {
-      return res.status(400).json({ success: false, error: "Veuillez fournir un mot et une langue (english ou french)" });
-    }
-    const lang = language.toLowerCase();
-    if (!['english', 'french'].includes(lang)) {
-      return res.status(400).json({ success: false, error: "Langue non supportée. Utilisez 'english' ou 'french'" });
-    }
-    const searchWord = word.trim();
-    if (!searchWord) return res.status(400).json({ success: false, error: "Le mot ne peut pas être vide." });
-
-    const sourceLang = lang === 'english' ? 'en' : 'fr';
-    try {
-      const translationUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(searchWord)}&langpair=${sourceLang}|ar`;
-      const translationResponse = await axios.get(translationUrl, { timeout: 10000 });
-      if (translationResponse.data.responseStatus === 200 && translationResponse.data.responseData.translatedText) {
-        const arabicTranslation = translationResponse.data.responseData.translatedText;
-        return res.json({
-          success: true,
-          word: searchWord,
-          language: lang,
-          arabic: arabicTranslation,
-          pronunciation: `Prononciation de: ${arabicTranslation}`,
-          meaning: `Traduction du mot "${searchWord}" (${lang === 'english' ? 'Anglais' : 'Français'}) vers l'Arabe`,
-          source: "MyMemory API"
-        });
-      } else {
-        throw new Error("Réponse invalide");
-      }
-    } catch (apiError) {
-      return res.json({ success: false, message: `Impossible de traduire "${searchWord}" en ce moment.` });
-    }
-  } catch (err) {
-    console.error("Dictionary translate error:", err);
-    res.status(500).json({ success: false, error: "Erreur serveur lors de la traduction" });
-  }
-});
-
 // ── CHATBOT TEMPLATE FALLBACK ────────────────────────────────────
 // Used only when no AI API key is configured.
 const TEMPLATE_RULES = [
@@ -394,7 +357,6 @@ function getTemplateResponse(message) {
       if (lower.includes(np)) return rule.answer;
     }
   }
-  const preview = message.slice(0, 40);
   return `Je n'ai pas bien compris votre question. Essayez de me demander des informations sur un cours spécifique (Alphabet, Tajwid, Mémorisation...), les sessions live, ou la navigation sur Safoua Academy. 😊`;
 }
 
