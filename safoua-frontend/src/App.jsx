@@ -21,16 +21,16 @@ import CourseDetail  from "./components/CourseDetail";
 import Footer        from "./components/Footer";
 import Chatbot       from "./components/Chatbot";
 import NotFound      from "./components/NotFound";
-import Dictionary   from "./components/Dictionary";
-import ProtectedRoute   from "./components/ProtectedRoute";
-import AlphabetArabe    from "./components/courses/AlphabetArabe";
-import Tajwid           from "./components/courses/Tajwid";
-import Memorisation     from "./components/courses/Memorisation";
-import Grammaire        from "./components/courses/Grammaire";
-import Fiqh             from "./components/courses/Fiqh";
-import Sira             from "./components/courses/Sira";
-import Calligraphy      from "./components/courses/Calligraphy";
-import BecomeMuslim     from "./components/courses/BecomeMuslim";
+import Dictionary    from "./components/Dictionary";
+import ProtectedRoute    from "./components/ProtectedRoute";
+import AlphabetArabe     from "./components/courses/AlphabetArabe";
+import Tajwid            from "./components/courses/Tajwid";
+import Memorisation      from "./components/courses/Memorisation";
+import Grammaire         from "./components/courses/Grammaire";
+import Fiqh              from "./components/courses/Fiqh";
+import Sira              from "./components/courses/Sira";
+import Calligraphy       from "./components/courses/Calligraphy";
+import BecomeMuslim      from "./components/courses/BecomeMuslim";
 
 /* ── FONTS ──────────────────────────────────────────────────────── */
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
@@ -47,6 +47,40 @@ const C = {
   dim:   "rgba(242,237,230,0.16)",
   border:"rgba(255,255,255,0.07)",
 };
+
+/* ── TYPEWRITER HOOK ────────────────────────────────────────────── */
+function useTypewriter(words, speed = 80, pause = 1800) {
+  const [display, setDisplay] = useState("");
+  const [wordIdx, setWordIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = words[wordIdx];
+    const delay = deleting
+      ? speed / 2
+      : charIdx === current.length
+      ? pause
+      : speed;
+
+    const timer = setTimeout(() => {
+      if (!deleting && charIdx === current.length) {
+        setDeleting(true);
+      } else if (deleting && charIdx === 0) {
+        setDeleting(false);
+        setWordIdx((i) => (i + 1) % words.length);
+      } else {
+        const next = charIdx + (deleting ? -1 : 1);
+        setCharIdx(next);
+        setDisplay(current.slice(0, next));
+      }
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [charIdx, deleting, wordIdx, words, speed, pause]);
+
+  return display;
+}
 
 /* ── CURSOR SPARKS ──────────────────────────────────────────────── */
 function CursorSparks() {
@@ -103,16 +137,16 @@ function PageTransition({ children }) {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
-  <motion.div
-    key={location.pathname}
-    initial={{ opacity:0 }}
-    animate={{ opacity:1 }}
-    exit={{ opacity:0 }}
-    transition={{ duration:0.25 }}
-  >
-    {children}
-    </motion.div>
-  </AnimatePresence>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity:0 }}
+        animate={{ opacity:1 }}
+        exit={{ opacity:0 }}
+        transition={{ duration:0.25 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -148,7 +182,6 @@ function HomeBg() {
       <div style={{position:"absolute",top:"30%",right:"-8%",width:500,height:500,background:"radial-gradient(circle,rgba(29,181,132,0.045) 0%,transparent 65%)",filter:"blur(60px)"}}/>
       <canvas ref={canvasRef} style={{position:"absolute",inset:0,width:"100%",height:"100%"}}/>
       <div style={{position:"absolute",inset:0,backgroundImage:`linear-gradient(rgba(201,168,76,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.022) 1px,transparent 1px)`,backgroundSize:"88px 88px"}}/>
-      {/* Noise */}
       <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",opacity:0.03,mixBlendMode:"overlay"}} xmlns="http://www.w3.org/2000/svg">
         <filter id="hn"><feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
         <rect width="100%" height="100%" filter="url(#hn)"/>
@@ -168,44 +201,10 @@ function FeatureCard({ icon, color, title, desc, delay }) {
       transition={{ duration:0.65, delay, ease:[.22,.68,0,1] }}
       whileHover={{ y:-6, transition:{ duration:0.3 } }}
       style={{ padding:"28px 24px",borderRadius:22,background:"rgba(255,255,255,0.028)",border:`1px solid ${C.border}`,backdropFilter:"blur(12px)",cursor:"default",position:"relative",overflow:"hidden" }}>
-      {/* Glow on hover handled by CSS */}
       <div style={{ width:48,height:48,borderRadius:14,background:`${color}15`,border:`1.5px solid ${color}30`,display:"flex",alignItems:"center",justifyContent:"center",color,marginBottom:20 }}>{icon}</div>
       <h3 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:700,color:C.text,marginBottom:10,letterSpacing:"-0.01em" }}>{title}</h3>
       <p style={{ color:C.muted,fontSize:13,lineHeight:1.68,fontFamily:"'DM Sans',sans-serif",fontWeight:300 }}>{desc}</p>
       <div style={{ position:"absolute",bottom:0,left:0,right:0,height:1,background:`linear-gradient(90deg,transparent,${color}40,transparent)`,opacity:0.5 }}/>
-    </motion.div>
-  );
-}
-
-/* ── HOME: PREVIEW CARD (floating hero) ─────────────────────────── */
-function FloatingCard({ course, floatDuration, rotateDeg, delay, style={} }) {
-  const [imgOk, setImgOk] = useState(false);
-  return (
-    <motion.div
-      initial={{ opacity:0, scale:0.88 }}
-      animate={{ opacity:1, scale:1 }}
-      transition={{ duration:0.8, delay, ease:[.22,.68,0,1] }}
-      style={{ position:"absolute", borderRadius:20, overflow:"hidden", background:"rgba(13,17,23,0.85)", border:`1px solid ${course.accent}30`, backdropFilter:"blur(20px)", boxShadow:`0 24px 60px rgba(0,0,0,0.55),0 0 0 1px ${course.accent}15`, ...style }}>
-      <motion.div
-        animate={{ y:[0,-14,0], rotate:[rotateDeg, rotateDeg+0.5, rotateDeg] }}
-        transition={{ duration:floatDuration, repeat:Infinity, ease:"easeInOut" }}>
-        <div style={{ height:100, overflow:"hidden", position:"relative" }}>
-          <img src={course.image} alt="" onLoad={()=>setImgOk(true)}
-            style={{ width:"100%", height:"100%", objectFit:"cover", opacity:imgOk?0.5:0, transition:"opacity 0.5s" }}/>
-          <div style={{ position:"absolute",inset:0,background:`linear-gradient(180deg,transparent 20%,rgba(8,11,15,0.9) 100%)` }}/>
-          <div style={{ position:"absolute",bottom:10,left:12,fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:course.accent,direction:"rtl",opacity:0.9 }}>{course.titleAr}</div>
-        </div>
-        <div style={{ padding:"12px 14px" }}>
-          <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:4 }}>
-            <div style={{ width:26,height:26,borderRadius:7,background:`${course.accent}20`,border:`1px solid ${course.accent}40`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:course.accent,fontWeight:700 }}>{course.icon}</div>
-            <span style={{ fontSize:12,fontWeight:600,color:C.text,fontFamily:"'DM Sans',sans-serif" }}>{course.title}</span>
-          </div>
-          <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-            <span style={{ fontSize:10,color:C.dim,fontFamily:"'DM Sans',sans-serif" }}>{course.level}</span>
-            <span style={{ display:"flex",alignItems:"center",gap:3,fontSize:10,color:C.dim,fontFamily:"'DM Sans',sans-serif" }}><Users size={9}/>{course.students}</span>
-          </div>
-        </div>
-      </motion.div>
     </motion.div>
   );
 }
@@ -233,6 +232,391 @@ function Testimonial({ name, role, text, avatar, color, delay }) {
   );
 }
 
+/* ── 3D FLOATING QURAN + DRAGGABLE ARABIC LETTERS ───────────────── */
+const ARABIC_LETTERS = [
+  { char: "ب", x: "6%",  y: "10%", size: 46, color: C.gold,    dur: 4.1, delay: 0 },
+  { char: "س", x: "76%", y: "6%",  size: 38, color: C.teal,    dur: 3.5, delay: 0.6 },
+  { char: "م", x: "80%", y: "66%", size: 52, color: "#9d7bea",  dur: 5.0, delay: 0.3 },
+  { char: "ا", x: "3%",  y: "70%", size: 36, color: C.tealL,   dur: 3.8, delay: 1.0 },
+  { char: "ل", x: "48%", y: "2%",  size: 30, color: C.goldL,   dur: 4.6, delay: 0.8 },
+  { char: "ن", x: "58%", y: "80%", size: 44, color: "#d4654a",  dur: 3.2, delay: 0.2 },
+  { char: "ر", x: "88%", y: "35%", size: 34, color: C.gold,    dur: 4.3, delay: 1.2 },
+  { char: "ح", x: "2%",  y: "38%", size: 40, color: C.teal,    dur: 3.9, delay: 0.5 },
+];
+
+function FloatingQuran() {
+  const [rot, setRot] = useState({ x: -12, y: 20 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef(null);
+  const floatY = useSpring(0, { stiffness: 22, damping: 8 });
+
+  const onMouseDown = (e) => {
+    e.preventDefault();
+    setDragging(true);
+    dragStart.current = { x: e.clientX, y: e.clientY, rot: { ...rot } };
+  };
+  const onTouchStart = (e) => {
+    setDragging(true);
+    dragStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, rot: { ...rot } };
+  };
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragging || !dragStart.current) return;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      const dx = cx - dragStart.current.x;
+      const dy = cy - dragStart.current.y;
+      setRot({
+        x: Math.max(-45, Math.min(45, dragStart.current.rot.x - dy * 0.35)),
+        y: Math.max(-65, Math.min(65, dragStart.current.rot.y + dx * 0.35)),
+      });
+    };
+    const onUp = () => setDragging(false);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: true });
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [dragging]);
+
+  // Idle float
+  useEffect(() => {
+    let up = true;
+    const iv = setInterval(() => {
+      if (!dragging) { floatY.set(up ? -16 : 0); up = !up; }
+    }, 2000);
+    return () => clearInterval(iv);
+  }, [dragging, floatY]);
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: 500, perspective: 1000 }}>
+
+      {/* Floating draggable Arabic letters */}
+      {ARABIC_LETTERS.map((l, i) => (
+        <motion.div
+          key={i}
+          drag
+          dragConstraints={{ left: -70, right: 70, top: -70, bottom: 70 }}
+          dragElastic={0.2}
+          dragMomentum={false}
+          animate={{ y: [0, -(14 + i * 1.5), 0], rotate: [0, 5, -4, 0] }}
+          transition={{ duration: l.dur, delay: l.delay, repeat: Infinity, ease: "easeInOut" }}
+          whileDrag={{ scale: 1.3, zIndex: 30, filter: `drop-shadow(0 0 18px ${l.color})` }}
+          whileHover={{ scale: 1.15 }}
+          style={{
+            position: "absolute",
+            left: l.x, top: l.y,
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: l.size,
+            color: l.color,
+            fontWeight: 700,
+            cursor: "grab",
+            userSelect: "none",
+            textShadow: `0 0 20px ${l.color}55, 0 0 40px ${l.color}22`,
+            zIndex: 5,
+            lineHeight: 1,
+          }}
+        >
+          {l.char}
+        </motion.div>
+      ))}
+
+      {/* 3D Book wrapper */}
+      <motion.div
+        style={{
+          position: "absolute",
+          top: "50%", left: "50%",
+          x: "-50%", y: floatY,
+          marginTop: -110,
+          cursor: dragging ? "grabbing" : "grab",
+          zIndex: 10,
+          transformStyle: "preserve-3d",
+          userSelect: "none",
+        }}
+        onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
+      >
+        {/* Book inner — rotates on drag */}
+        <div
+          style={{
+            width: 170,
+            height: 228,
+            transformStyle: "preserve-3d",
+            transform: `rotateX(${rot.x}deg) rotateY(${rot.y}deg)`,
+            transition: dragging ? "none" : "transform 1s cubic-bezier(.22,.68,0,1)",
+            position: "relative",
+          }}
+        >
+          {/* ── FRONT COVER — black + ornate gold like reference ── */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(160deg,#1a1a0e 0%,#0d0d07 50%,#111108 100%)",
+            borderRadius: "4px 12px 12px 4px",
+            transform: "translateZ(18px)",
+            boxShadow: "0 32px 80px rgba(0,0,0,0.9), inset 0 1px 0 rgba(201,168,76,0.08)",
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            overflow: "hidden",
+          }}>
+            {/* ── Gold ornamental border band (outer) ── */}
+            <div style={{
+              position:"absolute", inset:4,
+              border:"2.5px solid #b8922a",
+              borderRadius:9,
+              pointerEvents:"none",
+            }}/>
+            {/* ── Decorative inner border ── */}
+            <div style={{
+              position:"absolute", inset:8,
+              border:"1px solid rgba(201,168,76,0.45)",
+              borderRadius:6,
+              pointerEvents:"none",
+            }}/>
+            {/* ── Dense arabesque corner fill using SVG pattern ── */}
+            {/* Top-left corner ornament */}
+            <svg style={{position:"absolute",top:10,left:10,width:44,height:44,opacity:0.88}} viewBox="0 0 44 44">
+              <g fill="none" stroke="#c9a84c" strokeWidth="0.9">
+                <path d="M2 2 Q11 2 11 11 Q11 2 20 2"/>
+                <path d="M2 2 Q2 11 11 11 Q2 11 2 20"/>
+                <path d="M6 6 Q13 6 13 13 Q13 6 20 6"/>
+                <path d="M6 6 Q6 13 13 13 Q6 13 6 20"/>
+                <circle cx="11" cy="11" r="3.5" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="2" cy="2" r="1.2" fill="#c9a84c"/>
+                <path d="M2 8 Q5 5 8 2" strokeWidth="0.6"/>
+                <path d="M2 14 Q8 8 14 2" strokeWidth="0.5" opacity="0.5"/>
+              </g>
+            </svg>
+            {/* Top-right corner ornament */}
+            <svg style={{position:"absolute",top:10,right:10,width:44,height:44,opacity:0.88,transform:"scaleX(-1)"}} viewBox="0 0 44 44">
+              <g fill="none" stroke="#c9a84c" strokeWidth="0.9">
+                <path d="M2 2 Q11 2 11 11 Q11 2 20 2"/>
+                <path d="M2 2 Q2 11 11 11 Q2 11 2 20"/>
+                <path d="M6 6 Q13 6 13 13 Q13 6 20 6"/>
+                <path d="M6 6 Q6 13 13 13 Q6 13 6 20"/>
+                <circle cx="11" cy="11" r="3.5" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="2" cy="2" r="1.2" fill="#c9a84c"/>
+                <path d="M2 8 Q5 5 8 2" strokeWidth="0.6"/>
+                <path d="M2 14 Q8 8 14 2" strokeWidth="0.5" opacity="0.5"/>
+              </g>
+            </svg>
+            {/* Bottom-left corner ornament */}
+            <svg style={{position:"absolute",bottom:10,left:10,width:44,height:44,opacity:0.88,transform:"scaleY(-1)"}} viewBox="0 0 44 44">
+              <g fill="none" stroke="#c9a84c" strokeWidth="0.9">
+                <path d="M2 2 Q11 2 11 11 Q11 2 20 2"/>
+                <path d="M2 2 Q2 11 11 11 Q2 11 2 20"/>
+                <path d="M6 6 Q13 6 13 13 Q13 6 20 6"/>
+                <path d="M6 6 Q6 13 13 13 Q6 13 6 20"/>
+                <circle cx="11" cy="11" r="3.5" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="2" cy="2" r="1.2" fill="#c9a84c"/>
+                <path d="M2 8 Q5 5 8 2" strokeWidth="0.6"/>
+                <path d="M2 14 Q8 8 14 2" strokeWidth="0.5" opacity="0.5"/>
+              </g>
+            </svg>
+            {/* Bottom-right corner ornament */}
+            <svg style={{position:"absolute",bottom:10,right:10,width:44,height:44,opacity:0.88,transform:"scale(-1,-1)"}} viewBox="0 0 44 44">
+              <g fill="none" stroke="#c9a84c" strokeWidth="0.9">
+                <path d="M2 2 Q11 2 11 11 Q11 2 20 2"/>
+                <path d="M2 2 Q2 11 11 11 Q2 11 2 20"/>
+                <path d="M6 6 Q13 6 13 13 Q13 6 20 6"/>
+                <path d="M6 6 Q6 13 13 13 Q6 13 6 20"/>
+                <circle cx="11" cy="11" r="3.5" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="2" cy="2" r="1.2" fill="#c9a84c"/>
+                <path d="M2 8 Q5 5 8 2" strokeWidth="0.6"/>
+                <path d="M2 14 Q8 8 14 2" strokeWidth="0.5" opacity="0.5"/>
+              </g>
+            </svg>
+
+            {/* ── Top horizontal arabesque band ── */}
+            <svg style={{position:"absolute",top:14,left:14,right:14,width:"calc(100% - 28px)",height:16,opacity:0.7}} viewBox="0 0 142 16" preserveAspectRatio="none">
+              <g fill="none" stroke="#c9a84c" strokeWidth="0.8">
+                {Array.from({length:9}).map((_,i)=>(
+                  <g key={i} transform={`translate(${i*16},0)`}>
+                    <path d="M0 8 Q4 0 8 8 Q12 16 16 8"/>
+                    <circle cx="8" cy="8" r="1.2" fill="#c9a84c" opacity="0.8"/>
+                  </g>
+                ))}
+              </g>
+            </svg>
+            {/* ── Bottom horizontal arabesque band ── */}
+            <svg style={{position:"absolute",bottom:14,left:14,right:14,width:"calc(100% - 28px)",height:16,opacity:0.7}} viewBox="0 0 142 16" preserveAspectRatio="none">
+              <g fill="none" stroke="#c9a84c" strokeWidth="0.8">
+                {Array.from({length:9}).map((_,i)=>(
+                  <g key={i} transform={`translate(${i*16},0)`}>
+                    <path d="M0 8 Q4 0 8 8 Q12 16 16 8"/>
+                    <circle cx="8" cy="8" r="1.2" fill="#c9a84c" opacity="0.8"/>
+                  </g>
+                ))}
+              </g>
+            </svg>
+
+            {/* ── Central oval medallion ── */}
+            <div style={{
+              position:"relative",
+              width:110, height:130,
+              display:"flex", flexDirection:"column",
+              alignItems:"center", justifyContent:"center",
+              zIndex:2,
+            }}>
+              {/* Oval border layers */}
+              <svg style={{position:"absolute",inset:0,width:"100%",height:"100%"}} viewBox="0 0 110 130">
+                <ellipse cx="55" cy="65" rx="52" ry="62" fill="#0d0d07" stroke="#c9a84c" strokeWidth="2.2"/>
+                <ellipse cx="55" cy="65" rx="46" ry="56" fill="none" stroke="rgba(201,168,76,0.5)" strokeWidth="0.8"/>
+                <ellipse cx="55" cy="65" rx="40" ry="50" fill="none" stroke="rgba(201,168,76,0.25)" strokeWidth="0.5"/>
+                {/* Oval ornamental diamonds at compass points */}
+                <polygon points="55,3 58,10 55,17 52,10" fill="#c9a84c" opacity="0.9"/>
+                <polygon points="55,113 58,120 55,127 52,120" fill="#c9a84c" opacity="0.9"/>
+                <polygon points="3,65 10,62 17,65 10,68" fill="#c9a84c" opacity="0.9"/>
+                <polygon points="93,65 100,62 107,65 100,68" fill="#c9a84c" opacity="0.9"/>
+                {/* Small accent dots */}
+                <circle cx="55" cy="24" r="2" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="55" cy="106" r="2" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="24" cy="65" r="2" fill="#c9a84c" opacity="0.6"/>
+                <circle cx="86" cy="65" r="2" fill="#c9a84c" opacity="0.6"/>
+              </svg>
+              {/* Inner text */}
+              <div style={{position:"relative",zIndex:1,textAlign:"center",lineHeight:1.3}}>
+                <div style={{
+                  fontFamily:"'Cormorant Garamond',serif",
+                  fontSize:9, color:"rgba(201,168,76,0.7)",
+                  letterSpacing:"0.1em", marginBottom:4,
+                }}>بِسْمِ اللَّهِ</div>
+                <div style={{
+                  fontFamily:"'Cormorant Garamond',serif",
+                  fontSize:22, fontWeight:700,
+                  color:"#d4a83a",
+                  textShadow:`0 0 14px rgba(201,168,76,0.8)`,
+                  lineHeight:1.1,
+                }}>القرآن</div>
+                <div style={{
+                  fontFamily:"'Cormorant Garamond',serif",
+                  fontSize:11, fontWeight:600,
+                  color:"rgba(201,168,76,0.8)",
+                  letterSpacing:"0.06em",
+                }}>الكريم</div>
+                <div style={{
+                  fontFamily:"'Cormorant Garamond',serif",
+                  fontSize:7, color:"rgba(201,168,76,0.45)",
+                  letterSpacing:"0.12em",
+                  marginTop:4, textTransform:"uppercase",
+                }}>Al-Qur'an</div>
+              </div>
+            </div>
+
+            {/* ── Shimmer light sweep ── */}
+            <div style={{
+              position:"absolute", inset:0,
+              background:"linear-gradient(120deg,rgba(255,255,255,0.04) 0%,transparent 40%,rgba(0,0,0,0.15) 100%)",
+              borderRadius:"inherit", pointerEvents:"none",
+            }}/>
+          </div>
+
+          {/* ── BACK COVER — black + gold ornate ── */}
+          <div style={{
+            position:"absolute", inset:0,
+            background:"linear-gradient(160deg,#141408 0%,#0a0a05 100%)",
+            borderRadius:"4px 12px 12px 4px",
+            transform:"rotateY(180deg) translateZ(18px)",
+            boxShadow:"0 28px 70px rgba(0,0,0,0.85)",
+          }}>
+            <div style={{ position:"absolute", inset:5, border:"2px solid rgba(201,168,76,0.35)", borderRadius:8 }}/>
+            <div style={{ position:"absolute", inset:9, border:"0.5px solid rgba(201,168,76,0.15)", borderRadius:6 }}/>
+          </div>
+
+          {/* ── SPINE — black + gold ── */}
+          <div style={{
+            position:"absolute",
+            top:0, left:0,
+            width:36, height:"100%",
+            background:"linear-gradient(90deg,#060603,#111108 40%,#0a0a05 70%,#060603)",
+            transform:"rotateY(-90deg) translateZ(0) translateX(-18px)",
+            borderRadius:"4px 0 0 4px",
+            display:"flex", alignItems:"center", justifyContent:"center",
+            boxShadow:"inset -3px 0 10px rgba(0,0,0,0.7)",
+            borderRight:"1px solid rgba(201,168,76,0.2)",
+          }}>
+            <div style={{
+              writingMode:"vertical-rl",
+              fontFamily:"'Cormorant Garamond',serif",
+              fontSize:8.5, color:"rgba(201,168,76,0.5)",
+              letterSpacing:"0.2em",
+              transform:"rotate(180deg)",
+              textTransform:"uppercase",
+            }}>القرآن الكريم</div>
+          </div>
+
+          {/* ── PAGE EDGES — cream/ivory with fine lines ── */}
+          <div style={{
+            position:"absolute", left:4, right:0, top:0, height:36,
+            background:"linear-gradient(180deg,#f0ebe0 0%,#e2d9c4 100%)",
+            transform:"rotateX(90deg) translateZ(0) translateY(-18px)",
+            backgroundImage:"repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 3px)",
+          }}/>
+          <div style={{
+            position:"absolute", left:4, right:0, bottom:0, height:36,
+            background:"linear-gradient(0deg,#f0ebe0 0%,#e2d9c4 100%)",
+            transform:"rotateX(-90deg) translateZ(0) translateY(18px)",
+            backgroundImage:"repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 3px)",
+          }}/>
+          <div style={{
+            position:"absolute", top:0, right:0, width:36, height:"100%",
+            background:"linear-gradient(90deg,#e2d9c4,#f0ebe0 40%,#e2d9c4)",
+            transform:"rotateY(90deg) translateZ(0) translateX(18px)",
+            backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 3px)",
+          }}/>
+
+          {/* ── RED BOOKMARK RIBBON ── */}
+          <div style={{
+            position:"absolute",
+            bottom:-28, right:28,
+            width:10, height:56,
+            background:"linear-gradient(180deg,#c0192c 0%,#8b0f1e 70%,#6b0b17 100%)",
+            transform:"translateZ(16px)",
+            zIndex:20,
+            clipPath:"polygon(0 0,100% 0,100% 80%,50% 100%,0 80%)",
+            boxShadow:"1px 2px 8px rgba(0,0,0,0.5)",
+          }}/>
+        </div>
+      </motion.div>
+
+      {/* Glow pool beneath book */}
+      <motion.div
+        style={{ y: floatY }}
+        animate={{ opacity: [0.4, 0.7, 0.4], scaleX: [1, 1.08, 1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div style={{
+          position:"absolute", top:"64%", left:"50%",
+          transform:"translate(-50%,0)",
+          width:150, height:28,
+          background:`radial-gradient(ellipse,${C.gold}28,transparent 70%)`,
+          filter:"blur(10px)",
+          pointerEvents:"none",
+        }}/>
+      </motion.div>
+
+      {/* Hint label */}
+      <div style={{
+        position:"absolute", bottom:8, left:"50%",
+        transform:"translateX(-50%)",
+        fontSize:10, color:"rgba(242,237,230,0.28)",
+        fontFamily:"'DM Sans',sans-serif",
+        letterSpacing:"0.1em",
+        whiteSpace:"nowrap",
+        userSelect:"none",
+        pointerEvents:"none",
+      }}>
+        Glissez le livre · Déplacez les lettres
+      </div>
+    </div>
+  );
+}
+
 /* ── HOME PAGE ──────────────────────────────────────────────────── */
 const FEATURES = [
   { icon:<BookOpen size={22}/>, color:C.teal,   title:"Alphabet & Phonétique",  desc:"Maîtrisez les 28 lettres arabes avec audio natif et exercices interactifs conçus par des experts." },
@@ -241,16 +625,18 @@ const FEATURES = [
   { icon:<Trophy size={22}/>,   color:"#d4654a", title:"Gamification",            desc:"Badges, points XP, classements hebdomadaires — restez motivé à chaque étape de votre voyage." },
 ];
 
-const PREVIEW_COURSES = [
-  { id:1, title:"Alphabet Arabe",  titleAr:"الحروف",  accent:C.teal,   icon:"أ", level:"Débutant",     students:"1.2k", image:"https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=600&q=80" },
-  { id:2, title:"Tajwid Sacré",    titleAr:"التجويد", accent:"#9d7bea", icon:"ت", level:"Intermédiaire", students:"850",  image:"https://images.unsplash.com/photo-1564349683136-77e08bef1ef1?auto=format&fit=crop&w=600&q=80" },
-  { id:3, title:"Mémorisation",    titleAr:"الحفظ",   accent:C.gold,   icon:"س", level:"Tous niveaux",  students:"3.4k", image:"https://images.unsplash.com/photo-1584281723509-a16997486420?auto=format&fit=crop&w=600&q=80" },
+const TESTIMONIALS = [
+  { name:"Yasmine B.", role:"Étudiante, Paris",      text:"J'ai appris l'alphabet en 2 semaines. Les exercices interactifs et le tuteur IA sont absolument incroyables.", avatar:"ي", color:C.teal },
+  { name:"Karim M.",   role:"Étudiant, Lyon",        text:"Le cours de Tajwid a transformé ma récitation. La qualité pédagogique est au niveau des meilleures universités islamiques.", avatar:"ك", color:"#9d7bea" },
+  { name:"Fatima S.",  role:"Enseignante, Marseille", text:"La plateforme la plus complète pour l'enseignement islamique. Je la recommande à tous mes élèves sans hésitation.", avatar:"ف", color:C.gold },
 ];
 
-const TESTIMONIALS = [
-  { name:"Yasmine B.", role:"Étudiante, Paris",     text:"J'ai appris l'alphabet en 2 semaines. Les exercices interactifs et le tuteur IA sont absolument incroyables.", avatar:"ي", color:C.teal },
-  { name:"Karim M.",   role:"Étudiant, Lyon",       text:"Le cours de Tajwid a transformé ma récitation. La qualité pédagogique est au niveau des meilleures universités islamiques.", avatar:"ك", color:"#9d7bea" },
-  { name:"Fatima S.",  role:"Enseignante, Marseille",text:"La plateforme la plus complète pour l'enseignement islamique. Je la recommande à tous mes élèves sans hésitation.", avatar:"ف", color:C.gold },
+const TYPEWRITER_PHRASES = [
+  "à votre rythme.",
+  "avec l'IA.",
+  "en famille.",
+  "sans limite.",
+  "avec passion.",
 ];
 
 function Home() {
@@ -258,11 +644,13 @@ function Home() {
   const heroY  = useTransform(scrollY, [0,600], [0,130]);
   const heroOp = useTransform(scrollY, [0,500], [1,0]);
 
-  const featRef = useRef(null);
+  const featRef    = useRef(null);
   const featInView = useInView(featRef, { once:true, margin:"-80px" });
-
-  const testRef = useRef(null);
+  const testRef    = useRef(null);
   const testInView = useInView(testRef, { once:true, margin:"-60px" });
+
+  // Typewriter
+  const typed = useTypewriter(TYPEWRITER_PHRASES, 75, 1900);
 
   return (
     <div style={{ fontFamily:"'DM Sans',sans-serif",position:"relative",overflowX:"hidden" }}>
@@ -270,24 +658,50 @@ function Home() {
 
       {/* ══ HERO ══════════════════════════════════════════════════ */}
       <section style={{ minHeight:"100vh",display:"flex",alignItems:"center",position:"relative",zIndex:1,overflow:"hidden" }}>
-        {/* Parallax Arabic glyph */}
+        {/* Parallax Arabic glyph background */}
         <motion.div style={{ y:heroY,position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:0 }}>
           <span style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(260px,38vw,580px)",color:"rgba(201,168,76,0.025)",lineHeight:1,userSelect:"none",letterSpacing:"-0.06em" }}>بسم</span>
         </motion.div>
 
         <motion.div style={{ opacity:heroOp,position:"relative",zIndex:1,maxWidth:1200,margin:"0 auto",padding:"120px 24px 80px",width:"100%",display:"grid",gridTemplateColumns:"1fr 1fr",gap:60,alignItems:"center" }} className="hero-grid">
 
-          {/* Left */}
+          {/* Left: text */}
           <div>
             <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.7,ease:easeOut}}
               style={{ display:"inline-flex",alignItems:"center",gap:8,padding:"7px 18px",borderRadius:99,background:"rgba(201,168,76,0.1)",border:"1px solid rgba(201,168,76,0.28)",fontSize:11,fontWeight:600,color:C.gold,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:28 }}>
               <Sparkles size={11}/> Plateforme Islamique · MERN + IA
             </motion.div>
 
-            <motion.h1 initial={{opacity:0,y:32}} animate={{opacity:1,y:0}} transition={{duration:0.9,delay:0.1,ease:[.22,.68,0,1]}}
+            <motion.h1
+              initial={{opacity:0,y:32}} animate={{opacity:1,y:0}}
+              transition={{duration:0.9,delay:0.1,ease:[.22,.68,0,1]}}
               style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(2.6rem,5.5vw,4.2rem)",fontWeight:700,lineHeight:1.06,color:C.text,marginBottom:22,letterSpacing:"-0.03em" }}>
               Apprenez le Coran<br/>& l'Arabe{" "}
-              <em style={{ fontStyle:"italic",background:`linear-gradient(135deg,${C.goldL} 0%,${C.tealL} 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>à votre rythme.</em>
+              {/* Typewriter phrase */}
+              <em style={{
+                fontStyle:"italic",
+                background:`linear-gradient(135deg,${C.goldL} 0%,${C.tealL} 100%)`,
+                WebkitBackgroundClip:"text",
+                WebkitTextFillColor:"transparent",
+                display:"inline-block",
+                minWidth:"2ch",
+                position:"relative",
+              }}>
+                {typed}
+                {/* blinking cursor */}
+                <motion.span
+                  animate={{ opacity:[1,0,1] }}
+                  transition={{ duration:0.9, repeat:Infinity, ease:"steps(1)" }}
+                  style={{
+                    display:"inline-block",
+                    width:3, height:"0.85em",
+                    background:C.gold,
+                    marginLeft:3,
+                    verticalAlign:"middle",
+                    borderRadius:2,
+                  }}
+                />
+              </em>
             </motion.h1>
 
             <motion.p initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8,delay:0.22,ease:easeOut}}
@@ -323,14 +737,15 @@ function Home() {
             </motion.div>
           </div>
 
-          {/* Right: floating cards */}
-          <div style={{ position:"relative",height:500,display:"flex",alignItems:"center",justifyContent:"center" }}>
-            <FloatingCard course={PREVIEW_COURSES[0]} floatDuration={3.8} rotateDeg={-2} delay={0.3} style={{ width:230,top:"5%",left:"5%" }}/>
-            <FloatingCard course={PREVIEW_COURSES[1]} floatDuration={4.5} rotateDeg={2}  delay={0.5} style={{ width:250,top:"28%",right:"0%" }}/>
-            <FloatingCard course={PREVIEW_COURSES[2]} floatDuration={3.2} rotateDeg={-1} delay={0.7} style={{ width:220,bottom:"5%",left:"15%" }}/>
-            {/* Central glow orb */}
-            <div style={{ position:"absolute",width:180,height:180,borderRadius:"50%",background:`radial-gradient(circle,${C.gold}12,transparent 70%)`,filter:"blur(30px)",zIndex:-1 }}/>
-          </div>
+          {/* Right: 3D Quran + floating letters */}
+          <motion.div
+            initial={{ opacity:0, x:40 }}
+            animate={{ opacity:1, x:0 }}
+            transition={{ duration:1, delay:0.3, ease:[.22,.68,0,1] }}
+            style={{ position:"relative", height:500, display:"flex", alignItems:"center", justifyContent:"center" }}
+          >
+            <FloatingQuran />
+          </motion.div>
         </motion.div>
 
         {/* Scroll cue */}
@@ -496,7 +911,6 @@ function Navbar() {
           .show-mobile   { display: block !important; }
           .hero-grid     { grid-template-columns: 1fr !important; }
         }
-        @keyframes slideDown { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
       `}</style>
     </>
   );
@@ -513,10 +927,10 @@ function AppInner() {
       <main style={{ flex:1 }}>
         <PageTransition>
           <Routes location={location} key={location.pathname}>
-            <Route path="/"         element={<Home/>}/>
-            <Route path="/courses"  element={<Courses/>}/>
-            <Route path="/login"    element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Login/>}/>
-            <Route path="/register" element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Register/>}/>
+            <Route path="/"          element={<Home/>}/>
+            <Route path="/courses"   element={<Courses/>}/>
+            <Route path="/login"     element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Login/>}/>
+            <Route path="/register"  element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Register/>}/>
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
             <Route path="/course-view/1" element={<ProtectedRoute><AlphabetArabe/></ProtectedRoute>}/>
             <Route path="/course-view/2" element={<ProtectedRoute><Tajwid/></ProtectedRoute>}/>

@@ -31,37 +31,176 @@ const ROADMAP = [
   {
     phase: "DÉPART", phaseAr: "البداية", phaseColor: C.teal, num: "01",
     courses: [
-      { id:1, title:"Alphabet Arabe & Phonétique", titleAr:"الحروف والصوتيات", category:"Arabe", level:"Débutant", duration:"10h", rating:4.9, students:"1.2k", instructor:"Pr. Yassine", accent:C.teal, icon:"أ", image:"https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=1200&q=85", tags:["Écriture","Oral"], description:"Maîtrisez les 28 lettres arabes, leurs formes et leur phonétique.", recommended:true },
-      { id:7, title:"Calligraphie Arabe", titleAr:"الخط العربي", category:"Arabe", level:"Débutant", duration:"12h", rating:4.6, students:"450", instructor:"Ustadh Kamal", accent:"#9d7bea", icon:"خ", image:"https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=85", tags:["Art","Créativité"], description:"Transformez l'écriture en art avec les styles Naskh et Thuluth.", recommended:false },
+      {
+        id:1, title:"Alphabet Arabe & Phonétique", titleAr:"الحروف والصوتيات",
+        category:"Arabe", level:"Débutant", duration:"10h", rating:4.9, students:"1.2k",
+        instructor:"Pr. Yassine", accent:C.teal, icon:"أ",
+        image:"https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=90",
+        tags:["Écriture","Oral"],
+        description:"Maîtrisez les 28 lettres arabes, leurs formes et leur phonétique.",
+        recommended:true
+      },
+      {
+        id:7, title:"L'Art du Tashkeel Arabe", titleAr:"فن التشكيل العربي",
+        category:"Arabe", level:"Débutant", duration:"12h", rating:4.6, students:"450",
+        instructor:"Ustadh Kamal", accent:"#9d7bea", icon:"خ",
+        image:"https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=1200&q=90",
+        tags:["Art","Créativité"],
+        description:"Transformez l'écriture en art avec les styles Naskh et Thuluth.",
+        recommended:false
+      },
     ]
   },
   {
     phase: "FONDATIONS", phaseAr: "الأساسيات", phaseColor: C.gold, num: "02",
     courses: [
-      { id:4, title:"Grammaire : Tome 1 de Médine", titleAr:"النحو العربي", category:"Arabe", level:"Débutant", duration:"25h", rating:4.7, students:"2.1k", instructor:"Dr. Amira", accent:"#4fadd4", icon:"ن", image:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=85", tags:["Syntaxe","Vocabulaire"], description:"Bases solides en grammaire arabe avec la méthode de l'Université de Médine.", recommended:true },
-      { id:8, title:"Devenir Musulman : Les Bases", titleAr:"أساسيات الإسلام", category:"Sciences", level:"Débutant", duration:"14h", rating:4.9, students:"1.2k", instructor:"Dr. Nadia", accent:"#2ab89a", icon:"☪", image:"https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=1200&q=85", tags:["Conversion","Fondements"], description:"La Chahada, les 5 piliers, la prière et comment vivre en Islam.", recommended:false },
+      {
+        id:4, title:"Grammaire : Tome 1 de Médine", titleAr:"النحو العربي",
+        category:"Arabe", level:"Débutant", duration:"25h", rating:4.7, students:"2.1k",
+        instructor:"Dr. Amira", accent:"#4fadd4", icon:"ن",
+        image:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=90",
+        tags:["Syntaxe","Vocabulaire"],
+        description:"Bases solides en grammaire arabe avec la méthode de l'Université de Médine.",
+        recommended:true
+      },
+      {
+        id:8, title:"Devenir Musulman : Les Bases", titleAr:"أساسيات الإسلام",
+        category:"Sciences", level:"Débutant", duration:"14h", rating:4.9, students:"1.2k",
+        instructor:"Dr. Nadia", accent:"#2ab89a", icon:"☪",
+        image:"https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=1200&q=90",
+        tags:["Conversion","Fondements"],
+        description:"La Chahada, les 5 piliers, la prière et comment vivre en Islam.",
+        recommended:false
+      },
     ]
   },
   {
     phase: "CORAN", phaseAr: "القرآن الكريم", phaseColor: "#9d7bea", num: "03",
     courses: [
-      { id:2, title:"Tajwid : Récitation Sacrée", titleAr:"أحكام التجويد", category:"Coran", level:"Intermédiaire", duration:"15h", rating:4.8, students:"850", instructor:"Cheikh Omar", accent:"#9d7bea", icon:"ت", image:"https://images.unsplash.com/photo-1564349683136-77e08bef1ef1?auto=format&fit=crop&w=1200&q=85", tags:["Règles","Mélodie"], description:"Récitez le Coran avec perfection grâce aux règles du Tajwid.", recommended:true },
-      { id:3, title:"Mémorisation : Les Sourates", titleAr:"حفظ القرآن", category:"Coran", level:"Tous niveaux", duration:"20h", rating:5.0, students:"3.4k", instructor:"Pr. Fatma", accent:C.gold, icon:"س", image:"https://images.unsplash.com/photo-1584281723509-a16997486420?auto=format&fit=crop&w=1200&q=85", tags:["Hifz","Pratique"], description:"Mémorisez les sourates courtes avec des techniques éprouvées.", recommended:false },
+      {
+        id:2, title:"Tajwid : Récitation Sacrée", titleAr:"أحكام التجويد",
+        category:"Coran", level:"Intermédiaire", duration:"15h", rating:4.8, students:"850",
+        instructor:"Cheikh Omar", accent:"#9d7bea", icon:"ت",
+        image:"https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=1200&q=90",
+        tags:["Règles","Mélodie"],
+        description:"Récitez le Coran avec perfection grâce aux règles du Tajwid.",
+        recommended:true
+      },
+      {
+        id:3, title:"Mémorisation : Les Sourates", titleAr:"حفظ القرآن",
+        category:"Coran", level:"Tous niveaux", duration:"20h", rating:5.0, students:"3.4k",
+        instructor:"Pr. Fatma", accent:C.gold, icon:"س",
+        image:"https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=90",
+        tags:["Hifz","Pratique"],
+        description:"Mémorisez les sourates courtes avec des techniques éprouvées.",
+        recommended:false
+      },
     ]
   },
   {
     phase: "MAÎTRISE", phaseAr: "الإتقان", phaseColor: "#d4654a", num: "04",
     courses: [
-      { id:9, title:"Arabe Moderne Standard", titleAr:"اللغة العربية الفصحى", category:"Arabe", level:"Intermédiaire", duration:"30h", rating:4.7, students:"1.8k", instructor:"Prof. Leila", accent:"#4fadd4", icon:"ع", image:"https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=85", tags:["Conversation","Presse"], description:"Maîtrisez l'arabe moderne pour lire la presse et communiquer.", recommended:true },
-      { id:5, title:"Introduction au Fiqh", titleAr:"أصول الفقه", category:"Sciences", level:"Intermédiaire", duration:"12h", rating:4.9, students:"600", instructor:"Dr. Hassan", accent:"#d4654a", icon:"ف", image:"https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=85", tags:["Législation","Éthique"], description:"Les fondements de la jurisprudence islamique.", recommended:false },
-      { id:6, title:"Sira : Vie du Prophète ﷺ", titleAr:"السيرة النبوية", category:"Sciences", level:"Tous niveaux", duration:"18h", rating:4.9, students:"1.5k", instructor:"Pr. Walid", accent:C.teal, icon:"م", image:"https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1200&q=85", tags:["Histoire","Éthique"], description:"Un voyage à travers la vie du Prophète Muhammad ﷺ.", recommended:false },
+      {
+        id:9, title:"Arabe Moderne Standard", titleAr:"اللغة العربية الفصحى",
+        category:"Arabe", level:"Intermédiaire", duration:"30h", rating:4.7, students:"1.8k",
+        instructor:"Prof. Leila", accent:"#4fadd4", icon:"ع",
+        image:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=90",
+        tags:["Conversation","Presse"],
+        description:"Maîtrisez l'arabe moderne pour lire la presse et communiquer.",
+        recommended:true
+      },
+      {
+        id:5, title:"Introduction au Fiqh", titleAr:"أصول الفقه",
+        category:"Sciences", level:"Intermédiaire", duration:"12h", rating:4.9, students:"600",
+        instructor:"Dr. Hassan", accent:"#d4654a", icon:"ف",
+        image:"https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=1200&q=90",
+        tags:["Législation","Éthique"],
+        description:"Les fondements de la jurisprudence islamique.",
+        recommended:false
+      },
+      {
+        id:6, title:"Sira : Vie du Prophète ﷺ", titleAr:"السيرة النبوية",
+        category:"Sciences", level:"Tous niveaux", duration:"18h", rating:4.9, students:"1.5k",
+        instructor:"Pr. Walid", accent:C.teal, icon:"م",
+        image:"https://images.unsplash.com/photo-1564349683136-77e08bef1ef1?auto=format&fit=crop&w=1200&q=90",
+        tags:["Histoire","Éthique"],
+        description:"Un voyage à travers la vie du Prophète Muhammad ﷺ.",
+        recommended:false
+      },
     ]
   }
 ];
 
 const ROUTES = {1:"/course-view/1",2:"/course-view/2",3:"/course-view/3",4:"/course-view/4",5:"/course-view/5",6:"/course-view/6",7:"/course-view/7",8:"/course-view/8",9:"/course-view/9"};
 
-/* ── NOISE TEXTURE SVG (inline, no external dep) ───────────────── */
+/* ── TYPEWRITER HOOK ───────────────────────────────────────────── */
+function useTypewriter(text, { speed = 38, startDelay = 0, trigger = true } = {}) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!trigger) return;
+    setDisplayed("");
+    setDone(false);
+    let i = 0;
+    const timeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        i++;
+        setDisplayed(text.slice(0, i));
+        if (i >= text.length) {
+          clearInterval(interval);
+          setDone(true);
+        }
+      }, speed);
+      return () => clearInterval(interval);
+    }, startDelay);
+    return () => clearTimeout(timeout);
+  }, [text, speed, startDelay, trigger]);
+
+  return { displayed, done };
+}
+
+/* ── WRITING ANIMATION TEXT ────────────────────────────────────── */
+function WritingText({ text, style, as: Tag = "span", speed = 38, startDelay = 0, trigger = true, cursorColor }) {
+  const { displayed, done } = useTypewriter(text, { speed, startDelay, trigger });
+  const cursor = cursorColor || C.gold;
+
+  return (
+    <Tag style={style}>
+      {displayed}
+      {!done && (
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
+          style={{ display: "inline-block", width: "2px", height: "1em", background: cursor, marginLeft: 2, verticalAlign: "text-bottom", borderRadius: 1 }}
+        />
+      )}
+    </Tag>
+  );
+}
+
+/* ── SPLIT WORD REVEAL ─────────────────────────────────────────── */
+function WordReveal({ text, style, delay = 0, inView = true }) {
+  const words = text.split(" ");
+  return (
+    <span style={{ ...style, display: "block" }}>
+      {words.map((word, i) => (
+        <span key={i} style={{ display: "inline-block", overflow: "hidden", marginRight: "0.28em" }}>
+          <motion.span
+            style={{ display: "inline-block" }}
+            initial={{ y: "110%", opacity: 0 }}
+            animate={inView ? { y: "0%", opacity: 1 } : {}}
+            transition={{ duration: 0.7, delay: delay + i * 0.07, ease: [0.22, 0.68, 0, 1] }}
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/* ── NOISE TEXTURE SVG ─────────────────────────────────────────── */
 function NoiseOverlay() {
   return (
     <svg style={{ position:"fixed",inset:0,width:"100%",height:"100%",pointerEvents:"none",zIndex:2,opacity:0.032,mixBlendMode:"overlay" }} xmlns="http://www.w3.org/2000/svg">
@@ -107,8 +246,9 @@ function CourseCard({ course, index }) {
       initial={{ opacity:0, y:48, scale:0.96 }}
       animate={inView ? { opacity:1, y:0, scale:1 } : {}}
       transition={{ duration:0.65, delay:index*0.1, ease:[.22,.68,0,1] }}
+      style={{ height:"100%" }}
     >
-      <Link to={ROUTES[course.id]||"/courses"} style={{ textDecoration:"none",display:"block" }}>
+      <Link to={ROUTES[course.id]||"/courses"} style={{ textDecoration:"none", display:"flex", height:"100%" }}>
         <motion.div
           onMouseEnter={()=>setHov(true)}
           onMouseLeave={()=>setHov(false)}
@@ -123,6 +263,7 @@ function CourseCard({ course, index }) {
               : "0 8px 32px rgba(0,0,0,0.35)",
             transition:"border-color 0.3s,box-shadow 0.3s",
             position:"relative",
+            display:"flex", flexDirection:"column", width:"100%",
           }}
         >
           {/* Image */}
@@ -168,7 +309,7 @@ function CourseCard({ course, index }) {
           </div>
 
           {/* Body */}
-          <div style={{ padding:"18px 20px 22px" }}>
+          <div style={{ padding:"18px 20px 22px", display:"flex", flexDirection:"column", flex:1 }}>
             {/* Arabic subtitle */}
             <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:`${course.accent}99`,marginBottom:5,direction:"rtl",letterSpacing:"0.03em" }}>
               {course.titleAr}
@@ -183,7 +324,7 @@ function CourseCard({ course, index }) {
             </p>
 
             {/* Tags */}
-            <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:16 }}>
+            <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:16,marginTop:"auto" }}>
               {course.tags.map(t=>(
                 <span key={t} style={{ padding:"3px 10px",borderRadius:99,background:`${course.accent}10`,border:`1px solid ${course.accent}28`,fontSize:10,fontWeight:600,color:course.accent,letterSpacing:"0.04em",fontFamily:"'DM Sans',sans-serif" }}>{t}</span>
               ))}
@@ -231,7 +372,6 @@ function PhaseDivider({ phase, index }) {
       transition={{ duration:0.7, ease:[.22,.68,0,1] }}
       style={{ display:"flex",alignItems:"center",gap:20,marginBottom:36 }}
     >
-      {/* Phase number */}
       <div style={{ flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:4 }}>
         <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:11,fontWeight:600,color:phase.phaseColor,letterSpacing:"0.2em",textTransform:"uppercase" }}>
           {phase.num}
@@ -240,15 +380,17 @@ function PhaseDivider({ phase, index }) {
       </div>
 
       <div>
-        <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color:C.text,lineHeight:1,marginBottom:3,letterSpacing:"-0.02em" }}>
-          {phase.phase}
-        </div>
+        <WordReveal
+          text={phase.phase}
+          inView={inView}
+          delay={0.1}
+          style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color:C.text,lineHeight:1,marginBottom:3,letterSpacing:"-0.02em" }}
+        />
         <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:18,color:phase.phaseColor,direction:"rtl",opacity:0.8 }}>
           {phase.phaseAr}
         </div>
       </div>
 
-      {/* Line */}
       <motion.div
         initial={{ scaleX:0 }}
         animate={inView ? { scaleX:1 } : {}}
@@ -256,7 +398,6 @@ function PhaseDivider({ phase, index }) {
         style={{ flex:1,height:1,background:`linear-gradient(90deg,${phase.phaseColor}50,transparent)`,transformOrigin:"left" }}
       />
 
-      {/* Phase tag */}
       <div style={{ flexShrink:0,padding:"6px 14px",borderRadius:99,background:`${phase.phaseColor}12`,border:`1px solid ${phase.phaseColor}30`,fontSize:10,fontWeight:700,color:phase.phaseColor,letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif" }}>
         {phase.courses.length} cours
       </div>
@@ -267,10 +408,19 @@ function PhaseDivider({ phase, index }) {
 /* ── HERO ──────────────────────────────────────────────────────── */
 function Hero() {
   const { scrollY } = useScroll();
-  const y     = useTransform(scrollY, [0,500], [0,120]);
+  const y      = useTransform(scrollY, [0,500], [0,120]);
   const opHero = useTransform(scrollY, [0,400], [1,0]);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStarted(true), 300);
+    return () => clearTimeout(t);
+  }, []);
 
   const total = ROADMAP.reduce((s,p)=>s+p.courses.length,0);
+
+  const line1 = "Votre parcours vers";
+  const line2 = "la maîtrise islamique";
 
   return (
     <div style={{ position:"relative",minHeight:"92vh",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",zIndex:1 }}>
@@ -291,37 +441,56 @@ function Hero() {
           <Sparkles size={11}/> {total} Cours · 4 Niveaux · Certifiés
         </motion.div>
 
-        {/* Heading */}
-        <motion.h1
-          initial={{ opacity:0, y:30 }}
-          animate={{ opacity:1, y:0 }}
-          transition={{ duration:0.9, delay:0.1, ease:[.22,.68,0,1] }}
-          style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(2.8rem,7vw,5.5rem)",fontWeight:700,lineHeight:1.04,color:C.text,marginBottom:22,letterSpacing:"-0.03em" }}>
-          Votre parcours vers<br/>
-          <span style={{ fontStyle:"italic",background:`linear-gradient(135deg,${C.goldL} 0%,${C.gold} 40%,${C.tealL} 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent" }}>
-            la maîtrise islamique
-          </span>
-        </motion.h1>
+        {/* Heading — writing animation */}
+        <h1 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(2.8rem,7vw,5.5rem)",fontWeight:700,lineHeight:1.08,color:C.text,marginBottom:22,letterSpacing:"-0.03em", minHeight: "2.4em" }}>
+          <WritingText
+            text={line1}
+            speed={42}
+            startDelay={400}
+            trigger={started}
+            style={{ display:"block" }}
+          />
+          {/* Second line only starts after first is done — use a stagger */}
+          <WritingAnimLine
+            text={line2}
+            speed={38}
+            startDelay={400 + line1.length * 42 + 180}
+            trigger={started}
+            gradient={`linear-gradient(135deg,${C.goldL} 0%,${C.gold} 40%,${C.tealL} 100%)`}
+          />
+        </h1>
 
+        {/* Subtitle — word by word reveal */}
         <motion.p
-          initial={{ opacity:0, y:20 }}
-          animate={{ opacity:1, y:0 }}
-          transition={{ duration:0.8, delay:0.25, ease:easeOut }}
+          initial={{ opacity:0 }}
+          animate={{ opacity:1 }}
+          transition={{ duration:0.5, delay: 0.4 + (line1.length + line2.length) * 0.042 + 0.3 }}
           style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(1rem,2vw,1.25rem)",fontStyle:"italic",color:C.muted,lineHeight:1.75,maxWidth:560,margin:"0 auto 44px" }}>
-          De l'alphabet au Coran — un chemin structuré, guidé par des experts, enrichi par l'intelligence artificielle.
+          <WritingText
+            text="De l'alphabet au Coran — un chemin structuré, guidé par des experts, enrichi par l'intelligence artificielle."
+            speed={22}
+            startDelay={400 + (line1.length + line2.length) * 40 + 400}
+            trigger={started}
+            cursorColor={C.teal}
+          />
         </motion.p>
 
         {/* Stats */}
         <motion.div
           initial={{ opacity:0, y:20 }}
           animate={{ opacity:1, y:0 }}
-          transition={{ duration:0.7, delay:0.4, ease:easeOut }}
+          transition={{ duration:0.7, delay:0.4 + (line1.length + line2.length) * 0.042 + 1.2 }}
           style={{ display:"flex",justifyContent:"center",gap:"clamp(24px,5vw,56px)",flexWrap:"wrap",paddingTop:36,borderTop:`1px solid ${C.border}` }}>
-          {[["9","Cours"],["4k+","Étudiants"],["98%","Réussite"],["6","Experts"]].map(([val,lbl])=>(
-            <div key={lbl} style={{ textAlign:"center" }}>
+          {[["9","Cours"],["4k+","Étudiants"],["98%","Réussite"],["6","Experts"]].map(([val,lbl], i)=>(
+            <motion.div
+              key={lbl}
+              initial={{ opacity:0, y:16 }}
+              animate={{ opacity:1, y:0 }}
+              transition={{ duration:0.5, delay: 0.4 + (line1.length + line2.length) * 0.042 + 1.2 + i * 0.12 }}
+              style={{ textAlign:"center" }}>
               <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(2rem,4vw,3rem)",fontWeight:700,background:`linear-gradient(135deg,${C.goldL},${C.tealL})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1 }}>{val}</div>
               <div style={{ fontFamily:"'DM Sans',sans-serif",fontSize:10,fontWeight:600,color:C.dim,letterSpacing:"0.12em",textTransform:"uppercase",marginTop:4 }}>{lbl}</div>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </motion.div>
@@ -335,6 +504,30 @@ function Hero() {
         <ChevronDown size={14} color={C.gold}/>
       </motion.div>
     </div>
+  );
+}
+
+/* Italic gradient writing line (for h1 second line) */
+function WritingAnimLine({ text, speed, startDelay, trigger, gradient }) {
+  const { displayed, done } = useTypewriter(text, { speed, startDelay, trigger });
+  return (
+    <span style={{
+      display:"block",
+      fontStyle:"italic",
+      background: gradient,
+      WebkitBackgroundClip:"text",
+      WebkitTextFillColor:"transparent",
+      backgroundClip:"text",
+    }}>
+      {displayed}
+      {!done && (
+        <motion.span
+          animate={{ opacity:[1,0] }}
+          transition={{ duration:0.5,repeat:Infinity,ease:"easeInOut" }}
+          style={{ display:"inline-block",width:"3px",height:"0.85em",background:C.goldL,marginLeft:3,verticalAlign:"text-bottom",borderRadius:1,WebkitTextFillColor:C.goldL }}
+        />
+      )}
+    </span>
   );
 }
 
