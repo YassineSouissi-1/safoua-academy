@@ -31,6 +31,7 @@ import Fiqh              from "./components/courses/Fiqh";
 import Sira              from "./components/courses/Sira";
 import Calligraphy       from "./components/courses/Calligraphy";
 import BecomeMuslim      from "./components/courses/BecomeMuslim";
+import ArabeModerneStandard from "./components/courses/ArabeModerneStandard";
 
 /* ── FONTS ──────────────────────────────────────────────────────── */
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
@@ -234,14 +235,16 @@ function Testimonial({ name, role, text, avatar, color, delay }) {
 
 /* ── 3D FLOATING QURAN + DRAGGABLE ARABIC LETTERS ───────────────── */
 const ARABIC_LETTERS = [
-  { char: "ب", x: "6%",  y: "10%", size: 46, color: C.gold,    dur: 4.1, delay: 0 },
+  { char: "ي", x: "20%",  y: "1%", size: 46, color: C.gold,    dur: 4.1, delay: 0 },
+  { char: "ش", x: "6%",  y: "30%", size: 46, color: C.gold,    dur: 4.1, delay: 0 },
   { char: "س", x: "76%", y: "6%",  size: 38, color: C.teal,    dur: 3.5, delay: 0.6 },
   { char: "م", x: "80%", y: "66%", size: 52, color: "#9d7bea",  dur: 5.0, delay: 0.3 },
-  { char: "ا", x: "3%",  y: "70%", size: 36, color: C.tealL,   dur: 3.8, delay: 1.0 },
+  { char: "ا", x: "25%",  y: "75%", size: 36, color: C.tealL,   dur: 3.8, delay: 1.0 },
   { char: "ل", x: "48%", y: "2%",  size: 30, color: C.goldL,   dur: 4.6, delay: 0.8 },
   { char: "ن", x: "58%", y: "80%", size: 44, color: "#d4654a",  dur: 3.2, delay: 0.2 },
   { char: "ر", x: "88%", y: "35%", size: 34, color: C.gold,    dur: 4.3, delay: 1.2 },
-  { char: "ح", x: "2%",  y: "38%", size: 40, color: C.teal,    dur: 3.9, delay: 0.5 },
+  { char: "ح", x: "8%",  y: "58%", size: 40, color: C.teal,    dur: 3.9, delay: 0.5 },
+  
 ];
 
 function FloatingQuran() {
@@ -940,6 +943,7 @@ function AppInner() {
             <Route path="/course-view/6" element={<ProtectedRoute><Sira/></ProtectedRoute>}/>
             <Route path="/course-view/7" element={<ProtectedRoute><Calligraphy/></ProtectedRoute>}/>
             <Route path="/course-view/8" element={<ProtectedRoute><BecomeMuslim/></ProtectedRoute>}/>
+            <Route path="/course-view/9" element={<ProtectedRoute><ArabeModerneStandard/></ProtectedRoute>}/>
             <Route path="/course-view/:id" element={<ProtectedRoute><CourseDetail/></ProtectedRoute>}/>
             <Route path="/dictionary"    element={<ProtectedRoute><Dictionary/></ProtectedRoute>}/>
             <Route path="*" element={<NotFound/>}/>
