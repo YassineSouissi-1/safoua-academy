@@ -1,14 +1,14 @@
 import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
-import { Mail, Phone, MapPin, Github, Twitter, Linkedin, Sparkles, ArrowUpRight } from "lucide-react";
+import { Github, Twitter, Linkedin } from "lucide-react";
 
 /* ── FONTS ─────────────────────────────────────────────────────── */
 const FONT_LINK = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 `;
 
-/* ── PALETTE (mirroring Courses page) ──────────────────────────── */
+/* ── PALETTE ────────────────────────────────────────────────────── */
 const C = {
   bg:      "#080b0f",
   surface: "#0d1117",
@@ -21,7 +21,6 @@ const C = {
   text:    "#f2ede6",
   muted:   "rgba(242,237,230,0.4)",
   dim:     "rgba(242,237,230,0.18)",
-  purple:  "#9d7bea",
 };
 
 const NAV_LINKS = [
@@ -30,19 +29,6 @@ const NAV_LINKS = [
   { label: "Mon Espace", to: "/dashboard" },
   { label: "Connexion",  to: "/login" },
   { label: "Inscription",to: "/register" },
-];
-
-const TECH_STACK = [
-  { name: "MongoDB",    desc: "Base de données", color: C.teal },
-  { name: "Express.js", desc: "Backend API",     color: "#60a5fa" },
-  { name: "React.js",   desc: "Interface",       color: "#38bdf8" },
-  { name: "Node.js",    desc: "Runtime",         color: C.tealL },
-];
-
-const CONTACT = [
-  { icon: <Mail size={14}/>,   label: "contact@safoua.edu",   href: "mailto:contact@safoua.edu" },
-  { icon: <Phone size={14}/>,  label: "+216 00 000 000",       href: "tel:+21600000000" },
-  { icon: <MapPin size={14}/>, label: "Tunis, Tunisie",        href: "#" },
 ];
 
 const SOCIALS = [
@@ -89,14 +75,14 @@ function Footer() {
     <footer style={{ background: C.bg, fontFamily: "'DM Sans', sans-serif", position: "relative", overflow: "hidden" }}>
       <style>{FONT_LINK}</style>
 
-      {/* Background grid (matches Courses page) */}
+      {/* Background grid */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
         backgroundImage: `linear-gradient(${C.border} 1px, transparent 1px), linear-gradient(90deg, ${C.border} 1px, transparent 1px)`,
         backgroundSize: "88px 88px", opacity: 0.4,
       }}/>
 
-      {/* Ambient orb */}
+      {/* Ambient orbs */}
       <motion.div
         animate={{ x: [0, 20, -10, 0], y: [0, -15, 10, 0] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
@@ -193,76 +179,6 @@ function Footer() {
             </div>
           </FadeIn>
 
-          {/* TECH STACK */}
-          <FadeIn delay={0.16}>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 11, fontWeight: 600, color: C.gold, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>
-              Stack MERN
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 22 }}>
-              {TECH_STACK.map((tech, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: tech.color, flexShrink: 0, boxShadow: `0 0 8px ${tech.color}60` }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: tech.color }}>{tech.name}</span>
-                  <span style={{ fontSize: 11, color: C.dim }}>{tech.desc}</span>
-                </div>
-              ))}
-            </div>
-            {/* AI Badge */}
-            <div style={{
-              padding: "12px 16px", borderRadius: 14,
-              background: `linear-gradient(135deg, rgba(29,181,132,0.08), rgba(201,168,76,0.06))`,
-              border: `1px solid rgba(29,181,132,0.2)`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <Sparkles size={11} color={C.teal}/>
-                <span style={{ fontSize: 10, fontWeight: 700, color: C.teal, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                  IA Integration
-                </span>
-              </div>
-              <p style={{ fontSize: 11, color: C.muted, fontWeight: 300 }}>Chatbot · Traducteur · Quiz adaptatif</p>
-            </div>
-          </FadeIn>
-
-          {/* CONTACT */}
-          <FadeIn delay={0.24}>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 11, fontWeight: 600, color: C.gold, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>
-              Contact
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
-              {CONTACT.map((c, i) => (
-                <motion.a
-                  key={i} href={c.href}
-                  whileHover={{ x: 4 }}
-                  style={{
-                    textDecoration: "none", display: "flex", alignItems: "center", gap: 10,
-                    fontSize: 13, fontWeight: 400, color: C.muted, transition: "color 0.25s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = C.text}
-                  onMouseLeave={e => e.currentTarget.style.color = C.muted}
-                >
-                  <span style={{ color: C.teal, flexShrink: 0 }}>{c.icon}</span>
-                  {c.label}
-                </motion.a>
-              ))}
-            </div>
-
-            {/* Project badge */}
-            <div style={{
-              padding: "14px 18px", borderRadius: 14,
-              background: C.card,
-              border: `1px solid ${C.border}`,
-              position: "relative", overflow: "hidden",
-            }}>
-              {/* accent line */}
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${C.gold}, ${C.teal})` }}/>
-              <p style={{ fontSize: 10, fontWeight: 600, color: C.dim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-                Projet de Fin d'Études
-              </p>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 700, color: C.text, letterSpacing: "-0.01em" }}>
-                L3 Informatique — 2026
-              </p>
-            </div>
-          </FadeIn>
         </div>
 
         {/* ── BOTTOM DIVIDER ──────────────────────────────────── */}
