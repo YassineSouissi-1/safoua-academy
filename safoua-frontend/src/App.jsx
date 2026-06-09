@@ -235,10 +235,10 @@ function Testimonial({ name, role, text, avatar, color, delay }) {
 
 /* ── 3D FLOATING QURAN + DRAGGABLE ARABIC LETTERS ───────────────── */
 const ARABIC_LETTERS = [
-  { char: "ي", x: "20%",  y: "1%", size: 46, color: C.gold,    dur: 4.1, delay: 0 },
-  { char: "ش", x: "6%",  y: "30%", size: 46, color: C.gold,    dur: 4.1, delay: 0 },
+  { char: "ي", x: "20%",  y: "1%", size: 46, color: "#5822d7",    dur: 4.1, delay: 0 },
+  { char: "ش", x: "6%",  y: "30%", size: 46, color: "#5822d7",    dur: 4.1, delay: 0 },
   { char: "س", x: "76%", y: "6%",  size: 38, color: C.teal,    dur: 3.5, delay: 0.6 },
-  { char: "م", x: "80%", y: "66%", size: 52, color: "#9d7bea",  dur: 5.0, delay: 0.3 },
+  { char: "م", x: "80%", y: "66%", size: 52, color: "#15b94c",  dur: 5.0, delay: 0.3 },
   { char: "ا", x: "25%",  y: "75%", size: 36, color: C.tealL,   dur: 3.8, delay: 1.0 },
   { char: "ل", x: "48%", y: "2%",  size: 30, color: C.goldL,   dur: 4.6, delay: 0.8 },
   { char: "ن", x: "58%", y: "80%", size: 44, color: "#d4654a",  dur: 3.2, delay: 0.2 },
