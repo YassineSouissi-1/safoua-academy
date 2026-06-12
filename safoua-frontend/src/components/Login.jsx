@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { API_BASE } from "../config/api";
+import { setToken } from "../utils/auth"; // ← NEW
+import axios from "axios";
 
 function Login() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const from      = location.state?.from?.pathname || "/dashboard";
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [message,  setMessage]  = useState("");
-  const [loading,  setLoading]  = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,12 +20,18 @@ function Login() {
     setMessage("");
     try {
       const response = await axios.post(`${API_BASE}/api/login`, formData);
-      const user = response.data.user;
-      localStorage.setItem("username",  user.username);
+      const { token, user } = response.data;
+
+      // ✅ Store the JWT token (replaces storing username/role in plain localStorage)
+      setToken(token);
+
+      // Keep these for components that still read them directly (backwards compat)
+      // You can remove them once all components use getUser() from auth.js
+      localStorage.setItem("username", user.username);
       localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userRole",  user.role || "student");
+      localStorage.setItem("userRole", user.role || "student");
+
       setMessage("Connexion réussie !");
-      // ✅ Redirect back to where the user was trying to go (or dashboard)
       setTimeout(() => navigate(from, { replace: true }), 900);
     } catch (err) {
       setMessage("Erreur : " + (err.response?.data?.error || "Identifiants invalides"));
@@ -69,7 +76,7 @@ function Login() {
                 onChange={(e) => setFormData({ ...formData, [f.key]: e.target.value })} required
                 style={{ width: "100%", padding: "11px 14px", borderRadius: "12px", border: "1.5px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: "13px", outline: "none", fontFamily: "inherit", boxSizing: "border-box", transition: "border-color 0.2s" }}
                 onFocus={(e) => e.target.style.borderColor = "#10b981"}
-                onBlur={(e)  => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
+                onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"} />
             </div>
           ))}
 

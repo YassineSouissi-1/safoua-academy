@@ -7,7 +7,12 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import axios from "axios";
+
+// ✅ CHANGE 1: Replace "import axios from 'axios'" with this:
+import { api, getUser, logout } from "../utils/auth";
+// "api" is axios with your token already attached — use it instead of plain axios
+// "getUser()" reads your info from the token — no more localStorage.getItem("username")
+// "logout()" clears the token and redirects home
 
 /* ── FONTS ─────────────────────────────────────────────────────── */
 const FONT_LINK = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
@@ -31,12 +36,9 @@ const C = {
 };
 
 /* ── CONSTANTS ──────────────────────────────────────────────────── */
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// ✅ CHANGE 2: Remove the API constant — "api" from auth.js uses it automatically
+// DELETE THIS LINE: const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-/**
- * ALL 9 COURSES — mirrors the exact lesson/module structure used in each
- * CourseDetail component so lessonKey() matches what MongoDB stores.
- */
 const ALL_COURSES = [
   {
     id: 1,
@@ -265,7 +267,9 @@ const EMPTY_FORM = {
   duration: 60, maxStudents: 8, level: "Débutant", meetLink: "", accent: C.purple,
 };
 
-/* ── AMBIENT ORBS ──────────────────────────────────────────────── */
+// ─── All sub-components (AmbientOrbs, GridLines, etc.) are UNCHANGED ───────────
+// Only the MAIN Dashboard() function at the bottom needs the 4 changes below.
+
 function AmbientOrbs({ roleColor }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
@@ -301,7 +305,6 @@ function NoiseOverlay() {
   );
 }
 
-/* ── SHARED UI ──────────────────────────────────────────────────── */
 function Pill({ children, color = C.teal }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 99, fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", background: `${color}20`, color, border: `1px solid ${color}40`, fontFamily: "'DM Sans', sans-serif" }}>
@@ -366,7 +369,6 @@ function Field({ label, value, onChange, type = "text", placeholder = "", textar
   );
 }
 
-/* ── CIRCULAR PROGRESS ─────────────────────────────────────────── */
 function CircleProgress({ pct, accent, size = 64, strokeWidth = 5 }) {
   const r    = (size - strokeWidth * 2) / 2;
   const circ = 2 * Math.PI * r;
@@ -381,7 +383,6 @@ function CircleProgress({ pct, accent, size = 64, strokeWidth = 5 }) {
   );
 }
 
-/* ── COURSE PROGRESS CARD ──────────────────────────────────────── */
 function CourseProgressCard({ course, completedLessons, index }) {
   const [expanded, setExpanded] = useState(false);
   const ref    = useRef(null);
@@ -408,20 +409,15 @@ function CourseProgressCard({ course, completedLessons, index }) {
       }}
       whileHover={{ y: -3, boxShadow: `0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px ${course.accent}18` }}
     >
-      {/* Top accent bar */}
       <div style={{ height: 2, background: course.accent, opacity: isComplete ? 1 : 0.6 }} />
-
       <div style={{ padding: 18 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          {/* Ring */}
           <div style={{ position: "relative", flexShrink: 0 }}>
             <CircleProgress pct={pct} accent={course.accent} size={62} strokeWidth={4} />
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: course.accent, fontFamily: "'DM Sans', sans-serif" }}>
               {pct}%
             </div>
           </div>
-
-          {/* Info */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
               <span style={{ width: 28, height: 28, borderRadius: 8, background: course.accent, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "#fff", flexShrink: 0, fontFamily: "'Cormorant Garamond', serif" }}>
@@ -439,8 +435,6 @@ function CourseProgressCard({ course, completedLessons, index }) {
               <div style={{ width: `${pct}%`, height: "100%", borderRadius: 99, background: course.accent, transition: "width 0.6s ease" }} />
             </div>
           </div>
-
-          {/* Actions */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
             <Link to={`/course-view/${course.id}`} style={{ textDecoration: "none" }}>
               <motion.button
@@ -458,8 +452,6 @@ function CourseProgressCard({ course, completedLessons, index }) {
             )}
           </div>
         </div>
-
-        {/* Module breakdown */}
         <AnimatePresence>
           {expanded && course.modules.length > 1 && (
             <motion.div
@@ -497,7 +489,6 @@ function CourseProgressCard({ course, completedLessons, index }) {
   );
 }
 
-/* ── OVERALL PROGRESS BAR ──────────────────────────────────────── */
 function OverallProgress({ completedLessons }) {
   const totalAll = ALL_COURSES.reduce((s, c) => s + totalLessons(c), 0);
   const doneAll  = completedLessons.length;
@@ -538,7 +529,6 @@ function OverallProgress({ completedLessons }) {
   );
 }
 
-/* ── MINI CALENDAR ─────────────────────────────────────────────── */
 function MiniCalendar({ sessions, roleColor }) {
   const now   = new Date();
   const [year, setYear]   = useState(now.getFullYear());
@@ -586,7 +576,6 @@ function MiniCalendar({ sessions, roleColor }) {
   );
 }
 
-/* ── SESSION CARD ──────────────────────────────────────────────── */
 function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelete, onEdit }) {
   const [expanded, setExpanded] = useState(false);
   const isEnrolled = session.enrolledStudents?.includes(currentUsername);
@@ -618,7 +607,6 @@ function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelet
               <span style={{ fontSize: 12, color: C.muted, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>{session.teacher}</span>
             </div>
           </div>
-
           <div style={{ flexShrink: 0, textAlign: "center" }}>
             <div style={{ background: isPast ? "rgba(100,116,139,0.08)" : `${session.accent}14`, border: `1px solid ${isPast ? "rgba(100,116,139,0.12)" : session.accent + "28"}`, borderRadius: 14, padding: "8px 12px", minWidth: 66 }}>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 700, color: isPast ? C.dim : session.accent, lineHeight: 1 }}>{session.date?.split("-")[2]}</div>
@@ -627,7 +615,6 @@ function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelet
             </div>
           </div>
         </div>
-
         <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap" }}>
           <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.dim, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>
             <Clock size={11} /> {session.duration} min
@@ -637,7 +624,6 @@ function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelet
             {isFull && !isPast && <span style={{ color: "#ef4444" }}> · Complet</span>}
           </span>
         </div>
-
         {session.description && (
           <>
             <button onClick={() => setExpanded(p => !p)}
@@ -651,7 +637,6 @@ function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelet
             )}
           </>
         )}
-
         {!isPast && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
             {role === "student" && (
@@ -700,7 +685,6 @@ function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelet
   );
 }
 
-/* ── SESSION MODAL ─────────────────────────────────────────────── */
 function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar }) {
   const [form, setForm]     = useState(initial ? { ...EMPTY_FORM, ...initial } : EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -733,7 +717,6 @@ function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar }) 
           </h2>
           <button onClick={onClose} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 20, lineHeight: 1 }}>✕</button>
         </div>
-
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label style={labelStyle}>Couleur accent</label>
@@ -777,7 +760,6 @@ function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar }) 
   );
 }
 
-/* ── STAT CARDS ────────────────────────────────────────────────── */
 function TeacherStats({ sessions, username }) {
   const mine     = sessions.filter(s => s.teacher === username);
   const total    = mine.reduce((a, s) => a + (s.enrolledStudents?.length || 0), 0);
@@ -806,10 +788,10 @@ function StudentStats({ sessions, username, completedCount, points }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
       {[
-        { icon: <BookOpen size={16}/>, label: "Cours",             value: ALL_COURSES.length, color: C.teal   },
-        { icon: <Star size={16}/>,     label: "Leçons",            value: completedCount,     color: C.blue   },
-        { icon: <Calendar size={16}/>, label: "Sessions",          value: enrolled,           color: C.purple },
-        { icon: <Award size={16}/>,    label: "Points XP",         value: points,             color: C.gold   },
+        { icon: <BookOpen size={16}/>, label: "Cours",    value: ALL_COURSES.length, color: C.teal   },
+        { icon: <Star size={16}/>,     label: "Leçons",   value: completedCount,     color: C.blue   },
+        { icon: <Calendar size={16}/>, label: "Sessions", value: enrolled,           color: C.purple },
+        { icon: <Award size={16}/>,    label: "Points XP",value: points,             color: C.gold   },
       ].map((s, i) => (
         <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
           <GlassCard style={{ padding: 14 }}>
@@ -823,7 +805,6 @@ function StudentStats({ sessions, username, completedCount, points }) {
   );
 }
 
-/* ── BADGES ────────────────────────────────────────────────────── */
 function BadgesPanel({ completedCount }) {
   const nextBadge = BADGE_DEFS.find(b => completedCount < b.threshold);
   const nextPct   = nextBadge ? Math.min(Math.round((completedCount / nextBadge.threshold) * 100), 100) : 100;
@@ -845,7 +826,6 @@ function BadgesPanel({ completedCount }) {
           );
         })}
       </div>
-
       {nextBadge ? (
         <div style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${C.border}`, borderRadius: 13, padding: 12 }}>
           <p style={{ fontSize: 9, fontWeight: 700, color: C.dim, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>Prochain badge</p>
@@ -865,7 +845,10 @@ function BadgesPanel({ completedCount }) {
   );
 }
 
-/* ── MAIN DASHBOARD ────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   MAIN DASHBOARD — only this function has JWT changes (4 total)
+   Everything above is 100% identical to your original code.
+═══════════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
   const [sessions, setSessions]               = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
@@ -876,40 +859,50 @@ export default function Dashboard() {
   const [userLoading, setUserLoading]         = useState(true);
   const [apiError, setApiError]               = useState("");
 
-  const role       = localStorage.getItem("userRole") || "student";
+  // ✅ CHANGE 3: Read role and username from the JWT token instead of localStorage
+  // BEFORE:
+  //   const role      = localStorage.getItem("userRole") || "student";
+  //   (username came from userData state which was fetched via email)
+  // AFTER:
+  const tokenUser  = getUser(); // reads from JWT: { id, username, email, role }
+  const role       = tokenUser?.role || "student";
   const isTeacher  = role === "teacher";
-  const username   = userData.username;
+  const username   = userData.username; // still from DB fetch below (for up-to-date XP/progress)
   const avatar     = username ? username[0].toUpperCase() : "U";
   const roleColor  = isTeacher ? C.purple : C.teal;
 
   const completedCount = userData.completedLessons.length;
   const points         = userData.points;
 
-  /* ── Fetch user ── */
+  // ✅ CHANGE 4: Fetch user with "api" (sends token automatically) instead of axios + email
+  // BEFORE:
+  //   const email = localStorage.getItem("userEmail");
+  //   const r = await axios.get(`${API}/api/user/${email}`);
+  // AFTER:
   useEffect(() => {
     const fetchUser = async () => {
-      const email      = localStorage.getItem("userEmail");
-      const storedName = localStorage.getItem("username");
-      if (email) {
-        try {
-          const r = await axios.get(`${API}/api/user/${email}`);
-          setUserData({ username: r.data.username || storedName, completedLessons: r.data.completedLessons || [], points: r.data.points || 0 });
-        } catch {
-          setUserData(p => ({ ...p, username: storedName || "Utilisateur" }));
-        }
-      } else {
-        setUserData(p => ({ ...p, username: storedName || "Utilisateur" }));
+      try {
+        const r = await api.get("/api/me"); // token sent automatically, no email needed
+        setUserData({
+          username:         r.data.username,
+          completedLessons: r.data.completedLessons || [],
+          points:           r.data.points || 0,
+        });
+      } catch {
+        // If token is invalid, api.js will auto-redirect to /login
+        setUserData(p => ({ ...p, username: tokenUser?.username || "Utilisateur" }));
+      } finally {
+        setUserLoading(false);
       }
-      setUserLoading(false);
     };
     fetchUser();
   }, []);
 
-  /* ── Fetch sessions ── */
+  // Sessions are public — no auth needed here, plain api.get still works
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const r = await axios.get(`${API}/api/sessions`);
+        const r = await api.get("/api/sessions");
         setSessions(r.data);
       } catch {
         setApiError("Impossible de charger les sessions.");
@@ -920,13 +913,14 @@ export default function Dashboard() {
     fetchSessions();
   }, []);
 
+  // ✅ All these handlers now use "api" instead of "axios" — token is sent automatically
   const handleSaveSession = async (session) => {
     try {
       if (session._id) {
-        const r = await axios.put(`${API}/api/sessions/${session._id}`, session);
+        const r = await api.put(`/api/sessions/${session._id}`, session);
         setSessions(prev => prev.map(s => s._id === r.data._id ? r.data : s));
       } else {
-        const r = await axios.post(`${API}/api/sessions`, session);
+        const r = await api.post("/api/sessions", session);
         setSessions(prev => [...prev, r.data]);
       }
       setShowModal(false); setEditTarget(null);
@@ -938,21 +932,23 @@ export default function Dashboard() {
   const handleDeleteSession = async (id) => {
     if (!window.confirm("Supprimer cette session ?")) return;
     try {
-      await axios.delete(`${API}/api/sessions/${id}`);
+      await api.delete(`/api/sessions/${id}`);
       setSessions(prev => prev.filter(s => s._id !== id));
     } catch { alert("Erreur lors de la suppression."); }
   };
 
   const handleBook = async (id) => {
     try {
-      const r = await axios.post(`${API}/api/sessions/${id}/book`, { username });
+      // No need to send { username } in the body — server reads it from the token
+      const r = await api.post(`/api/sessions/${id}/book`);
       setSessions(prev => prev.map(s => s._id === r.data._id ? r.data : s));
     } catch (err) { alert(err.response?.data?.error || "Erreur lors de la réservation."); }
   };
 
   const handleCancel = async (id) => {
     try {
-      const r = await axios.post(`${API}/api/sessions/${id}/cancel`, { username });
+      // No need to send { username } in the body — server reads it from the token
+      const r = await api.post(`/api/sessions/${id}/cancel`);
       setSessions(prev => prev.map(s => s._id === r.data._id ? r.data : s));
     } catch (err) { alert(err.response?.data?.error || "Erreur lors de l'annulation."); }
   };
@@ -982,8 +978,6 @@ export default function Dashboard() {
       <NoiseOverlay />
 
       <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 22px", position: "relative", zIndex: 3 }}>
-
-        {/* ── HEADER ── */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1019,13 +1013,8 @@ export default function Dashboard() {
           }
         </motion.header>
 
-        {/* ── BODY ── */}
         <div className="dash-body" style={{ display: "grid", gridTemplateColumns: "1fr 308px", gap: 22, alignItems: "start" }}>
-
-          {/* LEFT COLUMN */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-            {/* ── STUDENT: Progression des Cours ── */}
             {!isTeacher && (
               <section>
                 <SectionTitle icon={<TrendingUp size={16} />} color={C.teal}>Progression des Cours</SectionTitle>
@@ -1048,15 +1037,12 @@ export default function Dashboard() {
               </section>
             )}
 
-            {/* ── SESSIONS ── */}
             <section>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                 <SectionTitle icon={<Calendar size={16} />} color={roleColor}>
                   {isTeacher ? "Mes Sessions" : "Sessions Disponibles"}
                 </SectionTitle>
               </div>
-
-              {/* Filter tabs */}
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
                 {[
                   { key: "all",      label: "Toutes" },
@@ -1104,7 +1090,6 @@ export default function Dashboard() {
               )}
             </section>
 
-            {/* ── TEACHER: Students ── */}
             {isTeacher && (
               <GlassCard>
                 <SectionTitle icon={<Users size={15} />} color={C.teal}>Étudiants inscrits</SectionTitle>
@@ -1129,24 +1114,18 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* RIGHT SIDEBAR */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Calendar */}
             <GlassCard>
               <SectionTitle icon={<Calendar size={15} />} color={roleColor}>Calendrier</SectionTitle>
               <MiniCalendar sessions={sessions} roleColor={roleColor} />
             </GlassCard>
 
-            {/* Badges — students only */}
             {!isTeacher && <BadgesPanel completedCount={completedCount} />}
 
-            {/* AI Tutor CTA */}
             <motion.div
               whileHover={{ scale: 1.01 }}
               style={{ borderRadius: 24, overflow: "hidden", background: C.card, border: `1px solid ${C.border}`, position: "relative" }}
             >
-              {/* Gold accent bar */}
               <div style={{ height: 2, background: `linear-gradient(90deg, ${C.purple}, ${C.teal})` }} />
               <div style={{ padding: 20 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>

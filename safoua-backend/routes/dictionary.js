@@ -8,6 +8,7 @@
 
 import express from "express";
 import axios   from "axios";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -206,7 +207,7 @@ Return exactly:
 });
 
 /* ── Cache flush (dev: GET /api/dictionary/flush) ─────────────────── */
-router.get("/flush", (_req, res) => {
+router.get("/flush", authMiddleware, (_req, res) => {
   const size = cache.size;
   cache.clear();
   console.log(`[Dict] cache flushed (${size} entries)`);

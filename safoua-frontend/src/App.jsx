@@ -12,7 +12,7 @@ import {
   BookOpen, Mic, Trophy, Brain, ChevronDown, Users
 } from "lucide-react";
 
-/* ── page imports ───────────────────────────────────────────────── */
+import { isLoggedIn, getUser, logout } from "./utils/auth";
 import Register      from "./components/Register";
 import Courses       from "./components/Courses";
 import Login         from "./components/Login";
@@ -679,7 +679,7 @@ function Home() {
               initial={{opacity:0,y:32}} animate={{opacity:1,y:0}}
               transition={{duration:0.9,delay:0.1,ease:[.22,.68,0,1]}}
               style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(2.6rem,5.5vw,4.2rem)",fontWeight:700,lineHeight:1.06,color:C.text,marginBottom:22,letterSpacing:"-0.03em" }}>
-              Apprenez le Coran<br/>& l'Arabe{" "}
+              Apprenez le Quran<br/>& l'Arabe{" "}
               {/* Typewriter phrase */}
               <em style={{
                 fontStyle:"italic",
@@ -827,8 +827,9 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const isLoggedIn = !!localStorage.getItem("username");
-  const userRole   = localStorage.getItem("userRole");
+  const loggedIn  = isLoggedIn();
+  const user      = getUser();
+  const userRole  = user?.role;
   const darkPages  = ["/", "/courses"];
   const alwaysDark = darkPages.some(p=>p==="/"?location.pathname==="/":location.pathname.startsWith(p));
   useEffect(()=>{ setMenuOpen(false); },[location.pathname]);
@@ -838,7 +839,7 @@ function Navbar() {
     onScroll();
     return()=>window.removeEventListener("scroll",onScroll);
   },[]);
-  const handleLogout=()=>{ localStorage.removeItem("username");localStorage.removeItem("userEmail");localStorage.removeItem("userRole");window.location.href="/"; };
+  const handleLogout = () => logout();
   const transparent = alwaysDark && !scrolled;
   const navBg = (!alwaysDark&&scrolled)?"rgba(255,255,255,0.97)":transparent?"transparent":alwaysDark?"rgba(8,11,15,0.88)":"rgba(255,255,255,0.97)";
   const textColor = alwaysDark?"rgba(242,237,230,0.72)":"#475569";
@@ -860,7 +861,7 @@ function Navbar() {
             <NavLink to="/courses" style={navLinkStyle}>Cours</NavLink>
             <NavLink to="/dictionary" style={navLinkStyle}>Dictionnaire</NavLink>
             <div style={{ width:1,height:16,background:alwaysDark?"rgba(255,255,255,0.1)":"#e2e8f0" }}/>
-            {isLoggedIn?(
+            {loggedIn?(
               <>
                 <div style={{ display:"flex",alignItems:"center" }}><NavLink to="/dashboard" style={navLinkStyle}>Mon Espace</NavLink>{roleBadge}</div>
                 <motion.button whileHover={{background:"rgba(212,101,74,0.18)"}} onClick={handleLogout}
@@ -890,13 +891,13 @@ function Navbar() {
         {menuOpen && (
           <motion.div initial={{opacity:0,y:-12}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-12}} transition={{duration:0.22}}
             style={{ position:"fixed",top:70,left:0,right:0,zIndex:49,background:"rgba(8,11,15,0.97)",backdropFilter:"blur(20px)",borderBottom:`1px solid ${C.border}`,padding:"12px 24px 20px" }}>
-            {[{label:"Accueil",to:"/"},{label:"Cours",to:"/courses"},{label:"Dictionnaire",to:"/dictionary"},...(isLoggedIn?[{label:"Mon Espace",to:"/dashboard"}]:[{label:"Connexion",to:"/login"},{label:"S'inscrire",to:"/register"}])].map((l,i)=>(
+            {[{label:"Accueil",to:"/"},{label:"Cours",to:"/courses"},{label:"Dictionnaire",to:"/dictionary"},...(loggedIn?[{label:"Mon Espace",to:"/dashboard"}]:[{label:"Connexion",to:"/login"},{label:"S'inscrire",to:"/register"}])].map((l,i)=>(
               <Link key={i} to={l.to} onClick={()=>setMenuOpen(false)}
                 style={{ display:"block",padding:"13px 0",fontSize:15,fontWeight:600,color:"rgba(242,237,230,0.75)",textDecoration:"none",borderBottom:`1px solid ${C.border}`,fontFamily:"'DM Sans',sans-serif" }}>
                 {l.label}
               </Link>
             ))}
-            {isLoggedIn&&<button onClick={handleLogout} style={{ marginTop:12,background:"none",border:"none",color:"#d4654a",fontWeight:600,fontSize:15,cursor:"pointer",padding:0,fontFamily:"'DM Sans',sans-serif" }}>Déconnexion</button>}
+            {loggedIn&&<button onClick={handleLogout} style={{ marginTop:12,background:"none",border:"none",color:"#d4654a",fontWeight:600,fontSize:15,cursor:"pointer",padding:0,fontFamily:"'DM Sans',sans-serif" }}>Déconnexion</button>}
           </motion.div>
         )}
       </AnimatePresence>
@@ -922,7 +923,7 @@ function Navbar() {
 /* ── APP ────────────────────────────────────────────────────────── */
 function AppInner() {
   const location = useLocation();
-  const isLoggedIn = !!localStorage.getItem("username");
+  const loggedIn = isLoggedIn();
   return (
     <div style={{ minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column" }}>
       <CursorSparks/>
@@ -932,8 +933,8 @@ function AppInner() {
           <Routes location={location} key={location.pathname}>
             <Route path="/"          element={<Home/>}/>
             <Route path="/courses"   element={<Courses/>}/>
-            <Route path="/login"     element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Login/>}/>
-            <Route path="/register"  element={isLoggedIn ? <Navigate to="/dashboard" replace/> : <Register/>}/>
+            <Route path="/login"     element={loggedIn ? <Navigate to="/dashboard" replace/> : <Login/>}/>
+            <Route path="/register"  element={loggedIn ? <Navigate to="/dashboard" replace/> : <Register/>}/>
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
             <Route path="/course-view/1" element={<ProtectedRoute><AlphabetArabe/></ProtectedRoute>}/>
             <Route path="/course-view/2" element={<ProtectedRoute><Tajwid/></ProtectedRoute>}/>

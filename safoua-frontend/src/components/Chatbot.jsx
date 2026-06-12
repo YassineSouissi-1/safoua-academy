@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, Loader, Sparkles, ChevronDown } from "lucide-react";
 import { API_BASE } from "../config/api";
+import { getToken } from "../utils/auth"; // ← FIXED: use the shared auth utility
 
 const SUGGESTED = [
   "Comment apprendre l'alphabet arabe ?",
@@ -45,34 +46,67 @@ function ChatBot() {
   const handleSend = async (text) => {
     const msg = (text || input).trim();
     if (!msg || isLoading) return;
+
     setMessages(prev => [...prev, { role: "user", text: msg }]);
     setInput("");
     setIsLoading(true);
+
+    // ── FIXED: use getToken() which reads from 'safoua_token' ──────
+    const token = getToken();
+
     try {
       const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` }),
+        },
         body: JSON.stringify({ message: msg }),
       });
+
+      // Handle auth errors gracefully
+      if (res.status === 401 || res.status === 403) {
+        setMessages(prev => [
+          ...prev,
+          { role: "bot", text: "🔒 Veuillez vous connecter pour utiliser le chat." }
+        ]);
+        return;
+      }
+
+      // Handle unexpected server errors
+      if (!res.ok) {
+        setMessages(prev => [
+          ...prev,
+          { role: "bot", text: "⚠️ Une erreur serveur s'est produite. Réessayez dans quelques instants." }
+        ]);
+        return;
+      }
+
       const data = await res.json();
-      setMessages(prev => [...prev, { role: "bot", text: data.reply || "Désolé, une erreur s'est produite." }]);
+      setMessages(prev => [
+        ...prev,
+        { role: "bot", text: data.reply || "Désolé, une erreur s'est produite." }
+      ]);
     } catch {
-      setMessages(prev => [...prev, { role: "bot", text: "⚠️ Impossible de joindre le serveur. Vérifiez votre connexion." }]);
+      setMessages(prev => [
+        ...prev,
+        { role: "bot", text: "⚠️ Impossible de joindre le serveur. Vérifiez votre connexion." }
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const G = {
-    bg: "#080b0f",
+    bg:      "#080b0f",
     surface: "rgba(13,17,23,0.97)",
-    card: "rgba(255,255,255,0.04)",
-    border: "rgba(255,255,255,0.08)",
-    gold: "#c9a84c",
-    teal: "#1db584",
-    text: "#f2ede6",
-    muted: "rgba(242,237,230,0.5)",
-    dim: "rgba(242,237,230,0.18)",
+    card:    "rgba(255,255,255,0.04)",
+    border:  "rgba(255,255,255,0.08)",
+    gold:    "#c9a84c",
+    teal:    "#1db584",
+    text:    "#f2ede6",
+    muted:   "rgba(242,237,230,0.5)",
+    dim:     "rgba(242,237,230,0.18)",
   };
 
   return (
@@ -87,6 +121,7 @@ function ChatBot() {
           display: "flex", flexDirection: "column", overflow: "hidden",
           backdropFilter: "blur(24px)",
           animation: "chatSlideIn 0.28s cubic-bezier(.22,.68,0,1)",
+          position: "relative",
         }}>
           {/* Header */}
           <div style={{
@@ -112,26 +147,47 @@ function ChatBot() {
                 </div>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)}
-              style={{ background: "none", border: "none", color: G.muted, cursor: "pointer", padding: 4,
-                       display: "flex", alignItems: "center", justifyContent: "center",
-                       borderRadius: 8, transition: "color 0.15s" }}
+            <button
+              onClick={() => setIsOpen(false)}
+              style={{
+                background: "none", border: "none", color: G.muted, cursor: "pointer", padding: 4,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: 8, transition: "color 0.15s",
+              }}
               onMouseEnter={e => e.currentTarget.style.color = G.text}
-              onMouseLeave={e => e.currentTarget.style.color = G.muted}>
+              onMouseLeave={e => e.currentTarget.style.color = G.muted}
+            >
               <X size={18} />
             </button>
           </div>
 
           {/* Messages */}
-          <div ref={messagesAreaRef} onScroll={handleScroll}
-            style={{ flex: 1, padding: "14px 14px 6px", overflowY: "auto",
-                     display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
+          <div
+            ref={messagesAreaRef}
+            onScroll={handleScroll}
+            style={{
+              flex: 1, padding: "14px 14px 6px", overflowY: "auto",
+              display: "flex", flexDirection: "column", gap: 10,
+            }}
+          >
             {messages.map((m, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 7 }}>
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                  alignItems: "flex-end",
+                  gap: 7,
+                }}
+              >
                 {m.role === "bot" && (
-                  <div style={{ width: 24, height: 24, borderRadius: 8, background: `linear-gradient(135deg, ${G.gold}40, ${G.teal}30)`,
-                                border: `1px solid ${G.gold}30`, display: "flex", alignItems: "center", justifyContent: "center",
-                                flexShrink: 0, marginBottom: 2 }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: 8,
+                    background: `linear-gradient(135deg, ${G.gold}40, ${G.teal}30)`,
+                    border: `1px solid ${G.gold}30`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, marginBottom: 2,
+                  }}>
                     <Bot size={12} color={G.gold} />
                   </div>
                 )}
@@ -151,16 +207,28 @@ function ChatBot() {
                 </div>
               </div>
             ))}
+
+            {/* Typing indicator */}
             {isLoading && (
               <div style={{ display: "flex", alignItems: "flex-end", gap: 7 }}>
-                <div style={{ width: 24, height: 24, borderRadius: 8, background: `linear-gradient(135deg, ${G.gold}40, ${G.teal}30)`,
-                              border: `1px solid ${G.gold}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{
+                  width: 24, height: 24, borderRadius: 8,
+                  background: `linear-gradient(135deg, ${G.gold}40, ${G.teal}30)`,
+                  border: `1px solid ${G.gold}30`,
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}>
                   <Bot size={12} color={G.gold} />
                 </div>
-                <div style={{ padding: "12px 16px", borderRadius: 16, borderBottomLeftRadius: 4, background: G.card, border: `1px solid ${G.border}`, display: "flex", gap: 4, alignItems: "center" }}>
-                  {[0,1,2].map(i => (
-                    <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: G.gold, opacity: 0.7,
-                                          animation: `dotBounce 1.2s ${i * 0.2}s ease-in-out infinite` }} />
+                <div style={{
+                  padding: "12px 16px", borderRadius: 16, borderBottomLeftRadius: 4,
+                  background: G.card, border: `1px solid ${G.border}`,
+                  display: "flex", gap: 4, alignItems: "center",
+                }}>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{
+                      width: 6, height: 6, borderRadius: "50%", background: G.gold, opacity: 0.7,
+                      animation: `dotBounce 1.2s ${i * 0.2}s ease-in-out infinite`,
+                    }} />
                   ))}
                 </div>
               </div>
@@ -168,55 +236,84 @@ function ChatBot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Scroll-to-bottom */}
+          {/* Scroll-to-bottom button */}
           {showScrollBtn && (
-            <button onClick={scrollToBottom}
-              style={{ position: "absolute", bottom: 80, right: 20, width: 28, height: 28, borderRadius: "50%",
-                       background: G.gold, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                       boxShadow: `0 4px 12px rgba(201,168,76,0.4)` }}>
+            <button
+              onClick={scrollToBottom}
+              style={{
+                position: "absolute", bottom: 80, right: 20,
+                width: 28, height: 28, borderRadius: "50%",
+                background: G.gold, border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: `0 4px 12px rgba(201,168,76,0.4)`,
+              }}
+            >
               <ChevronDown size={14} color="#080b0f" />
             </button>
           )}
 
-          {/* Suggestions (only on first message) */}
+          {/* Suggestions (only shown before any user message) */}
           {messages.length === 1 && (
             <div style={{ padding: "4px 14px 8px", display: "flex", flexWrap: "wrap", gap: 5 }}>
               {SUGGESTED.map((s, i) => (
-                <button key={i} onClick={() => handleSend(s)}
-                  style={{ padding: "5px 10px", borderRadius: 99, border: `1px solid ${G.gold}30`,
-                           background: `${G.gold}10`, color: G.gold, fontSize: 11, fontWeight: 600,
-                           cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
-                           transition: "all 0.15s" }}
+                <button
+                  key={i}
+                  onClick={() => handleSend(s)}
+                  style={{
+                    padding: "5px 10px", borderRadius: 99,
+                    border: `1px solid ${G.gold}30`,
+                    background: `${G.gold}10`, color: G.gold,
+                    fontSize: 11, fontWeight: 600,
+                    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
+                    transition: "all 0.15s",
+                  }}
                   onMouseEnter={e => { e.currentTarget.style.background = `${G.gold}20`; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = `${G.gold}10`; }}>
+                  onMouseLeave={e => { e.currentTarget.style.background = `${G.gold}10`; }}
+                >
                   {s}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Input */}
-          <div style={{ padding: "10px 12px 12px", borderTop: `1px solid ${G.border}`, display: "flex", gap: 8 }}>
-            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
+          {/* Input bar */}
+          <div style={{
+            padding: "10px 12px 12px",
+            borderTop: `1px solid ${G.border}`,
+            display: "flex", gap: 8,
+          }}>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && !isLoading && handleSend()}
               placeholder="Posez votre question..."
               disabled={isLoading}
               style={{
                 flex: 1, background: G.card, border: `1.5px solid ${G.border}`,
-                borderRadius: 12, padding: "9px 13px", color: G.text, fontSize: 13,
-                outline: "none", fontFamily: "inherit", transition: "border-color 0.2s",
+                borderRadius: 12, padding: "9px 13px", color: G.text,
+                fontSize: 13, outline: "none", fontFamily: "inherit",
+                transition: "border-color 0.2s",
                 opacity: isLoading ? 0.6 : 1,
               }}
               onFocus={e => e.target.style.borderColor = G.gold}
-              onBlur={e => e.target.style.borderColor = G.border} />
-            <button onClick={() => handleSend()} disabled={isLoading || !input.trim()}
+              onBlur={e  => e.target.style.borderColor = G.border}
+            />
+            <button
+              onClick={() => handleSend()}
+              disabled={isLoading || !input.trim()}
               style={{
-                width: 38, height: 38, borderRadius: 11, border: "none", cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
-                background: input.trim() && !isLoading ? `linear-gradient(135deg, ${G.gold}, ${G.teal})` : G.card,
+                width: 38, height: 38, borderRadius: 11, border: "none",
+                cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
+                background: input.trim() && !isLoading
+                  ? `linear-gradient(135deg, ${G.gold}, ${G.teal})`
+                  : G.card,
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                transition: "all 0.2s", opacity: !input.trim() || isLoading ? 0.5 : 1,
+                transition: "all 0.2s",
+                opacity: !input.trim() || isLoading ? 0.5 : 1,
                 boxShadow: input.trim() && !isLoading ? `0 0 16px rgba(201,168,76,0.3)` : "none",
-              }}>
+              }}
+            >
               <Send size={15} color={input.trim() && !isLoading ? "#080b0f" : G.muted} />
             </button>
           </div>
@@ -224,18 +321,23 @@ function ChatBot() {
       )}
 
       {/* Toggle button */}
-      <button onClick={() => setIsOpen(o => !o)}
+      <button
+        onClick={() => setIsOpen(o => !o)}
         style={{
-          width: 52, height: 52, borderRadius: 16, border: "none", cursor: "pointer",
-          background: isOpen ? "rgba(8,11,15,0.9)" : `linear-gradient(135deg, ${G.gold}, ${G.teal})`,
+          width: 52, height: 52, borderRadius: 16, cursor: "pointer",
+          background: isOpen
+            ? "rgba(8,11,15,0.9)"
+            : `linear-gradient(135deg, ${G.gold}, ${G.teal})`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: isOpen ? `0 4px 20px rgba(0,0,0,0.5)` : `0 0 28px rgba(201,168,76,0.45), 0 4px 20px rgba(0,0,0,0.4)`,
+          boxShadow: isOpen
+            ? `0 4px 20px rgba(0,0,0,0.5)`
+            : `0 0 28px rgba(201,168,76,0.45), 0 4px 20px rgba(0,0,0,0.4)`,
           border: isOpen ? `1px solid ${G.border}` : "none",
           transition: "all 0.28s cubic-bezier(.22,.68,0,1)",
-          transform: isOpen ? "rotate(0deg)" : "rotate(0deg)",
         }}
         onMouseEnter={e => { if (!isOpen) e.currentTarget.style.transform = "scale(1.08)"; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}>
+        onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+      >
         {isOpen
           ? <X size={22} color={G.muted} />
           : <MessageCircle size={22} color="#080b0f" />
@@ -244,8 +346,14 @@ function ChatBot() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap');
-        @keyframes chatSlideIn { from { opacity:0; transform: translateY(12px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
-        @keyframes dotBounce { 0%,80%,100% { transform: translateY(0); opacity:0.5; } 40% { transform: translateY(-5px); opacity:1; } }
+        @keyframes chatSlideIn {
+          from { opacity: 0; transform: translateY(12px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes dotBounce {
+          0%, 80%, 100% { transform: translateY(0);   opacity: 0.5; }
+          40%            { transform: translateY(-5px); opacity: 1;   }
+        }
       `}</style>
     </div>
   );

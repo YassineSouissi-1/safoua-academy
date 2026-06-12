@@ -8,7 +8,7 @@ import {
   Zap, Headphones, Mic, BarChart2, Sparkles,
   Trophy, Flame, Target, BookMarked, Layers
 } from "lucide-react";
-import axios from "axios";
+import { api, getUser } from "../utils/auth";
 
 /* ── FONTS ─────────────────────────────────────────────────────── */
 const FONT_LINK = `
@@ -341,9 +341,7 @@ export default function CourseDetail() {
   const [letterLang,           setLetterLang]           = useState("ar");
 
   useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-    axios.get(`${API}/api/user/${email}`)
+    api.get("/api/me")
       .then(r => setCompletedLessons(new Set(r.data.completedLessons || [])))
       .catch(() => {});
   }, []);
@@ -351,14 +349,14 @@ export default function CourseDetail() {
   const lessonKey = (modTitle, lesTitle) => `${course.title} — ${modTitle} — ${lesTitle}`;
 
   const handleMarkComplete = async () => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) { alert("Connectez-vous pour enregistrer votre progression."); return; }
+    const user = getUser();
+    if (!user) { alert("Connectez-vous pour enregistrer votre progression."); return; }
     if (!currentModule) return;
     const key = lessonKey(currentModule.title, currentModule.lessons[currentLessonIndex].title);
     if (completedLessons.has(key)) return;
     setMarkingComplete(true);
     try {
-      const res = await axios.post(`${API}/api/update-progress`, { email, lessonTitle: key });
+      const res = await api.post("/api/update-progress", { lessonTitle: key });
       setCompletedLessons(prev => new Set([...prev, key]));
       setXpNotif({ lessonTitle: currentModule.lessons[currentLessonIndex].title, points: res.data.points });
       setTimeout(() => setXpNotif(null), 4200);
@@ -388,7 +386,7 @@ export default function CourseDetail() {
     if (!dictSearchTerm.trim()) return;
     setDictLoading(true); setDictError(""); setDictResults(null);
     try {
-      const r = await axios.get(`${API}/api/dictionary/translate`, {
+      const r = await api.get("/api/dictionary/translate", {
         params: { word: dictSearchTerm.trim(), language: dictSearchLanguage }
       });
       if (r.data.success) setDictResults(r.data);

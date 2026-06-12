@@ -4,7 +4,7 @@ import {
   BookOpen, StopCircle, Hash, ChevronRight,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import { api } from "../utils/auth";
 import { speakArabic, stopArabicAudio, onTTSState } from "../utils/arabicTTS";
 
 /* ── FONTS ──────────────────────────────────────────────────────── */
@@ -329,10 +329,9 @@ export default function Dictionary() {
     setResults(null);
 
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/dictionary/translate`,
-        { params: { word: term, language: searchLanguage } }
-      );
+      const response = await api.get("/api/dictionary/translate", {
+  params: { word: term, language: searchLanguage },
+});
       if (response.data.success) {
         setResults(response.data);
       } else {
