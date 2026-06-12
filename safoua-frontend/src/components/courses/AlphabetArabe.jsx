@@ -9,10 +9,8 @@ const COURSE_TITLE = "Alphabet Arabe & Phonétique";
 
 // Saves a completed lesson key to MongoDB via /api/update-progress
 async function saveProgress(lessonKey) {
-  const email = localStorage.getItem("userEmail");
-  if (!email) return;
   try {
-    await axios.post(`${API}/api/update-progress`, { email, lessonTitle: lessonKey });
+    await api.post("/api/update-progress", { lessonTitle: lessonKey });
   } catch (err) {
     console.error("Erreur de progression :", err);
   }

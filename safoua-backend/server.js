@@ -10,6 +10,7 @@ import pronunciationsRouter from './routes/pronunciations.js';
 import ttsRouter from './routes/tts.js';
 import dictionaryRouter from './routes/dictionary.js';
 import authMiddleware from './middleware/authMiddleware.js';
+import Session from './models/Session.js';
 
 dotenv.config();
 
@@ -36,25 +37,7 @@ app.use('/api/tts', ttsRouter);
 // ── DICTIONARY (Claude AI-powered, protected) ──────────────────
 app.use('/api/dictionary', authMiddleware, dictionaryRouter);
 
-// ── SESSION MODEL ───────────────────────────────────────────────
-const SessionSchema = new mongoose.Schema({
-  title:            { type: String, required: true },
-  topic:            { type: String, required: true },
-  description:      String,
-  teacher:          { type: String, required: true },
-  teacherAvatar:    String,
-  date:             { type: String, required: true },
-  time:             { type: String, required: true },
-  duration:         { type: Number, default: 60 },
-  maxStudents:      { type: Number, default: 8 },
-  enrolledStudents: { type: [String], default: [] },
-  level:            { type: String, default: 'Débutant' },
-  meetLink:         String,
-  accent:           { type: String, default: '#8b5cf6' },
-  status:           { type: String, enum: ['upcoming', 'past'], default: 'upcoming' },
-}, { timestamps: true });
 
-const Session = mongoose.model('Session', SessionSchema);
 
 // ── INPUT VALIDATION HELPERS ─────────────────────────────────────
 function validateEmail(email) {

@@ -13,10 +13,8 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const COURSE_TITLE = "Mémorisation : Les 10 dernières Sourates";
 
 async function saveProgress(lessonKey) {
-  const email = localStorage.getItem("userEmail");
-  if (!email) return;
   try {
-    await axios.post(`${API_URL}/api/update-progress`, { email, lessonTitle: lessonKey });
+    await api.post("/api/update-progress", { lessonTitle: lessonKey });
   } catch (err) {
     console.error("Erreur de progression :", err);
   }

@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { isLoggedIn } from "../utils/auth";
+import { isLoggedIn, getUser } from "../utils/auth";
 
 /**
  * ProtectedRoute — JWT version
@@ -22,7 +22,6 @@ export default function ProtectedRoute({ children, requiredRole }) {
   // Optional: role-based protection
   // Example: <ProtectedRoute requiredRole="teacher"><TeacherDashboard /></ProtectedRoute>
   if (requiredRole) {
-    const { getUser } = require("../utils/auth");
     const user = getUser();
     if (!user || user.role !== requiredRole) {
       return <Navigate to="/dashboard" replace />;
