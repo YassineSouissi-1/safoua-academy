@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { api } from "../utils/auth";
-import { speakArabic, stopArabicAudio, onTTSState } from "../utils/arabicTTS";
+import { speakArabic, stopArabicAudio, onTTSState, playReciterAyah } from "../utils/arabicTTS";
 
 /* ── FONTS ──────────────────────────────────────────────────────── */
 const FONT_LINK = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
@@ -118,7 +118,7 @@ function SpeakButton({ arabic, ttsState, onSpeak, onStop, size = 64 }) {
 }
 
 /* ── RESULT CARD ────────────────────────────────────────────────── */
-function ResultCard({ results, ttsState, onSpeak, onStop }) {
+function ResultCard({ results, ttsState, onSpeak, onStop, onSpeakAyah, reciterState }) {
   const ref    = useRef(null);
   const inView = useInView(ref, { once:true });
 
@@ -247,7 +247,6 @@ function ResultCard({ results, ttsState, onSpeak, onStop }) {
                   padding:"16px 20px",borderRadius:14,
                   background:"rgba(255,255,255,0.025)",
                   border:`1px solid ${C.border}`,
-                  position:"relative",
                 }}
               >
                 {/* Arabic example */}
@@ -266,26 +265,31 @@ function ResultCard({ results, ttsState, onSpeak, onStop }) {
                     {ex.transliteration}
                   </div>
                 )}
-                {/* Translation */}
-                <div style={{ fontFamily:"'DM Sans',sans-serif",fontSize:13,color:C.muted,fontWeight:400 }}>
-                  {ex.translation}
+                {/* Translation + reciter button */}
+                <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginTop:2 }}>
+                  <div style={{ fontFamily:"'DM Sans',sans-serif",fontSize:13,color:C.muted,fontWeight:400 }}>
+                    {ex.translation}
+                  </div>
+                  <button
+                    onClick={() => onSpeakAyah(ex)}
+                    title={ex.surah ? "Écouter — Mishary Rashid Alafasy" : "Écouter la prononciation"}
+                    style={{
+                      flexShrink:0,
+                      display:"flex",alignItems:"center",gap:5,
+                      padding:"5px 10px",borderRadius:8,
+                      background: ex.surah ? "rgba(29,181,132,0.1)" : "rgba(201,168,76,0.1)",
+                      border:`1px solid ${ex.surah ? "rgba(29,181,132,0.3)" : "rgba(201,168,76,0.2)"}`,
+                      cursor:"pointer",
+                    }}
+                  >
+                    <Volume2 size={12} color={ex.surah ? C.teal : C.gold}/>
+                    {ex.surah && (
+                      <span style={{ fontSize:10,fontWeight:700,color:C.tealL,fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap" }}>
+                        {reciterState==="playing" ? "▶ En lecture" : "Récitateur"}
+                      </span>
+                    )}
+                  </button>
                 </div>
-
-                {/* Speak example button */}
-                <button
-                  onClick={() => onSpeak(ex.arabic)}
-                  title="Écouter cet exemple"
-                  style={{
-                    position:"absolute",top:14,right:14,
-                    width:30,height:30,borderRadius:9,
-                    background:"rgba(201,168,76,0.1)",
-                    border:`1px solid rgba(201,168,76,0.2)`,
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    cursor:"pointer",
-                  }}
-                >
-                  <Volume2 size={14} color={C.gold}/>
-                </button>
               </motion.div>
             ))}
           </div>
@@ -311,6 +315,7 @@ export default function Dictionary() {
   const [error, setError]                   = useState("");
   const [searchLanguage, setSearchLanguage] = useState("english");
   const [ttsState, setTtsState]             = useState("idle");
+  const [reciterState, setReciterState]     = useState("idle");
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -352,7 +357,27 @@ export default function Dictionary() {
     });
   };
 
-  const handleStop = () => stopArabicAudio();
+  const handleSpeakAyah = async (ex) => {
+    stopArabicAudio();
+    if (ex.surah && ex.ayah) {
+      // Play real Mishary Rashid recitation
+      setReciterState("loading");
+      await playReciterAyah(ex.surah, ex.ayah, {
+        onStart: () => setReciterState("playing"),
+        onEnd:   () => setReciterState("idle"),
+        onError: () => {
+          // fallback to Google TTS if reciter CDN fails
+          setReciterState("idle");
+          speakArabic(ex.arabic);
+        },
+      });
+    } else {
+      // No surah reference — fall back to Google TTS
+      speakArabic(ex.arabic);
+    }
+  };
+
+  const handleStop = () => { stopArabicAudio(); setReciterState("idle"); };
 
   const exampleWords = EXAMPLES[searchLanguage];
 
@@ -583,6 +608,8 @@ export default function Dictionary() {
                 ttsState={ttsState}
                 onSpeak={handleSpeak}
                 onStop={handleStop}
+                onSpeakAyah={handleSpeakAyah}
+                reciterState={reciterState}
               />
             )}
           </AnimatePresence>

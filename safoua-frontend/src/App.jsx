@@ -830,8 +830,8 @@ function Navbar() {
   const loggedIn  = isLoggedIn();
   const user      = getUser();
   const userRole  = user?.role;
-  const darkPages  = ["/", "/courses"];
-  const alwaysDark = darkPages.some(p=>p==="/"?location.pathname==="/":location.pathname.startsWith(p));
+  const heroPages  = ["/", "/courses"];
+  const isHeroPage = heroPages.some(p=>p==="/"?location.pathname==="/":location.pathname.startsWith(p));
   useEffect(()=>{ setMenuOpen(false); },[location.pathname]);
   useEffect(()=>{
     const onScroll=()=>setScrolled(window.scrollY>24);
@@ -840,10 +840,11 @@ function Navbar() {
     return()=>window.removeEventListener("scroll",onScroll);
   },[]);
   const handleLogout = () => logout();
-  const transparent = alwaysDark && !scrolled;
-  const navBg = (!alwaysDark&&scrolled)?"rgba(255,255,255,0.97)":transparent?"transparent":alwaysDark?"rgba(8,11,15,0.88)":"rgba(255,255,255,0.97)";
-  const textColor = alwaysDark?"rgba(242,237,230,0.72)":"#475569";
-  const logoColor = alwaysDark?"#f2ede6":"#0f172a";
+  // Always dark — transparent only on hero pages before scroll
+  const transparent = isHeroPage && !scrolled;
+  const navBg = transparent ? "transparent" : scrolled ? "rgba(8,11,15,0.96)" : "rgba(8,11,15,0.88)";
+  const textColor = "rgba(242,237,230,0.72)";
+  const logoColor = "#f2ede6";
   const navLinkStyle=({isActive})=>({fontSize:13,fontWeight:600,textDecoration:"none",color:isActive?C.gold:textColor,borderBottom:isActive?`2px solid ${C.gold}`:"2px solid transparent",paddingBottom:2,transition:"color 0.15s",fontFamily:"'DM Sans',sans-serif",letterSpacing:"0.02em"});
   const roleBadge=userRole==="teacher"?<span style={{fontSize:9,fontWeight:700,background:"rgba(157,123,234,0.18)",color:"#9d7bea",border:"1px solid rgba(157,123,234,0.3)",borderRadius:99,padding:"2px 7px",marginLeft:6}}>Enseignant</span>:userRole==="student"?<span style={{fontSize:9,fontWeight:700,background:"rgba(29,181,132,0.12)",color:C.teal,border:`1px solid rgba(29,181,132,0.28)`,borderRadius:99,padding:"2px 7px",marginLeft:6}}>Étudiant</span>:null;
   return (
@@ -853,14 +854,14 @@ function Navbar() {
         style={{ position:"fixed",top:0,left:0,right:0,zIndex:50,height:70,display:"flex",alignItems:"center",padding:"0 24px",background:navBg,borderBottom:scrolled?`1px solid ${C.border}`:"1px solid transparent",backdropFilter:transparent?"none":"blur(22px)",WebkitBackdropFilter:transparent?"none":"blur(22px)",transition:"background 0.35s,border-color 0.35s" }}>
         <div style={{ maxWidth:1200,margin:"0 auto",width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
           <Link to="/" style={{ textDecoration:"none",display:"flex",alignItems:"center",gap:10 }}>
-            <motion.div whileHover={{scale:1.08}} style={{ width:38,height:38,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.teal})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:700,color:"#080b0f",boxShadow:alwaysDark?`0 0 16px ${C.gold}40`:"none" }}>س</motion.div>
+            <motion.div whileHover={{scale:1.08}} style={{ width:38,height:38,borderRadius:12,background:`linear-gradient(135deg,${C.gold},${C.teal})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:700,color:"#080b0f",boxShadow:`0 0 16px ${C.gold}40` }}>س</motion.div>
             <span style={{ fontSize:17,fontWeight:700,color:logoColor,fontFamily:"'Cormorant Garamond',serif",letterSpacing:"-0.01em" }}>Safoua Academy</span>
           </Link>
           <div style={{ display:"flex",alignItems:"center",gap:28 }} className="hidden-mobile">
             <NavLink to="/" end style={navLinkStyle}>Accueil</NavLink>
             <NavLink to="/courses" style={navLinkStyle}>Cours</NavLink>
             <NavLink to="/dictionary" style={navLinkStyle}>Dictionnaire</NavLink>
-            <div style={{ width:1,height:16,background:alwaysDark?"rgba(255,255,255,0.1)":"#e2e8f0" }}/>
+            <div style={{ width:1,height:16,background:"rgba(255,255,255,0.1)" }}/>
             {loggedIn?(
               <>
                 <div style={{ display:"flex",alignItems:"center" }}><NavLink to="/dashboard" style={navLinkStyle}>Mon Espace</NavLink>{roleBadge}</div>
@@ -881,7 +882,7 @@ function Navbar() {
               </>
             )}
           </div>
-          <button onClick={()=>setMenuOpen(o=>!o)} className="show-mobile" style={{ background:"none",border:"none",color:alwaysDark?"rgba(242,237,230,0.8)":"#0f172a",cursor:"pointer",padding:6,display:"none" }}>
+          <button onClick={()=>setMenuOpen(o=>!o)} className="show-mobile" style={{ background:"none",border:"none",color:"rgba(242,237,230,0.8)",cursor:"pointer",padding:6,display:"none" }}>
             {menuOpen?<X size={22}/>:<Menu size={22}/>}
           </button>
         </div>

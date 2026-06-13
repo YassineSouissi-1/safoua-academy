@@ -77,7 +77,7 @@ STRICT RULES:
 
 4. "meaning" = 2-3 sentences in ${defLang} about the meaning and Islamic/Quranic relevance.
 
-5. "examples" = 1-2 short Quranic or Islamic phrases using the word.
+5. "examples" = 1-2 real Quranic verses containing the word. You MUST include the real surah number and ayah number.
 
 Return exactly:
 {
@@ -87,9 +87,11 @@ Return exactly:
   "root": "<Arabic script root only, e.g. ح ب ب>",
   "examples": [
     {
-      "arabic": "<Arabic phrase with diacritics>",
-      "transliteration": "<Latin romanization>",
-      "translation": "<${defLang} translation>"
+      "arabic": "<full Quranic verse in Arabic with diacritics>",
+      "transliteration": "<Latin romanization of the verse>",
+      "translation": "<${defLang} translation of the verse>",
+      "surah": <integer surah number, e.g. 2>,
+      "ayah": <integer ayah number, e.g. 255>
     }
   ]
 }`;
@@ -179,9 +181,15 @@ Return exactly:
       meaning:       meaning || `Traduction de "${clean}" en arabe.`,
       root,
       examples:      Array.isArray(parsed.examples)
-                       ? parsed.examples.filter(
-                           (e) => e && e.arabic && containsArabic(e.arabic)
-                         )
+                       ? parsed.examples
+                           .filter((e) => e && e.arabic && containsArabic(e.arabic))
+                           .map((e) => ({
+                             arabic:         e.arabic,
+                             transliteration:e.transliteration || "",
+                             translation:    e.translation || "",
+                             surah:          e.surah   ? parseInt(e.surah)   : null,
+                             ayah:           e.ayah    ? parseInt(e.ayah)    : null,
+                           }))
                        : [],
       source: "Groq AI (llama-3.3-70b)",
     };

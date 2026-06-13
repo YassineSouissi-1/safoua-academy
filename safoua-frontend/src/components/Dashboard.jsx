@@ -7,17 +7,12 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-
-// ✅ CHANGE 1: Replace "import axios from 'axios'" with this:
 import { api, getUser, logout } from "../utils/auth";
-// "api" is axios with your token already attached — use it instead of plain axios
-// "getUser()" reads your info from the token — no more localStorage.getItem("username")
-// "logout()" clears the token and redirects home
 
 /* ── FONTS ─────────────────────────────────────────────────────── */
 const FONT_LINK = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
 
-/* ── PALETTE (matches Courses.jsx exactly) ─────────────────────── */
+/* ── PALETTE ────────────────────────────────────────────────────── */
 const C = {
   bg:      "#080b0f",
   surface: "#0d1117",
@@ -36,9 +31,6 @@ const C = {
 };
 
 /* ── CONSTANTS ──────────────────────────────────────────────────── */
-// ✅ CHANGE 2: Remove the API constant — "api" from auth.js uses it automatically
-// DELETE THIS LINE: const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
 const ALL_COURSES = [
   {
     id: 1,
@@ -70,10 +62,7 @@ const ALL_COURSES = [
           "Pratique Nun (ن)","Pratique Ha2 (ه)","Pratique Waw (و)","Pratique Ya (ي)",
         ],
       },
-      {
-        title: "Quiz",
-        lessons: ["Quiz Alphabet (10/10)"],
-      },
+      { title: "Quiz", lessons: ["Quiz Alphabet (10/10)"] },
     ],
   },
   {
@@ -85,14 +74,8 @@ const ALL_COURSES = [
       {
         title: "Tajwid : Récitation Sacrée",
         lessons: [
-          "La Prolongation",
-          "Le Son Nasal",
-          "L'Assimilation",
-          "Le Voilement",
-          "L'Écho / Vibration",
-          "La Prononciation Claire",
-          "La Transformation",
-          "L'Arrêt",
+          "La Prolongation","Le Son Nasal","L'Assimilation","Le Voilement",
+          "L'Écho / Vibration","La Prononciation Claire","La Transformation","L'Arrêt",
         ],
       },
     ],
@@ -102,48 +85,15 @@ const ALL_COURSES = [
     title: "Mémorisation : Les 10 dernières Sourates",
     accent: C.gold,
     icon: "س",
+    targetLessons: 10,
     modules: [
       {
         title: "Sourates",
         lessons: [
-          "Sourate 1 : Al-Fatiha","Sourate 2 : Al-Baqarah","Sourate 3 : Al-Imran",
-          "Sourate 4 : An-Nisa","Sourate 5 : Al-Ma'idah","Sourate 6 : Al-An'am",
-          "Sourate 7 : Al-A'raf","Sourate 8 : Al-Anfal","Sourate 9 : At-Tawbah",
-          "Sourate 10 : Yunus","Sourate 11 : Hud","Sourate 12 : Yusuf",
-          "Sourate 13 : Ar-Ra'd","Sourate 14 : Ibrahim","Sourate 15 : Al-Hijr",
-          "Sourate 16 : An-Nahl","Sourate 17 : Al-Isra","Sourate 18 : Al-Kahf",
-          "Sourate 19 : Maryam","Sourate 20 : Ta-Ha","Sourate 21 : Al-Anbiya",
-          "Sourate 22 : Al-Hajj","Sourate 23 : Al-Mu'minun","Sourate 24 : An-Nur",
-          "Sourate 25 : Al-Furqan","Sourate 26 : Ash-Shu'ara","Sourate 27 : An-Naml",
-          "Sourate 28 : Al-Qasas","Sourate 29 : Al-Ankabut","Sourate 30 : Ar-Rum",
-          "Sourate 31 : Luqman","Sourate 32 : As-Sajdah","Sourate 33 : Al-Ahzab",
-          "Sourate 34 : Saba","Sourate 35 : Fatir","Sourate 36 : Ya-Sin",
-          "Sourate 37 : As-Saffat","Sourate 38 : Sad","Sourate 39 : Az-Zumar",
-          "Sourate 40 : Ghafir","Sourate 41 : Fussilat","Sourate 42 : Ash-Shura",
-          "Sourate 43 : Az-Zukhruf","Sourate 44 : Ad-Dukhan","Sourate 45 : Al-Jathiyah",
-          "Sourate 46 : Al-Ahqaf","Sourate 47 : Muhammad","Sourate 48 : Al-Fath",
-          "Sourate 49 : Al-Hujurat","Sourate 50 : Qaf","Sourate 51 : Adh-Dhariyat",
-          "Sourate 52 : At-Tur","Sourate 53 : An-Najm","Sourate 54 : Al-Qamar",
-          "Sourate 55 : Ar-Rahman","Sourate 56 : Al-Waqi'ah","Sourate 57 : Al-Hadid",
-          "Sourate 58 : Al-Mujadila","Sourate 59 : Al-Hashr","Sourate 60 : Al-Mumtahanah",
-          "Sourate 61 : As-Saf","Sourate 62 : Al-Jumu'ah","Sourate 63 : Al-Munafiqun",
-          "Sourate 64 : At-Taghabun","Sourate 65 : At-Talaq","Sourate 66 : At-Tahrim",
-          "Sourate 67 : Al-Mulk","Sourate 68 : Al-Qalam","Sourate 69 : Al-Haqqah",
-          "Sourate 70 : Al-Ma'arij","Sourate 71 : Nuh","Sourate 72 : Al-Jinn",
-          "Sourate 73 : Al-Muzzammil","Sourate 74 : Al-Muddaththir","Sourate 75 : Al-Qiyamah",
-          "Sourate 76 : Al-Insan","Sourate 77 : Al-Mursalat","Sourate 78 : An-Naba",
-          "Sourate 79 : An-Nazi'at","Sourate 80 : Abasa","Sourate 81 : At-Takwir",
-          "Sourate 82 : Al-Infitar","Sourate 83 : Al-Mutaffifin","Sourate 84 : Al-Inshiqaq",
-          "Sourate 85 : Al-Buruj","Sourate 86 : At-Tariq","Sourate 87 : Al-A'la",
-          "Sourate 88 : Al-Ghashiyah","Sourate 89 : Al-Fajr","Sourate 90 : Al-Balad",
-          "Sourate 91 : Ash-Shams","Sourate 92 : Al-Layl","Sourate 93 : Ad-Duha",
-          "Sourate 94 : Ash-Sharh","Sourate 95 : At-Tin","Sourate 96 : Al-Alaq",
-          "Sourate 97 : Al-Qadr","Sourate 98 : Al-Bayyinah","Sourate 99 : Az-Zalzalah",
-          "Sourate 100 : Al-Adiyat","Sourate 101 : Al-Qari'ah","Sourate 102 : At-Takathur",
-          "Sourate 103 : Al-Asr","Sourate 104 : Al-Humazah","Sourate 105 : Al-Fil",
-          "Sourate 106 : Quraysh","Sourate 107 : Al-Ma'un","Sourate 108 : Al-Kawthar",
-          "Sourate 109 : Al-Kafirun","Sourate 110 : An-Nasr","Sourate 111 : Al-Masad",
-          "Sourate 112 : Al-Ikhlas","Sourate 113 : Al-Falaq","Sourate 114 : An-Nas",
+          "Sourate 105 : Al-Fil","Sourate 106 : Quraysh","Sourate 107 : Al-Ma'un",
+          "Sourate 108 : Al-Kawthar","Sourate 109 : Al-Kafirun","Sourate 110 : An-Nasr",
+          "Sourate 111 : Al-Masad","Sourate 112 : Al-Ikhlas","Sourate 113 : Al-Falaq",
+          "Sourate 114 : An-Nas",
         ],
       },
     ],
@@ -176,14 +126,7 @@ const ALL_COURSES = [
     modules: [
       {
         title: "Introduction au Fiqh",
-        lessons: [
-          "Introduction au Fiqh islamique","Les sources du Fiqh","Le Coran comme source législative",
-          "La Sunnah et ses catégories","L'Ijmâ et le Qiyâs","La purification (Taharah)",
-          "Les ablutions (Wudhu)","La prière (Salat) : conditions","Les piliers de la prière",
-          "Le jeûne (Sawm)","La Zakat : calcul et règles","Le Hajj : piliers et obligations",
-          "Les transactions halal & haram","Le mariage en Islam","L'éthique islamique au quotidien",
-          "Quiz Fiqh",
-        ],
+        lessons: ["La Purification","La Prière","La Zakat","Le Jeûne","Le Pèlerinage","Quiz Fiqh"],
       },
     ],
   },
@@ -196,13 +139,11 @@ const ALL_COURSES = [
       {
         title: "Sira : Vie du Prophète ﷺ",
         lessons: [
-          "L'Arabie avant l'Islam","La naissance du Prophète ﷺ","L'enfance et la jeunesse",
-          "Le mariage avec Khadija","La révélation à Hira","Les premières conversions",
-          "La persécution des musulmans","L'Hégire vers l'Abyssinie","Le voyage nocturne (Isra wal Mi'raj)",
-          "L'Hégire vers Médine","La Constitution de Médine","La bataille de Badr",
-          "La bataille d'Uhud","La bataille du Fossé","La conquête de La Mecque",
-          "Le pèlerinage d'adieu","Le décès du Prophète ﷺ","L'héritage spirituel",
-          "Quiz Sira",
+          "Naissance du Prophète ﷺ","Mariage avec Khadīja","Première Révélation",
+          "Début de la Prédication Publique","Hégire en Abyssinie","L'Année du Chagrin",
+          "Le Voyage Nocturne","L'Hégire vers Médine","Bataille de Badr",
+          "Bataille d'Uhud","Bataille du Fossé","Conquête de La Mecque",
+          "Le Pèlerinage d'Adieu","Quiz Sira",
         ],
       },
     ],
@@ -244,6 +185,21 @@ const ALL_COURSES = [
       },
     ],
   },
+  {
+    id: 9,
+    title: "Arabe Moderne Standard",
+    accent: "#f97316",
+    icon: "ع",
+    modules: [
+      {
+        title: "Arabe Moderne Standard",
+        lessons: [
+          "Module 1 : Fondamentaux","Module 2 : Vocabulaire","Module 3 : Grammaire avancée",
+          "Module 4 : Expression","Module 5 : Compréhension","Quiz Arabe Moderne",
+        ],
+      },
+    ],
+  },
 ];
 
 const lessonKey = (courseTitle, moduleTitle, lessonTitle) =>
@@ -253,10 +209,10 @@ const totalLessons = (course) =>
   course.modules.reduce((s, m) => s + m.lessons.length, 0);
 
 const BADGE_DEFS = [
-  { icon: "🏅", label: "Première Leçon",  threshold: 1,  desc: "Terminez votre 1ère leçon"  },
-  { icon: "📖", label: "Lecteur Assidu",   threshold: 5,  desc: "Terminez 5 leçons"           },
-  { icon: "⭐", label: "Top Étudiant",    threshold: 15, desc: "Terminez 15 leçons"          },
-  { icon: "🎓", label: "Diplômé",         threshold: 30, desc: "Terminez 30 leçons"          },
+  { icon: "🏅", label: "Première Leçon",  type: "lessons",  threshold: 1,  desc: "Terminez votre 1ère leçon"    },
+  { icon: "📖", label: "Lecteur Assidu",  type: "lessons",  threshold: 5,  desc: "Terminez 5 leçons"             },
+  { icon: "⭐", label: "Top Étudiant",   type: "lessons",  threshold: 15, desc: "Terminez 15 leçons"            },
+  { icon: "🎓", label: "Diplômé",        type: "courses",  threshold: 9,  desc: "Terminez les 9 cours complets" },
 ];
 
 const DAYS   = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
@@ -267,9 +223,122 @@ const EMPTY_FORM = {
   duration: 60, maxStudents: 8, level: "Débutant", meetLink: "", accent: C.purple,
 };
 
-// ─── All sub-components (AmbientOrbs, GridLines, etc.) are UNCHANGED ───────────
-// Only the MAIN Dashboard() function at the bottom needs the 4 changes below.
+/* ── HELPERS ────────────────────────────────────────────────────── */
+function pad(n) { return String(n).padStart(2, "0"); }
+function toDateStr(y, m, d) { return `${y}-${pad(m)}-${pad(d)}`; }
 
+/* ── ISLAMIC EVENTS CACHE ───────────────────────────────────────── */
+const islamicEventsCache = {};
+
+async function fetchIslamicEventsForMonth(gYear, gMonth) {
+  const key = `${gYear}-${gMonth}`;
+  if (islamicEventsCache[key]) return islamicEventsCache[key];
+
+  const events = {};
+  const daysInMonth = new Date(gYear, gMonth, 0).getDate();
+
+  try {
+    const promises = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      promises.push(
+        fetch(`https://api.aladhan.com/v1/gToH/${pad(d)}-${pad(gMonth)}-${gYear}`)
+          .then(r => r.json())
+          .then(data => ({ d, hijri: data.data?.hijri }))
+      );
+    }
+    const results = await Promise.all(promises);
+
+    results.forEach(({ d, hijri }) => {
+      if (!hijri) return;
+      const hDay   = parseInt(hijri.day);
+      const hMonth = parseInt(hijri.month.number);
+      const dateStr = toDateStr(gYear, gMonth, d);
+
+      const add = (label, type, desc) => {
+        if (!events[dateStr]) events[dateStr] = [];
+        events[dateStr].push({ label, type, desc });
+      };
+
+      // ── Muharram ────────────────────────────────────────────────
+      if (hMonth === 1 && hDay === 1)
+        add("Nouvel An Hégirien", "special", "1 Muharram — Nouvel An Islamique");
+      if (hMonth === 1 && hDay === 9)
+        add("Tassua", "sunnah", "9 Muharram — jeûne sunnah avant Achoura");
+      if (hMonth === 1 && hDay === 10)
+        add("Achoura", "fast", "10 Muharram — jeûne expiatoire (2 ans de péchés effacés)");
+
+      // ── Rajab ───────────────────────────────────────────────────
+      if (hMonth === 7 && hDay === 27)
+        add("Isra' & Mi'raj", "special", "27 Rajab — Voyage nocturne du Prophète ﷺ");
+
+      // ── Sha'ban ─────────────────────────────────────────────────
+      if (hMonth === 8 && hDay === 15)
+        add("Laylat al-Barâ'a", "special", "15 Sha'ban — Nuit du pardon et de la destinée");
+
+      // ── Ramadan ─────────────────────────────────────────────────
+      if (hMonth === 9) {
+        if (hDay === 1)
+          add("Ramadan", "ramadan", "1 Ramadan — début du jeûne obligatoire 🌙");
+        else if (hDay === 27)
+          add("Laylat al-Qadr", "laylatul", "27 Ramadan — Nuit du Destin ✨ (meilleure des nuits)");
+        else
+          add("Ramadan", "ramadan", `${hDay} Ramadan — jeûne obligatoire`);
+      }
+
+      // ── Shawwal ─────────────────────────────────────────────────
+      if (hMonth === 10 && hDay === 1)
+        add("Aïd el-Fitr", "eid", "1 Shawwal — fête de la rupture du jeûne 🌙");
+      if (hMonth === 10 && hDay >= 2 && hDay <= 7)
+        add("Jeûne Shawwal", "fast", `${hDay - 1}/6 — jeûne de Shawwal (équivaut à jeûner une année entière)`);
+
+      // ── Dhul Hijja ──────────────────────────────────────────────
+      if (hMonth === 12 && hDay >= 1 && hDay <= 8)
+        add("10 jours Dhul Hijja", "special", `${hDay} Dhul Hijja — parmi les meilleurs jours de l'année`);
+      if (hMonth === 12 && hDay === 9)
+        add("Jour d'Arafah", "arafah", "9 Dhul Hijja — jeûne efface 2 ans de péchés 🤲");
+      if (hMonth === 12 && hDay === 10)
+        add("Aïd el-Adha", "eid", "10 Dhul Hijja — fête du sacrifice 🐑");
+      if (hMonth === 12 && hDay >= 11 && hDay <= 13)
+        add("Ayyam al-Tashriq", "special", `${hDay} Dhul Hijja — jours de célébration (jeûne interdit)`);
+
+      // ── Ayyam al-Bidh — 13, 14, 15 of every month ──────────────
+      if ([13, 14, 15].includes(hDay)) {
+        const ordinal = { 13: "13ème", 14: "14ème", 15: "15ème" }[hDay];
+        add("Ayyam al-Bidh", "sunnah", `${ordinal} jour lunaire — jeûne des nuits blanches`);
+      }
+    });
+
+    islamicEventsCache[key] = events;
+    return events;
+  } catch (err) {
+    console.warn("[IslamicCalendar] API fetch failed:", err.message);
+    islamicEventsCache[key] = {};
+    return {};
+  }
+}
+
+/* ── EVENT TYPE CONFIG ──────────────────────────────────────────── */
+const EVENT_TYPES = {
+  eid:      { color: "#c9a84c", bg: "rgba(201,168,76,0.22)",  dot: "#c9a84c",  border: "rgba(201,168,76,0.5)"  },
+  ramadan:  { color: "#25d4a0", bg: "rgba(29,181,132,0.18)",  dot: "#1db584",  border: "rgba(29,181,132,0.4)"  },
+  laylatul: { color: "#e8c97a", bg: "rgba(232,201,122,0.28)", dot: "#e8c97a",  border: "rgba(232,201,122,0.6)" },
+  arafah:   { color: "#9d7bea", bg: "rgba(157,123,234,0.22)", dot: "#9d7bea",  border: "rgba(157,123,234,0.5)" },
+  fast:     { color: "#4fadd4", bg: "rgba(79,173,212,0.15)",  dot: "#4fadd4",  border: "rgba(79,173,212,0.35)" },
+  sunnah:   { color: "#9d7bea", bg: "rgba(157,123,234,0.12)", dot: "#9d7bea",  border: "rgba(157,123,234,0.3)" },
+  special:  { color: "#f97316", bg: "rgba(249,115,22,0.13)",  dot: "#f97316",  border: "rgba(249,115,22,0.35)" },
+};
+
+const LEGEND = [
+  { type: "eid",      label: "Aïd" },
+  { type: "ramadan",  label: "Ramadan" },
+  { type: "laylatul", label: "Laylat al-Qadr" },
+  { type: "arafah",   label: "Arafah" },
+  { type: "fast",     label: "Jeûne recommandé" },
+  { type: "sunnah",   label: "Sunnah" },
+  { type: "special",  label: "Jour spécial" },
+];
+
+/* ── AMBIENT ORBS ───────────────────────────────────────────────── */
 function AmbientOrbs({ roleColor }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
@@ -389,11 +458,16 @@ function CourseProgressCard({ course, completedLessons, index }) {
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const doneSet = new Set(completedLessons);
 
-  const courseDone = course.modules.reduce((sum, mod) =>
-    sum + mod.lessons.filter(l => doneSet.has(lessonKey(course.title, mod.title, l))).length, 0);
-  const courseTotal  = totalLessons(course);
-  const pct          = courseTotal > 0 ? Math.min(Math.round((courseDone / courseTotal) * 100), 100) : 0;
-  const isComplete   = pct === 100;
+  const courseDone = course.targetLessons
+    ? Math.min(
+        completedLessons.filter(l => l.startsWith(course.title + " —")).length,
+        course.targetLessons
+      )
+    : course.modules.reduce((sum, mod) =>
+        sum + mod.lessons.filter(l => doneSet.has(lessonKey(course.title, mod.title, l))).length, 0);
+  const courseTotal = course.targetLessons ?? totalLessons(course);
+  const pct         = courseTotal > 0 ? Math.min(Math.round((courseDone / courseTotal) * 100), 100) : 0;
+  const isComplete  = pct === 100;
 
   return (
     <motion.div
@@ -529,53 +603,179 @@ function OverallProgress({ completedLessons }) {
   );
 }
 
+/* ── MINI CALENDAR ──────────────────────────────────────────────── */
 function MiniCalendar({ sessions, roleColor }) {
   const now   = new Date();
-  const [year, setYear]   = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth());
+  const [year, setYear]                   = useState(now.getFullYear());
+  const [month, setMonth]                 = useState(now.getMonth());
+  const [tooltip, setTooltip]             = useState(null);
+  const [islamicEvents, setIslamicEvents] = useState({});
+  const [loadingEvents, setLoadingEvents] = useState(false);
 
-  const firstDay     = new Date(year, month, 1).getDay();
-  const offset       = (firstDay + 6) % 7;
-  const daysInMonth  = new Date(year, month + 1, 0).getDate();
-  const sessionDates = new Set(sessions.filter(s => s.status !== "past").map(s => s.date));
-  const pad = n => String(n).padStart(2, "0");
-  const dateStr = d => `${year}-${pad(month + 1)}-${pad(d)}`;
-  const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
-  const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); };
+  useEffect(() => {
+    setLoadingEvents(true);
+    setTooltip(null);
+    fetchIslamicEventsForMonth(year, month + 1)
+      .then(evts => {
+        setIslamicEvents(evts);
+        setLoadingEvents(false);
+      });
+  }, [year, month]);
+
+  const firstDay    = new Date(year, month, 1).getDay();
+  const offset      = (firstDay + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const sessionDates = new Set(
+    sessions.filter(s => s.status !== "past").map(s => s.date)
+  );
+
+  const prevMonth = () => {
+    if (month === 0) { setMonth(11); setYear(y => y - 1); }
+    else setMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (month === 11) { setMonth(0); setYear(y => y + 1); }
+    else setMonth(m => m + 1);
+  };
 
   const cells = [];
   for (let i = 0; i < offset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
+  const PRIORITY = ["eid", "laylatul", "arafah", "ramadan", "fast", "sunnah", "special"];
+
+  const getDayStyle = (d) => {
+    const key        = toDateStr(year, month + 1, d);
+    const evts       = islamicEvents[key] || [];
+    const hasSession = sessionDates.has(key);
+    const isToday    = d === now.getDate() && month === now.getMonth() && year === now.getFullYear();
+
+    if (isToday) return { bg: roleColor, text: "#fff", border: "transparent", isToday: true };
+
+    const topType = PRIORITY.find(t => evts.some(e => e.type === t));
+    if (topType) {
+      const cfg = EVENT_TYPES[topType];
+      return { bg: cfg.bg, text: cfg.color, border: cfg.border, topType, hasSession, evts };
+    }
+    if (hasSession) return { bg: "rgba(157,123,234,0.1)", text: C.purple, border: "rgba(157,123,234,0.3)", hasSession };
+    return { bg: "transparent", text: C.dim, border: "transparent" };
+  };
+
   return (
     <div>
+      {/* Month navigation */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <button onClick={prevMonth} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1 }}>‹</button>
-        <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontWeight: 700, color: C.text }}>{MONTHS[month]} {year}</span>
-        <button onClick={nextMonth} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1 }}>›</button>
+        <button onClick={prevMonth} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 6px" }}>‹</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontWeight: 700, color: C.text }}>
+            {MONTHS[month]} {year}
+          </span>
+          {loadingEvents && (
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+              <Sparkles size={10} color={C.gold} />
+            </motion.div>
+          )}
+        </div>
+        <button onClick={nextMonth} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 6px" }}>›</button>
       </div>
+
+      {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 4 }}>
         {DAYS.map(d => (
           <div key={d} style={{ textAlign: "center", fontSize: 9, fontWeight: 700, color: C.dim, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>{d}</div>
         ))}
       </div>
+
+      {/* Day cells */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
         {cells.map((d, i) => {
           if (!d) return <div key={i} />;
-          const hasSession = sessionDates.has(dateStr(d));
-          const isToday    = d === now.getDate() && month === now.getMonth() && year === now.getFullYear();
+          const ds = getDayStyle(d);
           return (
-            <div key={i} style={{ aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, position: "relative", background: isToday ? roleColor : hasSession ? `${C.purple}22` : "transparent", border: hasSession && !isToday ? `1px solid ${C.purple}40` : "1px solid transparent" }}>
-              <span style={{ fontSize: 11, fontWeight: isToday || hasSession ? 900 : 400, color: isToday ? "#fff" : hasSession ? C.purple : C.dim, fontFamily: "'DM Sans', sans-serif" }}>{d}</span>
-              {hasSession && !isToday && (<div style={{ position: "absolute", bottom: 2, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: C.purple }} />)}
+            <div
+              key={i}
+              onClick={() => ds.evts?.length ? setTooltip(tooltip?.day === d ? null : { day: d, events: ds.evts }) : null}
+              style={{
+                aspectRatio: "1",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: 7, position: "relative",
+                background: ds.bg,
+                border: `1px solid ${ds.border}`,
+                cursor: ds.evts?.length ? "pointer" : "default",
+                transition: "all 0.15s",
+                opacity: loadingEvents ? 0.5 : 1,
+              }}
+            >
+              <span style={{
+                fontSize: 11,
+                fontWeight: ds.isToday || ds.topType || ds.hasSession ? 900 : 400,
+                color: ds.text,
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1,
+              }}>
+                {d}
+              </span>
+              {!ds.isToday && (ds.topType || ds.hasSession) && (
+                <div style={{ position: "absolute", bottom: 2, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 2 }}>
+                  {ds.topType && <div style={{ width: 3, height: 3, borderRadius: "50%", background: EVENT_TYPES[ds.topType]?.dot }} />}
+                  {ds.hasSession && <div style={{ width: 3, height: 3, borderRadius: "50%", background: C.purple }} />}
+                </div>
+              )}
             </div>
           );
         })}
+      </div>
+
+      {/* Tooltip */}
+      <AnimatePresence>
+        {tooltip && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              marginTop: 10, borderRadius: 12,
+              background: C.surface,
+              border: `1px solid ${C.border}`,
+              padding: "10px 12px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.dim, fontFamily: "'DM Sans', sans-serif", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {pad(tooltip.day)} {MONTHS[month]} {year}
+            </div>
+            {tooltip.events.map((ev, i) => {
+              const cfg = EVENT_TYPES[ev.type] || EVENT_TYPES.special;
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: i < tooltip.events.length - 1 ? 7 : 0 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot, marginTop: 4, flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: cfg.color, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.3 }}>{ev.label}</div>
+                    <div style={{ fontSize: 11, color: C.muted, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.4, marginTop: 1 }}>{ev.desc}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Legend */}
+      <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: "5px 10px" }}>
+        {LEGEND.map(({ type, label }) => (
+          <div key={type} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: EVENT_TYPES[type].dot, flexShrink: 0 }} />
+            <span style={{ fontSize: 9, color: C.dim, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
+/* ── SESSION CARD ───────────────────────────────────────────────── */
 function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelete, onEdit }) {
   const [expanded, setExpanded] = useState(false);
   const isEnrolled = session.enrolledStudents?.includes(currentUsername);
@@ -685,6 +885,7 @@ function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelet
   );
 }
 
+/* ── SESSION MODAL ──────────────────────────────────────────────── */
 function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar }) {
   const [form, setForm]     = useState(initial ? { ...EMPTY_FORM, ...initial } : EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -760,6 +961,7 @@ function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar }) 
   );
 }
 
+/* ── TEACHER STATS ──────────────────────────────────────────────── */
 function TeacherStats({ sessions, username }) {
   const mine     = sessions.filter(s => s.teacher === username);
   const total    = mine.reduce((a, s) => a + (s.enrolledStudents?.length || 0), 0);
@@ -783,15 +985,16 @@ function TeacherStats({ sessions, username }) {
   );
 }
 
+/* ── STUDENT STATS ──────────────────────────────────────────────── */
 function StudentStats({ sessions, username, completedCount, points }) {
   const enrolled = sessions.filter(s => s.enrolledStudents?.includes(username) && s.status !== "past").length;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
       {[
-        { icon: <BookOpen size={16}/>, label: "Cours",    value: ALL_COURSES.length, color: C.teal   },
-        { icon: <Star size={16}/>,     label: "Leçons",   value: completedCount,     color: C.blue   },
-        { icon: <Calendar size={16}/>, label: "Sessions", value: enrolled,           color: C.purple },
-        { icon: <Award size={16}/>,    label: "Points XP",value: points,             color: C.gold   },
+        { icon: <BookOpen size={16}/>, label: "Cours",     value: ALL_COURSES.length, color: C.teal   },
+        { icon: <Star size={16}/>,     label: "Leçons",    value: completedCount,     color: C.blue   },
+        { icon: <Calendar size={16}/>, label: "Sessions",  value: enrolled,           color: C.purple },
+        { icon: <Award size={16}/>,    label: "Points XP", value: points,             color: C.gold   },
       ].map((s, i) => (
         <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
           <GlassCard style={{ padding: 14 }}>
@@ -805,16 +1008,34 @@ function StudentStats({ sessions, username, completedCount, points }) {
   );
 }
 
-function BadgesPanel({ completedCount }) {
-  const nextBadge = BADGE_DEFS.find(b => completedCount < b.threshold);
-  const nextPct   = nextBadge ? Math.min(Math.round((completedCount / nextBadge.threshold) * 100), 100) : 100;
+/* ── BADGES PANEL ───────────────────────────────────────────────── */
+function BadgesPanel({ completedCount, completedLessons }) {
+  const doneSet = new Set(completedLessons);
+  const coursesCompleted = ALL_COURSES.filter(course => {
+    if (course.targetLessons) {
+      return Math.min(
+        completedLessons.filter(l => l.startsWith(course.title + " —")).length,
+        course.targetLessons
+      ) >= course.targetLessons;
+    }
+    const total = totalLessons(course);
+    if (total === 0) return false;
+    const done = course.modules.reduce((sum, mod) =>
+      sum + mod.lessons.filter(l => doneSet.has(lessonKey(course.title, mod.title, l))).length, 0);
+    return done >= total;
+  }).length;
+
+  const getCount  = (b) => b.type === "courses" ? coursesCompleted : completedCount;
+  const nextBadge = BADGE_DEFS.find(b => getCount(b) < b.threshold);
+  const nextCount = nextBadge ? getCount(nextBadge) : 0;
+  const nextPct   = nextBadge ? Math.min(Math.round((nextCount / nextBadge.threshold) * 100), 100) : 100;
 
   return (
     <GlassCard>
       <SectionTitle>🏅 Badges</SectionTitle>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
         {BADGE_DEFS.map((b, i) => {
-          const earned = completedCount >= b.threshold;
+          const earned = getCount(b) >= b.threshold;
           return (
             <motion.div key={i} title={b.desc}
               whileHover={earned ? { scale: 1.04 } : {}}
@@ -834,7 +1055,7 @@ function BadgesPanel({ completedCount }) {
             <motion.div initial={{ width: 0 }} animate={{ width: `${nextPct}%` }} transition={{ duration: 0.8, ease: [.22,.68,0,1], delay: 0.5 }}
               style={{ height: "100%", borderRadius: 99, background: C.teal }} />
           </div>
-          <p style={{ fontSize: 11, color: C.muted, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>{completedCount} / {nextBadge.threshold} leçons</p>
+          <p style={{ fontSize: 11, color: C.muted, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>{nextCount} / {nextBadge.threshold} {nextBadge.type === "courses" ? "cours terminés" : "leçons"}</p>
         </div>
       ) : (
         <div style={{ textAlign: "center", padding: "12px 0" }}>
@@ -844,10 +1065,180 @@ function BadgesPanel({ completedCount }) {
     </GlassCard>
   );
 }
+/* ── ISLAMIC NOTIFICATIONS BELL ─────────────────────────────────── */
+function IslamicNotificationsBell() {
+  const [open, setOpen]       = useState(false);
+  const [events, setEvents]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const ref                   = useRef(null);
 
+  useEffect(() => {
+    const handleClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      const now = new Date();
+      const months = Array.from({ length: 3 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        return { y: d.getFullYear(), m: d.getMonth() + 1 };
+      });
+      const results = await Promise.all(months.map(({ y, m }) => fetchIslamicEventsForMonth(y, m)));
+      const merged  = Object.assign({}, ...results);
+
+      const todayStr  = toDateStr(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const cutoff    = new Date(now); cutoff.setDate(cutoff.getDate() + 90);
+      const cutoffStr = toDateStr(cutoff.getFullYear(), cutoff.getMonth() + 1, cutoff.getDate());
+      const PRIORITY  = ["eid", "laylatul", "arafah", "ramadan", "fast", "sunnah", "special"];
+
+      const seen = new Set();
+      const upcoming = Object.entries(merged)
+        .filter(([date]) => date >= todayStr && date <= cutoffStr)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .flatMap(([date, evts]) => {
+          const diffDays = Math.round((new Date(date) - new Date(todayStr)) / 86400000);
+          const topType  = PRIORITY.find(t => evts.some(e => e.type === t));
+          const topEvt   = evts.find(e => e.type === topType);
+          if (!topEvt) return [];
+          if (seen.has(topEvt.label)) return [];
+          seen.add(topEvt.label);
+          return [{ date, diffDays, ...topEvt }];
+        })
+        .slice(0, 10);
+
+      setEvents(upcoming);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const todayCount = events.filter(e => e.diffDays === 0).length;
+  const badge      = (d) => {
+    if (d === 0) return { text: "Aujourd'hui", bg: `${C.teal}22`,              color: C.tealL };
+    if (d === 1) return { text: "Demain",      bg: `${C.gold}18`,              color: C.goldL };
+    if (d <= 7)  return { text: `Dans ${d} j`, bg: `${C.gold}14`,              color: C.gold  };
+    return              { text: `Dans ${d} j`, bg: "rgba(255,255,255,0.06)",   color: C.muted };
+  };
+
+  const todayEvts = events.filter(e => e.diffDays === 0);
+  const soonEvts  = events.filter(e => e.diffDays > 0 && e.diffDays <= 7);
+  const laterEvts = events.filter(e => e.diffDays > 7);
+
+  const SectionLabel = ({ children }) => (
+    <div style={{ fontSize: 9, fontWeight: 700, color: C.dim, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'DM Sans', sans-serif", margin: "10px 0 4px" }}>
+      {children}
+    </div>
+  );
+
+  const NotifRow = ({ evt }) => {
+    const cfg = EVENT_TYPES[evt.type] || EVENT_TYPES.special;
+    const b   = badge(evt.diffDays);
+    return (
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "9px 0", borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ width: 3, borderRadius: 99, background: cfg.dot, alignSelf: "stretch", minHeight: 32, flexShrink: 0 }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.text, lineHeight: 1.3, marginBottom: 2, fontFamily: "'DM Sans', sans-serif" }}>
+            {evt.label}
+          </div>
+          <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4, marginBottom: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif" }}>
+            {evt.desc}
+          </div>
+          <span style={{ display: "inline-flex", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: b.bg, color: b.color, fontFamily: "'DM Sans', sans-serif" }}>
+            {b.text}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      {/* Bell button */}
+      <motion.button
+        onClick={() => setOpen(p => !p)}
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        style={{
+          position: "relative", width: 40, height: 40, borderRadius: 12,
+          background: open ? `${C.gold}18` : "rgba(255,255,255,0.05)",
+          border: `1px solid ${open ? C.gold + "40" : C.border}`,
+          color: open ? C.goldL : C.muted,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", transition: "all 0.2s", flexShrink: 0,
+        }}
+      >
+        <Globe size={16} />
+        {/* Red dot badge */}
+        {!loading && events.length > 0 && (
+          <div style={{
+            position: "absolute", top: 7, right: 7,
+            width: 7, height: 7, borderRadius: "50%",
+            background: todayCount > 0 ? C.teal : C.gold,
+            border: `1.5px solid ${C.bg}`,
+          }} />
+        )}
+      </motion.button>
+
+      {/* Dropdown panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: [.22, .68, 0, 1] }}
+            style={{
+              position: "absolute", top: "calc(100% + 10px)", right: 0,
+              width: 300, zIndex: 200,
+              background: C.surface,
+              border: `1px solid ${C.border}`,
+              borderRadius: 20,
+              boxShadow: "0 24px 60px rgba(0,0,0,0.6)",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
+            <div style={{ padding: "14px 16px 10px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <Globe size={13} color={C.gold} />
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontWeight: 700, color: C.text }}>
+                  Jours Islamiques
+                </span>
+              </div>
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: `${C.gold}18`, color: C.goldL, fontFamily: "'DM Sans', sans-serif" }}>
+                {events.length} à venir
+              </span>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: "4px 16px 14px", maxHeight: 420, overflowY: "auto" }}>
+              {loading ? (
+                <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.4, repeat: Infinity }}
+                  style={{ textAlign: "center", padding: "24px 0", fontSize: 12, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  Chargement…
+                </motion.div>
+              ) : events.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "24px 0", fontSize: 12, color: C.muted, fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
+                  Aucun événement à venir.
+                </div>
+              ) : (
+                <>
+                  {todayEvts.length > 0  && <><SectionLabel>Aujourd'hui</SectionLabel>  {todayEvts.map((e,i)  => <NotifRow key={i} evt={e} />)}</>}
+                  {soonEvts.length  > 0  && <><SectionLabel>Cette semaine</SectionLabel> {soonEvts.map((e,i)   => <NotifRow key={i} evt={e} />)}</>}
+                  {laterEvts.length > 0  && <><SectionLabel>Ce mois &amp; suivants</SectionLabel>{laterEvts.map((e,i) => <NotifRow key={i} evt={e} />)}</>}
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 /* ═══════════════════════════════════════════════════════════════════
-   MAIN DASHBOARD — only this function has JWT changes (4 total)
-   Everything above is 100% identical to your original code.
+   MAIN DASHBOARD
 ═══════════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
   const [sessions, setSessions]               = useState([]);
@@ -859,37 +1250,26 @@ export default function Dashboard() {
   const [userLoading, setUserLoading]         = useState(true);
   const [apiError, setApiError]               = useState("");
 
-  // ✅ CHANGE 3: Read role and username from the JWT token instead of localStorage
-  // BEFORE:
-  //   const role      = localStorage.getItem("userRole") || "student";
-  //   (username came from userData state which was fetched via email)
-  // AFTER:
-  const tokenUser  = getUser(); // reads from JWT: { id, username, email, role }
+  const tokenUser  = getUser();
   const role       = tokenUser?.role || "student";
   const isTeacher  = role === "teacher";
-  const username   = userData.username; // still from DB fetch below (for up-to-date XP/progress)
+  const username   = userData.username;
   const avatar     = username ? username[0].toUpperCase() : "U";
   const roleColor  = isTeacher ? C.purple : C.teal;
 
   const completedCount = userData.completedLessons.length;
   const points         = userData.points;
 
-  // ✅ CHANGE 4: Fetch user with "api" (sends token automatically) instead of axios + email
-  // BEFORE:
-  //   const email = localStorage.getItem("userEmail");
-  //   const r = await axios.get(`${API}/api/user/${email}`);
-  // AFTER:
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const r = await api.get("/api/me"); // token sent automatically, no email needed
+        const r = await api.get("/api/me");
         setUserData({
           username:         r.data.username,
           completedLessons: r.data.completedLessons || [],
           points:           r.data.points || 0,
         });
       } catch {
-        // If token is invalid, api.js will auto-redirect to /login
         setUserData(p => ({ ...p, username: tokenUser?.username || "Utilisateur" }));
       } finally {
         setUserLoading(false);
@@ -898,7 +1278,6 @@ export default function Dashboard() {
     fetchUser();
   }, []);
 
-  // Sessions are public — no auth needed here, plain api.get still works
   useEffect(() => {
     const fetchSessions = async () => {
       try {
@@ -913,7 +1292,6 @@ export default function Dashboard() {
     fetchSessions();
   }, []);
 
-  // ✅ All these handlers now use "api" instead of "axios" — token is sent automatically
   const handleSaveSession = async (session) => {
     try {
       if (session._id) {
@@ -939,7 +1317,6 @@ export default function Dashboard() {
 
   const handleBook = async (id) => {
     try {
-      // No need to send { username } in the body — server reads it from the token
       const r = await api.post(`/api/sessions/${id}/book`);
       setSessions(prev => prev.map(s => s._id === r.data._id ? r.data : s));
     } catch (err) { alert(err.response?.data?.error || "Erreur lors de la réservation."); }
@@ -947,7 +1324,6 @@ export default function Dashboard() {
 
   const handleCancel = async (id) => {
     try {
-      // No need to send { username } in the body — server reads it from the token
       const r = await api.post(`/api/sessions/${id}/cancel`);
       setSessions(prev => prev.map(s => s._id === r.data._id ? r.data : s));
     } catch (err) { alert(err.response?.data?.error || "Erreur lors de l'annulation."); }
@@ -997,6 +1373,9 @@ export default function Dashboard() {
                 {isTeacher ? "Gérez vos sessions et accompagnez vos étudiants." : "Continuez votre voyage vers la maîtrise islamique."}
               </p>
             </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+    <IslamicNotificationsBell />   {/* ← ADD THIS */}
+
             {isTeacher && (
               <motion.button onClick={() => { setEditTarget(null); setShowModal(true); }}
                 whileHover={{ scale: 1.03, boxShadow: `0 0 28px ${C.purple}40` }}
@@ -1006,6 +1385,7 @@ export default function Dashboard() {
               </motion.button>
             )}
           </div>
+        </div>
 
           {isTeacher
             ? <TeacherStats sessions={sessions} username={username} />
@@ -1114,13 +1494,14 @@ export default function Dashboard() {
             )}
           </div>
 
+          {/* ── RIGHT SIDEBAR ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <GlassCard>
-              <SectionTitle icon={<Calendar size={15} />} color={roleColor}>Calendrier</SectionTitle>
+              <SectionTitle icon={<Calendar size={15} />} color={roleColor}>Calendrier Islamique</SectionTitle>
               <MiniCalendar sessions={sessions} roleColor={roleColor} />
             </GlassCard>
 
-            {!isTeacher && <BadgesPanel completedCount={completedCount} />}
+            {!isTeacher && <BadgesPanel completedCount={completedCount} completedLessons={userData.completedLessons} />}
 
             <motion.div
               whileHover={{ scale: 1.01 }}

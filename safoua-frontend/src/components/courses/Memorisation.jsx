@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
+import { api, getUser } from "../../utils/auth";
 import {
   BookOpen, Play, Pause, Eye, EyeOff, CheckCircle, XCircle,
   RotateCcw, Mic, MicOff, Volume2, ChevronRight, ChevronDown,
@@ -1012,9 +1013,7 @@ function QuranBrowser({ onClose }) {
 
   // Load existing memorised surahs from backend on mount
   useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-    axios.get(`${API_URL}/api/user/${email}`)
+    api.get("/api/me")
       .then(r => {
         const completed = r.data.completedLessons || [];
         const nums = new Set();
@@ -1028,19 +1027,13 @@ function QuranBrowser({ onClose }) {
   }, []);
 
   const toggleMemorised = async (surah) => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
     const already = memorised.has(surah.n);
     if (already) {
-      // optimistic remove (no delete-lesson endpoint needed, just toggle UI)
       setMemorised(prev => { const s = new Set(prev); s.delete(surah.n); return s; });
     } else {
       setMemorised(prev => new Set([...prev, surah.n]));
       try {
-        await axios.post(`${API_URL}/api/update-progress`, {
-          email,
-          lessonTitle: surahKey(surah),
-        });
+        await api.post("/api/update-progress", { lessonTitle: surahKey(surah) });
       } catch (err) {
         console.error("Erreur sauvegarde mémorisation :", err);
         setMemorised(prev => { const s = new Set(prev); s.delete(surah.n); return s; });
@@ -1372,7 +1365,7 @@ function MemoPlan({ onClose }) {
                     setCompleted(c => ({...c,[dayView.day]:nowDone}));
                     if (nowDone) {
                       const surahNames = dayView.items.map(it => it.surah.en).join(" + ");
-                      saveProgress(`${COURSE_TITLE} — ${COURSE_TITLE} — Jour ${dayView.day} : ${surahNames}`);
+                      saveProgress(`${COURSE_TITLE} — Sourates — Jour ${dayView.day} : ${surahNames}`);
                     }
                   }} style={darkBtn(completed[dayView.day] ? TEAL : TEXT2, !!completed[dayView.day])}>
                     {completed[dayView.day] ? <><CheckCircle size={13}/> Terminé</> : <><Square size={13}/> Marquer fait</>}
