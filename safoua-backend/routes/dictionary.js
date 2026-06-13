@@ -4,6 +4,10 @@
  *
  * GET /api/dictionary/translate?word=peace&language=english
  * GET /api/dictionary/translate?word=paix&language=french
+ *
+ * FIX: After Groq returns surah/ayah references, we fetch the REAL verse text
+ * from quranjson (GitHub CDN) and replace whatever Groq hallucinated.
+ * This guarantees the displayed Arabic text always matches the reciter audio.
  */
 
 import express from "express";
@@ -13,7 +17,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 /* ── Cache ────────────────────────────────────────────────────────── */
-const CACHE_VERSION = "v6";
+const CACHE_VERSION = "v7"; // bumped — new verse-verification logic
 const cache         = new Map();
 const CACHE_MAX     = 500;
 
@@ -23,6 +27,43 @@ function cacheKey(word, lang) {
 
 function containsArabic(str) {
   return /[\u0600-\u06FF]/.test(str);
+}
+
+/* ── Quran verse fetcher ──────────────────────────────────────────
+ * Source: raw.githubusercontent.com/semarketir/quranjson
+ * URL pattern: /source/surah/surah_{N}.json
+ * Inside JSON: data.verse["verse_{ayah}"] = Arabic text
+ *
+ * NOTE: All surahs use verse_{ayah} directly (1-indexed).
+ *       Surahs 2–114 also have verse_0 = bismillah (not an ayah).
+ *       Surah 1 starts at verse_1 = bismillah (it IS ayah 1).
+ * ───────────────────────────────────────────────────────────────── */
+const verseCache = new Map(); // surahN → parsed JSON (in-process, resets on restart)
+
+async function fetchVerseText(surah, ayah) {
+  if (!surah || !ayah || surah < 1 || surah > 114 || ayah < 1) return null;
+
+  try {
+    let data = verseCache.get(surah);
+
+    if (!data) {
+      const url = `https://raw.githubusercontent.com/semarketir/quranjson/master/source/surah/surah_${surah}.json`;
+      const response = await axios.get(url, { timeout: 8000 });
+      data = response.data;
+      verseCache.set(surah, data);
+    }
+
+    const verseText = data?.verse?.[`verse_${ayah}`];
+    if (!verseText || !containsArabic(verseText)) {
+      console.warn(`[Dict] verse not found: S${surah}:A${ayah}`);
+      return null;
+    }
+
+    return verseText.trim();
+  } catch (err) {
+    console.warn(`[Dict] fetchVerseText failed for S${surah}:A${ayah}:`, err.message);
+    return null;
+  }
 }
 
 /* ── Route ────────────────────────────────────────────────────────── */
@@ -77,7 +118,9 @@ STRICT RULES:
 
 4. "meaning" = 2-3 sentences in ${defLang} about the meaning and Islamic/Quranic relevance.
 
-5. "examples" = 1-2 real Quranic verses containing the word. You MUST include the real surah number and ayah number.
+5. "examples" = 1-2 real Quranic verses. You MUST provide the CORRECT surah number and ayah number.
+   IMPORTANT: The surah and ayah numbers must be accurate — they will be used to fetch the real audio recitation.
+   Double-check your surah/ayah references before including them.
 
 Return exactly:
 {
@@ -87,7 +130,6 @@ Return exactly:
   "root": "<Arabic script root only, e.g. ح ب ب>",
   "examples": [
     {
-      "arabic": "<full Quranic verse in Arabic with diacritics>",
       "transliteration": "<Latin romanization of the verse>",
       "translation": "<${defLang} translation of the verse>",
       "surah": <integer surah number, e.g. 2>,
@@ -95,6 +137,9 @@ Return exactly:
     }
   ]
 }`;
+
+    // Note: we no longer ask Groq for the Arabic verse text at all —
+    // we fetch it ourselves from a verified source below.
 
     console.log(`[Dict] calling Groq for: "${clean}" (${lang})`);
 
@@ -107,7 +152,7 @@ Return exactly:
         messages: [
           {
             role:    "system",
-            content: "You are an Arabic dictionary API. Always respond with valid JSON only. Never use markdown. Never use Latin letters for the root field — always use Arabic script.",
+            content: "You are an Arabic dictionary API. Always respond with valid JSON only. Never use markdown. Never use Latin letters for the root field — always use Arabic script. Be very precise about surah and ayah numbers.",
           },
           {
             role:    "user",
@@ -147,7 +192,7 @@ Return exactly:
       });
     }
 
-    /* ── Validate ────────────────────────────────────────────────── */
+    /* ── Validate main word ──────────────────────────────────────── */
     const arabic        = (parsed.arabic        || "").trim();
     const pronunciation = (parsed.pronunciation || "").trim();
     const meaning       = (parsed.meaning       || "").trim();
@@ -172,6 +217,54 @@ Return exactly:
     // Root must be Arabic script — if it came back as Latin (e.g. "h-b-b"), discard it
     const root = containsArabic(rawRoot) ? rawRoot : "";
 
+    /* ── Verify & fix Quranic examples ──────────────────────────────
+     *
+     * THE CORE FIX:
+     * Groq often hallucinates verse text — it gives you real-sounding Arabic
+     * but it doesn't match the surah/ayah numbers it provides.
+     * The reciter plays audio for the surah/ayah numbers, so if the text
+     * doesn't match, you hear one verse but see another.
+     *
+     * Solution: ignore Groq's Arabic verse text entirely.
+     * Fetch the REAL text from quranjson using the surah/ayah numbers.
+     * If the fetch fails (bad numbers), drop that example entirely.
+     * ─────────────────────────────────────────────────────────────── */
+    const rawExamples = Array.isArray(parsed.examples) ? parsed.examples : [];
+
+    const verifiedExamples = await Promise.all(
+      rawExamples.map(async (e) => {
+        if (!e) return null;
+
+        const surah = e.surah ? parseInt(e.surah) : null;
+        const ayah  = e.ayah  ? parseInt(e.ayah)  : null;
+
+        if (!surah || !ayah || isNaN(surah) || isNaN(ayah)) {
+          console.warn("[Dict] example missing surah/ayah — dropped");
+          return null;
+        }
+
+        // Fetch the real verse text from quranjson
+        const realArabic = await fetchVerseText(surah, ayah);
+
+        if (!realArabic) {
+          console.warn(`[Dict] could not verify S${surah}:A${ayah} — dropped`);
+          return null;
+        }
+
+        console.log(`[Dict] ✅ verified S${surah}:A${ayah}: ${realArabic.slice(0, 60)}…`);
+
+        return {
+          arabic:          realArabic,           // ← real text, not Groq's guess
+          transliteration: e.transliteration || "",
+          translation:     e.translation     || "",
+          surah,
+          ayah,
+        };
+      })
+    );
+
+    const examples = verifiedExamples.filter(Boolean);
+
     const result = {
       success:       true,
       word:          clean,
@@ -180,21 +273,11 @@ Return exactly:
       pronunciation: badPronunciation ? "" : pronunciation,
       meaning:       meaning || `Traduction de "${clean}" en arabe.`,
       root,
-      examples:      Array.isArray(parsed.examples)
-                       ? parsed.examples
-                           .filter((e) => e && e.arabic && containsArabic(e.arabic))
-                           .map((e) => ({
-                             arabic:         e.arabic,
-                             transliteration:e.transliteration || "",
-                             translation:    e.translation || "",
-                             surah:          e.surah   ? parseInt(e.surah)   : null,
-                             ayah:           e.ayah    ? parseInt(e.ayah)    : null,
-                           }))
-                       : [],
+      examples,
       source: "Groq AI (llama-3.3-70b)",
     };
 
-    console.log(`[Dict] ✅ "${clean}" → arabic="${result.arabic}" pronunciation="${result.pronunciation}" root="${result.root}"`);
+    console.log(`[Dict] ✅ "${clean}" → arabic="${result.arabic}" examples=${examples.length}`);
 
     /* ── Cache ───────────────────────────────────────────────────── */
     if (cache.size >= CACHE_MAX) {
@@ -218,6 +301,7 @@ Return exactly:
 router.get("/flush", authMiddleware, (_req, res) => {
   const size = cache.size;
   cache.clear();
+  verseCache.clear(); // also flush the in-process verse cache
   console.log(`[Dict] cache flushed (${size} entries)`);
   res.json({ success: true, flushed: size });
 });
