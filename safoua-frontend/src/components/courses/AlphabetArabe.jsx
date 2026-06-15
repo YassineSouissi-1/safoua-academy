@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { ArrowLeft, Volume2, Globe, Search, RotateCcw, CheckCircle, Zap, Mic } from "lucide-react";
+import { ArrowLeft, Volume2, RotateCcw, CheckCircle, Zap, Mic, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 // arabicTTS utility used by other components (Dictionary, Grammaire, Tajwid)
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -406,6 +405,79 @@ function MicButton({ targetAr, onResult }) {
   );
 }
 
+// ─── Shape similarity: compare user canvas vs reference letter rendering ─────
+function computeShapeSimilarity(userCanvas, referenceChar, font) {
+  // Build a small offscreen canvas with the reference letter rendered in white on black
+  const W = userCanvas.width;
+  const H = userCanvas.height;
+  const ref = document.createElement("canvas");
+  ref.width = W; ref.height = H;
+  const rctx = ref.getContext("2d");
+  rctx.fillStyle = "black"; rctx.fillRect(0, 0, W, H);
+  const fs = Math.min(W, H) * 0.62;
+  rctx.font = `${fs}px 'Amiri', serif`;
+  rctx.fillStyle = "white";
+  rctx.textAlign = "center"; rctx.textBaseline = "middle";
+  rctx.fillText(referenceChar, W / 2, H / 2);
+
+  const refData = rctx.getImageData(0, 0, W, H).data;
+
+  // Get user drawing pixels (the canvas background is #1e1b4b ≈ rgb(30,27,75))
+  // User strokes are white/purple — look for pixels that differ significantly from bg
+  const userCtx = userCanvas.getContext("2d");
+  const userData = userCtx.getImageData(0, 0, W, H).data;
+
+  // Downsample to 64x64 grid for speed
+  const GRID = 64;
+  const cellW = W / GRID; const cellH = H / GRID;
+  const refMask = new Uint8Array(GRID * GRID);
+  const userMask = new Uint8Array(GRID * GRID);
+
+  for (let gy = 0; gy < GRID; gy++) {
+    for (let gx = 0; gx < GRID; gx++) {
+      // sample center pixel of each cell
+      const px = Math.floor((gx + 0.5) * cellW);
+      const py = Math.floor((gy + 0.5) * cellH);
+      const i = (py * W + px) * 4;
+      // reference: white pixel means letter is there
+      refMask[gy * GRID + gx] = refData[i] > 128 ? 1 : 0;
+      // user: detect stroke — r+g+b significantly above background (30,27,75)
+      const r = userData[i], g = userData[i+1], b = userData[i+2];
+      const brightness = (r + g + b) / 3;
+      userMask[gy * GRID + gx] = brightness > 90 ? 1 : 0;
+    }
+  }
+
+  // Count reference pixels, user pixels, and overlap
+  let refCount = 0, userCount = 0, overlap = 0;
+  for (let k = 0; k < GRID * GRID; k++) {
+    if (refMask[k]) refCount++;
+    if (userMask[k]) userCount++;
+    if (refMask[k] && userMask[k]) overlap++;
+  }
+
+  if (refCount === 0 || userCount === 0) return 0;
+
+  // Dice coefficient: 2*overlap / (ref+user) — penalises both missed areas and extra scribble
+  const dice = (2 * overlap) / (refCount + userCount);
+  // Also compute recall (how much of the letter was covered)
+  const recall = overlap / refCount;
+  // Blend: 60% dice (shape match) + 40% recall (coverage)
+  return Math.min(1, dice * 0.6 + recall * 0.4);
+}
+
+// Scoring thresholds
+const SCORE_EXCELLENT = 0.52;
+const SCORE_GOOD      = 0.36;
+const SCORE_POOR      = 0.18;
+
+function getScoreLabel(score) {
+  if (score >= SCORE_EXCELLENT) return { label: "Excellent! ⭐", color: "#10b981", pass: true,  stars: 3 };
+  if (score >= SCORE_GOOD)      return { label: "Bien! 👍",      color: "#f59e0b", pass: true,  stars: 2 };
+  if (score >= SCORE_POOR)      return { label: "Pas mal, encore un essai", color: "#f97316", pass: false, stars: 1 };
+  return                               { label: "Réessaie — suis le guide", color: "#ef4444", pass: false, stars: 0 };
+}
+
 // ─── DrawingPad ───────────────────────────────────────────────────────────────
 function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
   const canvasRef = useRef(null);
@@ -415,7 +487,8 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
   const [letterForm, setLetterForm] = useState(0);
   const lastPos = useRef(null);
   const [strokeCount, setStrokeCount] = useState(0);
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState(null); // { label, color, pass, score, stars }
+  const [attempts, setAttempts] = useState(0);
 
   const drawGuideLines = useCallback((ctx, w, h) => {
     ctx.strokeStyle = "rgba(139,92,246,0.2)"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
@@ -425,8 +498,9 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
   }, []);
 
   const drawGhostLetter = useCallback((ctx, w, h) => {
-    ctx.font = `${h * 0.6}px 'Amiri', serif`;
-    ctx.fillStyle = "rgba(139,92,246,0.15)";
+    const fs = Math.min(w, h) * 0.62;
+    ctx.font = `${fs}px 'Amiri', serif`;
+    ctx.fillStyle = "rgba(139,92,246,0.22)";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(forms[letterForm], w / 2, h / 2);
   }, [forms, letterForm]);
@@ -447,28 +521,45 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
     return { x: (src.clientX - rect.left) * (canvas.width / rect.width), y: (src.clientY - rect.top) * (canvas.height / rect.height) };
   };
 
-  const startDraw = (e) => { e.preventDefault(); setIsDrawing(true); setHasDrawn(true); lastPos.current = getPos(e, canvasRef.current); };
+  const startDraw = (e) => { e.preventDefault(); setIsDrawing(true); setHasDrawn(true); setFeedback(null); lastPos.current = getPos(e, canvasRef.current); };
   const draw = (e) => {
     e.preventDefault(); if (!isDrawing) return;
     const canvas = canvasRef.current; const ctx = canvas.getContext("2d");
     const pos = getPos(e, canvas);
     ctx.beginPath(); ctx.moveTo(lastPos.current.x, lastPos.current.y); ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = "#e0d4ff"; ctx.lineWidth = compact ? 5 : 6; ctx.lineCap = "round"; ctx.lineJoin = "round";
     ctx.stroke(); lastPos.current = pos;
   };
   const endDraw = () => { if (isDrawing) setStrokeCount(s => s + 1); setIsDrawing(false); lastPos.current = null; };
-  const clearCanvas = () => { redraw(); setHasDrawn(false); setStrokeCount(0); setFeedback(""); };
 
-  const handleSuccess = () => {
-    const names = ["isolée", "initiale", "médiale", "finale"];
-    setFeedback(`✓ Forme ${names[letterForm]} maîtrisée!`);
-    setTimeout(() => {
-      if (letterForm < 3) { setLetterForm(f => f + 1); clearCanvas(); }
-      else onSuccess();
-    }, 1200);
+  const clearCanvas = () => { redraw(); setHasDrawn(false); setStrokeCount(0); setFeedback(null); };
+
+  const handleValidate = () => {
+    const canvas = canvasRef.current; if (!canvas) return;
+    const score = computeShapeSimilarity(canvas, forms[letterForm], null);
+    const result = getScoreLabel(score);
+    setAttempts(a => a + 1);
+    setFeedback({ ...result, score: Math.round(score * 100) });
+
+    if (result.pass) {
+      const names = ["isolée", "initiale", "médiale", "finale"];
+      setTimeout(() => {
+        if (!compact && letterForm < 3) {
+          setLetterForm(f => f + 1);
+          clearCanvas();
+          setAttempts(0);
+        } else {
+          onSuccess(result.stars);
+        }
+      }, 1400);
+    }
   };
 
+  // After 4 failed attempts, allow skip with 0 stars
+  const handleForceNext = () => { onSuccess(0); };
+
   const canvasHeight = compact ? 200 : 300;
+  const formNames = ["Isolée","Initiale","Médiale","Finale"];
 
   return (
     <div style={{ background: "#0f0c29", borderRadius: 20, padding: compact ? "1rem" : "1.5rem", border: "1px solid rgba(139,92,246,0.3)" }}>
@@ -476,12 +567,12 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
         <div>
           <p style={{ color: "#a78bfa", fontSize: 11, fontWeight: 600, margin: 0, letterSpacing: 1, textTransform: "uppercase" }}>Atelier d'écriture</p>
           <p style={{ color: "white", fontSize: compact ? 14 : 16, fontWeight: 700, margin: 0 }}>
-            Trace <span style={{ color: "#a78bfa" }}>{forms[letterForm]}</span> — {targetName} ({["isolée","initiale","médiale","finale"][letterForm]})
+            Trace <span style={{ color: "#a78bfa" }}>{forms[letterForm]}</span> — {targetName} ({formNames[letterForm]})
           </p>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button onClick={() => setShowTarget(s => !s)} style={{ background: showTarget ? "rgba(139,92,246,0.3)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(139,92,246,0.4)", color: "#a78bfa", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 11, fontWeight: 600 }}>
-            {showTarget ? "👻" : "👁 Guide"}
+            {showTarget ? "👻 Cacher" : "👁 Guide"}
           </button>
           <button onClick={clearCanvas} style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 11, fontWeight: 600 }}>
             <RotateCcw size={12} style={{ display: "inline", marginRight: 2 }} />Effacer
@@ -489,7 +580,24 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
         </div>
       </div>
 
-      {feedback && <div style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.4)", borderRadius: 10, padding: "0.5rem", marginBottom: "0.75rem", color: "#10b981", fontWeight: 600, textAlign: "center", fontSize: 13 }}>{feedback}</div>}
+      {/* Feedback bar */}
+      {feedback && (
+        <div style={{ background: feedback.pass ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.1)", border: `1px solid ${feedback.pass ? "rgba(16,185,129,0.4)" : "rgba(239,68,68,0.3)"}`, borderRadius: 10, padding: "0.6rem 1rem", marginBottom: "0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ color: feedback.color, fontWeight: 700, fontSize: 14 }}>{feedback.label}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Similarité: {feedback.score}%</span>
+            <span style={{ fontSize: 16 }}>{[...Array(3)].map((_, i) => i < feedback.stars ? "⭐" : "☆").join("")}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Tip when failing */}
+      {feedback && !feedback.pass && (
+        <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 8, padding: "0.5rem 0.75rem", marginBottom: "0.5rem", fontSize: 12, color: "#fbbf24" }}>
+          💡 Active le <strong>Guide</strong> pour voir la lettre en transparence, puis trace par-dessus.
+          {attempts >= 4 && <span> — Ou clique <strong>Passer</strong> pour continuer.</span>}
+        </div>
+      )}
 
       <canvas ref={canvasRef} width={560} height={canvasHeight}
         onMouseDown={startDraw} onMouseMove={draw} onMouseUp={endDraw} onMouseLeave={endDraw}
@@ -498,8 +606,8 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
 
       {!compact && (
         <div style={{ display: "flex", gap: 6, marginTop: "0.75rem", justifyContent: "center" }}>
-          {["Isolée","Initiale","Médiale","Finale"].map((name, i) => (
-            <button key={i} onClick={() => { setLetterForm(i); clearCanvas(); }}
+          {formNames.map((name, i) => (
+            <button key={i} onClick={() => { setLetterForm(i); clearCanvas(); setAttempts(0); }}
               style={{ padding: "5px 10px", borderRadius: 6, border: `1.5px solid ${letterForm === i ? "#a78bfa" : "rgba(255,255,255,0.1)"}`, background: letterForm === i ? "rgba(167,139,250,0.2)" : "transparent", color: letterForm === i ? "#a78bfa" : "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: 11, fontWeight: 600, transition: "all 0.2s" }}>
               {name}
             </button>
@@ -511,11 +619,18 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, margin: 0 }}>
           {strokeCount > 0 ? `${strokeCount} trait${strokeCount > 1 ? "s" : ""}` : "Dessine avec ta souris ou ton doigt"}
         </p>
-        {hasDrawn && strokeCount >= 1 && (
-          <button onClick={handleSuccess} style={{ background: "linear-gradient(135deg, #10b981, #059669)", border: "none", color: "white", borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>
-            ✓ {compact ? "Valider" : (letterForm === 3 ? "Terminé!" : "Suivant")}
-          </button>
-        )}
+        <div style={{ display: "flex", gap: 8 }}>
+          {attempts >= 4 && feedback && !feedback.pass && (
+            <button onClick={handleForceNext} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)", borderRadius: 10, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+              Passer →
+            </button>
+          )}
+          {hasDrawn && strokeCount >= 1 && !feedback?.pass && (
+            <button onClick={handleValidate} style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)", border: "none", color: "white", borderRadius: 10, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 700, boxShadow: "0 2px 8px rgba(124,58,237,0.4)" }}>
+              ✓ Évaluer
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -579,7 +694,7 @@ function QuizDrawPanel({ quiz, onDone }) {
         <DrawingPad
           targetName={letterData?.fr || quiz.letter}
           forms={letterData?.forms || [quiz.letter, quiz.letter, quiz.letter, quiz.letter]}
-          onSuccess={onDone}
+          onSuccess={(stars) => onDone(stars)}
           compact={true}
         />
         <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "1.25rem", textAlign: "center" }}>
@@ -628,12 +743,7 @@ function AlphabetArabe() {
   // Vocab state
   const [activeVocabCat, setActiveVocabCat] = useState(0);
 
-  // Translator state
-  const [dictSearchTerm, setDictSearchTerm] = useState("");
-  const [dictLanguage, setDictLanguage] = useState("english");
-  const [dictResults, setDictResults] = useState(null);
-  const [dictLoading, setDictLoading] = useState(false);
-  const [dictError, setDictError] = useState("");
+
 
   // Writing workshop state
   const [drawingLetter, setDrawingLetter] = useState(null);
@@ -655,17 +765,7 @@ function AlphabetArabe() {
     setTimeout(() => setMicResult(null), 3500);
   };
 
-  const handleDictSearch = async (e) => {
-    e.preventDefault();
-    if (!dictSearchTerm.trim()) { setDictError("Entrez un mot à chercher"); return; }
-    setDictLoading(true); setDictError(""); setDictResults(null);
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/dictionary/translate`, { params: { word: dictSearchTerm.trim(), language: dictLanguage } });
-      if (response.data.success) { setDictResults(response.data); addXp(5); }
-      else setDictError(response.data.message || "Mot introuvable.");
-    } catch { setDictError("Erreur de connexion au serveur."); }
-    finally { setDictLoading(false); }
-  };
+
 
   // MCQ / listen_mcq answer
   const handleMcqAnswer = (idx) => {
@@ -685,9 +785,13 @@ function AlphabetArabe() {
     setTimeout(() => advanceQuiz(), 1400);
   };
 
-  // Draw quiz done
-  const handleDrawDone = () => {
-    if (!quizDrawDone) { setQuizScore(s => s + 1); addXp(20); setQuizDrawDone(true); }
+  // Draw quiz done — stars: 3=excellent, 2=good, 1/0=failed/skipped
+  const handleDrawDone = (stars = 0) => {
+    if (!quizDrawDone) {
+      setQuizDrawDone(true);
+      if (stars >= 2) { setQuizScore(s => s + 1); addXp(stars === 3 ? 30 : 20); }
+      else if (stars === 1) { addXp(5); } // partial XP for trying
+    }
     setTimeout(() => advanceQuiz(), 400);
   };
 
@@ -721,7 +825,6 @@ function AlphabetArabe() {
     { id: "ecriture", label: "Atelier Écriture", icon: "✏️" },
     { id: "quiz", label: "Quiz", icon: "🎯" },
     { id: "vocabulaire", label: "Vocabulaire", icon: "💬" },
-    { id: "traducteur", label: "Traducteur", icon: "🔤" },
   ];
 
   // Badge for quiz type
@@ -854,10 +957,10 @@ function AlphabetArabe() {
             </div>
             {drawingLetter !== null ? (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
-                <DrawingPad targetName={ARABIC_LETTERS[drawingLetter].fr} forms={ARABIC_LETTERS[drawingLetter].forms} onSuccess={() => {
-                  if (!practicedLetters.has(drawingLetter)) {
+                <DrawingPad targetName={ARABIC_LETTERS[drawingLetter].fr} forms={ARABIC_LETTERS[drawingLetter].forms} onSuccess={(stars) => {
+                  if (!practicedLetters.has(drawingLetter) && stars >= 1) {
                     setPracticedLetters(prev => new Set([...prev, drawingLetter]));
-                    addXp(15);
+                    addXp(stars === 3 ? 20 : stars === 2 ? 15 : 5);
                     const letter = ARABIC_LETTERS[drawingLetter];
                     saveProgress(`${COURSE_TITLE} — Atelier Écriture — Pratique ${letter.name} (${letter.letter})`);
                   }
@@ -1090,49 +1193,7 @@ function AlphabetArabe() {
           </div>
         )}
 
-        {/* ===== TRADUCTEUR ===== */}
-        {activeTab === "traducteur" && (
-          <div style={{ maxWidth: 600, margin: "0 auto" }}>
-            <div style={{ marginBottom: 24, textAlign: "center" }}>
-              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>🔤 Traducteur Arabe</h2>
-              <p style={{ margin: "8px 0 0", color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Traduis un mot en arabe et écoute sa prononciation.</p>
-            </div>
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              {["english","french"].map(lang => (
-                <button key={lang} onClick={() => { setDictLanguage(lang); setDictResults(null); setDictSearchTerm(""); }}
-                  style={{ flex: 1, padding: "10px", border: `1.5px solid ${dictLanguage === lang ? "rgba(139,92,246,0.6)" : "rgba(255,255,255,0.1)"}`, background: dictLanguage === lang ? "rgba(139,92,246,0.15)" : "transparent", color: dictLanguage === lang ? "#a78bfa" : "rgba(255,255,255,0.4)", borderRadius: 12, cursor: "pointer", fontWeight: 700, fontSize: 14 }}>
-                  {lang === "english" ? "🇬🇧 English" : "🇫🇷 Français"}
-                </button>
-              ))}
-            </div>
-            <form onSubmit={handleDictSearch} style={{ marginBottom: 20 }}>
-              <div style={{ position: "relative", marginBottom: 12 }}>
-                <Search size={18} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)" }} />
-                <input type="text" value={dictSearchTerm} onChange={e => setDictSearchTerm(e.target.value)}
-                  placeholder={dictLanguage === "english" ? "Ex: peace, hello, love…" : "Ex: paix, bonjour, amour…"}
-                  style={{ width: "100%", boxSizing: "border-box", paddingLeft: 46, paddingRight: 16, paddingTop: 14, paddingBottom: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, color: "white", fontSize: 15, outline: "none" }} />
-              </div>
-              <button type="submit" disabled={dictLoading} style={{ width: "100%", background: dictLoading ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #7c3aed, #a78bfa)", border: "none", color: "white", borderRadius: 14, padding: "14px", fontSize: 16, fontWeight: 800, cursor: dictLoading ? "not-allowed" : "pointer" }}>
-                {dictLoading ? "Traduction…" : "🔍 Traduire en Arabe"}
-              </button>
-            </form>
-            {dictError && <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 14, padding: "1rem", textAlign: "center", color: "#f87171", fontSize: 14, marginBottom: 16 }}>{dictError}</div>}
-            {dictResults && (
-              <div style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)", borderRadius: 20, padding: "2rem", textAlign: "center" }}>
-                <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 1 }}>Traduction Arabe</p>
-                <div style={{ fontSize: 72, fontFamily: "'Amiri', serif", color: "white", margin: "0.5rem 0", direction: "rtl" }}>{dictResults.arabic}</div>
-                <p style={{ margin: "8px 0 16px", fontSize: 18, color: "#a78bfa", fontWeight: 600, fontStyle: "italic" }}>{dictResults.pronunciation}</p>
-                <AudioButton display={dictResults.arabic} color="#a78bfa" label="🔊 Écouter la prononciation" />
-              </div>
-            )}
-            {!dictResults && !dictLoading && !dictError && (
-              <div style={{ textAlign: "center", padding: "3rem 1rem", color: "rgba(255,255,255,0.2)" }}>
-                <Globe size={48} style={{ marginBottom: 12 }} />
-                <p style={{ fontSize: 16 }}>Entrez un mot pour découvrir son équivalent en arabe ✨</p>
-              </div>
-            )}
-          </div>
-        )}
+
       </div>
 
       <style>{`
