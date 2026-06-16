@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
-/* On réinitialise les styles de base pour éviter le mode sombre forcé */
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #f8fafc; /* Gris très clair */
-  color: #0f172a; /* Bleu très foncé presque noir */
+  /* Dark background consistent with the app theme — prevents white flash on load */
+  background-color: #080b0f;
+  color: #f2ede6;
 }
 
 body {

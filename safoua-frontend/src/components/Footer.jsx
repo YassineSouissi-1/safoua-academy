@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { Github, Twitter, Linkedin } from "lucide-react";
 
-/* ── FONTS ─────────────────────────────────────────────────────── */
-const FONT_LINK = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-`;
+/* ── FONTS (loaded once in index.html) ─────────────────────────── */
+const FONT_LINK = ``;
 
 /* ── PALETTE ────────────────────────────────────────────────────── */
 const C = {

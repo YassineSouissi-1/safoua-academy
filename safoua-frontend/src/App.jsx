@@ -82,9 +82,8 @@ function AppInner() {
             {/* Protected */}
             <Route path="/dashboard"      element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/dictionary"     element={<ProtectedRoute><Dictionary /></ProtectedRoute>} />
-            <Route path="/course-view/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
 
-            {/* Course views */}
+            {/* Course views — specific routes MUST come before the generic :id catch-all */}
             <Route path="/course-view/1" element={<ProtectedRoute><AlphabetArabe /></ProtectedRoute>} />
             <Route path="/course-view/2" element={<ProtectedRoute><Tajwid /></ProtectedRoute>} />
             <Route path="/course-view/3" element={<ProtectedRoute><Memorisation /></ProtectedRoute>} />
@@ -94,6 +93,9 @@ function AppInner() {
             <Route path="/course-view/7" element={<ProtectedRoute><Calligraphy /></ProtectedRoute>} />
             <Route path="/course-view/8" element={<ProtectedRoute><BecomeMuslim /></ProtectedRoute>} />
             <Route path="/course-view/9" element={<ProtectedRoute><ArabeModerneStandard /></ProtectedRoute>} />
+
+            {/* Generic fallback for any other course ID */}
+            <Route path="/course-view/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

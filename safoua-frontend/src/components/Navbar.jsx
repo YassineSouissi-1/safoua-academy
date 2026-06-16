@@ -16,7 +16,8 @@ const C = {
   border: 'rgba(255,255,255,0.07)',
 };
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
+// Fonts are loaded once in index.html — no duplicate import needed here
+const FONTS = ``;
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
