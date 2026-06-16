@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Home, BookOpen } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 export default function NotFound() {
   const numRef = useRef(null);
@@ -28,6 +29,10 @@ export default function NotFound() {
       padding: "100px 24px 40px",
       position: "relative", overflow: "hidden",
     }}>
+      <Helmet>
+        <title>Page introuvable — Safoua Academy</title>
+        <meta name="description" content="La page que vous cherchez n'existe pas ou a été déplacée." />
+      </Helmet>
       {/* Arabic watermark */}
       <div style={{
         position: "absolute", top: "-60px", right: "-60px",

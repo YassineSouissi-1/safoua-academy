@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { Github, Twitter, Linkedin } from "lucide-react";
 
-/* ── FONTS (loaded once in index.html) ─────────────────────────── */
-const FONT_LINK = ``;
+/* ── FONTS ─────────────────────────────────────────────────────── */
+const FONT_LINK = `
+  `;
 
 /* ── PALETTE ────────────────────────────────────────────────────── */
 const C = {
@@ -120,11 +121,11 @@ function Footer() {
           <FadeIn delay={0} style={{ gridColumn: "span 1" }}>
             <Link to="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
               <div style={{
-                width: 44, height: 44, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700, color: C.bg,
-                background: `linear-gradient(135deg, ${C.goldL}, ${C.gold})`,
-                boxShadow: `0 4px 20px ${C.gold}40`,
-              }}>س</div>
+                width: 44, height: 44, borderRadius: 14, overflow: "hidden",
+                boxShadow: `0 4px 20px ${C.gold}40`, flexShrink: 0,
+              }}>
+                <img src="/images/favicon-512.png" alt="Safoua Academy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
               <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 700, color: C.text, letterSpacing: "-0.02em" }}>
                 Safoua Academy
               </span>

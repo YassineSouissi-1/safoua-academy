@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   Search, Volume2, Globe, Sparkles, ArrowRight,
   BookOpen, StopCircle,
@@ -7,7 +8,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { api } from "../utils/auth";
 import { speakArabic, stopArabicAudio, onTTSState, playReciterAyah } from "../utils/arabicTTS";
 
-const FONT_LINK = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
+const FONT_LINK = ``;
 
 const C = {
   bg:     "#080b0f",
@@ -414,6 +415,13 @@ export default function Dictionary() {
 
   return (
     <div style={{ minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans',sans-serif",position:"relative" }}>
+      <Helmet>
+        <title>Dictionnaire Arabe — Safoua Academy</title>
+        <meta name="description" content="Dictionnaire arabe-français interactif avec audio natif. Recherchez, écoutez et apprenez le vocabulaire arabe." />
+        <meta property="og:title" content="Dictionnaire Arabe — Safoua Academy" />
+        <meta property="og:description" content="Dictionnaire arabe-français interactif avec audio natif et exemples." />
+        <meta property="og:image" content="/images/og-cover.png" />
+      </Helmet>
       <style>{FONT_LINK + `
         * { box-sizing:border-box; margin:0; padding:0; }
         ::selection { background:rgba(201,168,76,0.25); color:#f2ede6; }

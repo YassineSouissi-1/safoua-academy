@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { API_BASE } from "../config/api";
@@ -48,6 +49,10 @@ function Login() {
       padding: "100px 24px 40px", fontFamily: "system-ui, sans-serif",
       position: "relative", overflow: "hidden",
     }}>
+      <Helmet>
+        <title>Connexion — Safoua Academy</title>
+        <meta name="description" content="Connectez-vous à votre espace personnel Safoua Academy et reprenez votre apprentissage." />
+      </Helmet>
       <div style={{ position: "absolute", bottom: "-60px", left: "-60px", fontSize: "300px", fontFamily: "serif", lineHeight: 1, color: "rgba(255,255,255,0.025)", pointerEvents: "none", userSelect: "none" }}>الله</div>
 
       <div style={{

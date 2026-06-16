@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import {
   motion, useScroll, useTransform, useSpring,
@@ -8,8 +9,7 @@ import { Star, Users, Clock, ArrowUpRight, Sparkles, ChevronDown } from "lucide-
 
 /* ── FONTS ─────────────────────────────────────────────────────── */
 const FONT_LINK = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-`;
+  `;
 
 /* ── PALETTE ───────────────────────────────────────────────────── */
 const C = {
@@ -535,6 +535,13 @@ function WritingAnimLine({ text, speed, startDelay, trigger, gradient }) {
 export default function Courses() {
   return (
     <div style={{ minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans',sans-serif",position:"relative" }}>
+      <Helmet>
+        <title>Nos Cours — Safoua Academy</title>
+        <meta name="description" content="Découvrez nos 9 cours : Alphabet Arabe, Tajwid, Mémorisation, Grammaire, Fiqh, Sira, Calligraphie et plus." />
+        <meta property="og:title" content="Nos Cours — Safoua Academy" />
+        <meta property="og:description" content="9 cours islamiques structurés, guidés par des experts et enrichis par l'IA." />
+        <meta property="og:image" content="/images/og-cover.png" />
+      </Helmet>
       <style>{FONT_LINK + `
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::selection { background: rgba(201,168,76,0.25); color: #f2ede6; }

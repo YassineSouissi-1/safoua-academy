@@ -16,7 +16,7 @@ const C = {
   border: 'rgba(255,255,255,0.07)',
 };
 
-// Fonts are loaded once in index.html — no duplicate import needed here
+// Fonts loaded once in index.html
 const FONTS = ``;
 
 export default function Navbar() {
@@ -97,8 +97,10 @@ export default function Navbar() {
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
             <motion.div
               whileHover={{ scale: 1.08 }}
-              style={{ width: 38, height: 38, borderRadius: 12, background: `linear-gradient(135deg,${C.gold},${C.teal})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, color: '#080b0f', boxShadow: `0 0 16px ${C.gold}40` }}
-            >س</motion.div>
+              style={{ width: 38, height: 38, borderRadius: 12, overflow: 'hidden', boxShadow: `0 0 16px ${C.gold}40`, flexShrink: 0 }}
+            >
+              <img src="/images/favicon-512.png" alt="Safoua Academy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </motion.div>
             <span style={{ fontSize: 17, fontWeight: 700, color: C.text, fontFamily: "'Cormorant Garamond',serif", letterSpacing: '-0.01em' }}>
               Safoua Academy
             </span>

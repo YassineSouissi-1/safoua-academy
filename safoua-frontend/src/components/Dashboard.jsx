@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import {
   BookOpen, Clock, Award, Star,
   Globe, Zap, ChevronRight, Plus, Users,
@@ -10,7 +11,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { api, getUser, logout } from "../utils/auth";
 
 /* ── FONTS ─────────────────────────────────────────────────────── */
-const FONT_LINK = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');`;
+const FONT_LINK = ``;
 
 /* ── PALETTE ────────────────────────────────────────────────────── */
 const C = {
@@ -1361,6 +1362,10 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'DM Sans', sans-serif", position: "relative", paddingTop: 96, paddingBottom: 80 }}>
+      <Helmet>
+        <title>Mon Espace — Safoua Academy</title>
+        <meta name="description" content="Suivez votre progression, gérez vos sessions et accédez à vos cours sur Safoua Academy." />
+      </Helmet>
       <style>{FONT_LINK + `
         * { box-sizing: border-box; }
         ::selection { background: rgba(201,168,76,0.22); color: #f2ede6; }

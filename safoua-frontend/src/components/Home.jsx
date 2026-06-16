@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link }                        from 'react-router-dom';
+import { Helmet }                      from 'react-helmet-async';
 import {
   motion, useScroll, useTransform,
   useSpring, useInView, easeOut,
@@ -330,6 +331,14 @@ export default function Home() {
 
   return (
     <div style={{ fontFamily: "'DM Sans',sans-serif", position: 'relative', overflowX: 'hidden' }}>
+      <Helmet>
+        <title>Safoua Academy — Apprendre le Coran & l'Arabe en ligne</title>
+        <meta name="description" content="Rejoignez Safoua Academy pour apprendre le Coran, le Tajwid et l'Arabe grâce à l'intelligence artificielle et des experts." />
+        <meta property="og:title" content="Safoua Academy — Accueil" />
+        <meta property="og:description" content="Plateforme islamique d'e-learning : Coran, Arabe, Tajwid, Sciences Islamiques." />
+        <meta property="og:image" content="/images/og-cover.png" />
+        <meta property="og:url" content="https://safouaacademy.netlify.app/" />
+      </Helmet>
       <HomeBg />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}

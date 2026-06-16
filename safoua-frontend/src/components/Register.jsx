@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { GraduationCap, BookOpen, Sparkles, CheckCircle, KeyRound } from "lucide-react";
@@ -69,6 +70,10 @@ function Register() {
       padding: "100px 24px 40px", fontFamily: "system-ui, sans-serif",
       position: "relative", overflow: "hidden",
     }}>
+      <Helmet>
+        <title>Inscription — Safoua Academy</title>
+        <meta name="description" content="Créez votre compte gratuitement et commencez à apprendre le Coran et l'Arabe dès aujourd'hui." />
+      </Helmet>
       {/* Arabic watermark */}
       <div style={{
         position: "absolute", top: "-40px", right: "-60px",
