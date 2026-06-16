@@ -835,7 +835,7 @@ function AlphabetArabe() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#09080f", color: "white", fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#09080f", color: "white", fontFamily: "'Inter', sans-serif", paddingTop: 70 }}>
 
       {/* HEADER */}
       <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #0f0c29 100%)", borderBottom: "1px solid rgba(139,92,246,0.2)", padding: "1rem 1.5rem" }}>

@@ -1517,7 +1517,7 @@ export default function AcademieHifz() {
   ];
 
   return (
-    <div style={{ fontFamily: "Georgia,'Times New Roman',serif", background: D1, minHeight: "100vh", color: TEXT1 }}>
+    <div style={{ fontFamily: "Georgia,'Times New Roman',serif", background: D1, minHeight: "100vh", color: TEXT1, paddingTop: 70 }}>
       <style>{`
         @keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
         @keyframes spin{to{transform:rotate(360deg)}}

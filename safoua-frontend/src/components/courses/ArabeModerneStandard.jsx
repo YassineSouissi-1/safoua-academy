@@ -1102,7 +1102,7 @@ export default function ArabeModerneStandard() {
   ];
 
   return (
-    <div style={{ minHeight:"100vh", background:C.bg, fontFamily:"'DM Sans',sans-serif", color:C.text, position:"relative" }}>
+    <div style={{ minHeight:"100vh", background:C.bg, fontFamily:"'DM Sans',sans-serif", color:C.text, position:"relative", paddingTop:70 }}>
       <style>{FONT_LINK + `
         *{box-sizing:border-box;margin:0;padding:0}
         ::selection{background:rgba(79,173,212,0.25);color:#f2ede6}

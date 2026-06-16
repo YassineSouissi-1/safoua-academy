@@ -342,7 +342,7 @@ export default function Fiqh() {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:C.bg, fontFamily:"'IBM Plex Sans Arabic', system-ui, sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:C.bg, fontFamily:"'IBM Plex Sans Arabic', system-ui, sans-serif", paddingTop:70 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }

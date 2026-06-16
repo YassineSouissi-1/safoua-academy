@@ -345,7 +345,7 @@ export default function Sira() {
   const pct = Math.round((readEvents.size / EVENTS.length) * 100);
 
   return (
-    <div style={{ minHeight:"100vh", background:C.bg, fontFamily:"Georgia, 'IBM Plex Sans Arabic', serif" }}>
+    <div style={{ minHeight:"100vh", background:C.bg, fontFamily:"Georgia, 'IBM Plex Sans Arabic', serif", paddingTop:70 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}

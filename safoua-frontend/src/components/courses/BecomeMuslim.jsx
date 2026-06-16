@@ -1068,7 +1068,7 @@ export default function BecomeMuslim() {
   const progress = Math.round((completed.length / CHAPTERS.length) * 100);
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Segoe UI', system-ui, sans-serif", color: C.text }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Segoe UI', system-ui, sans-serif", color: C.text, paddingTop: 70 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }

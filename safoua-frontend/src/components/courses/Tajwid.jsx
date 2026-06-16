@@ -1283,7 +1283,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Cairo',sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Cairo',sans-serif", paddingTop: 70 }}>
       <style>{GS}</style>
       <div style={{ background: `linear-gradient(180deg, #1d1508 0%, ${C.bg} 100%)`, borderBottom: `1px solid ${C.border}`, padding: "20px 24px 16px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
