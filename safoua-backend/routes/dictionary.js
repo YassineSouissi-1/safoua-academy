@@ -75,7 +75,11 @@ router.get("/translate", async (req, res) => {
       return res.status(400).json({ success: false, message: "Mot requis." });
     }
 
-    const clean = word.trim().slice(0, 100);
+    // Sanitize: strip HTML tags and control characters, limit length
+    const clean = word.trim().replace(/<[^>]*>/g, '').replace(/[^\w\s\u0600-\u06FF'-]/g, '').slice(0, 100);
+    if (!clean) {
+      return res.status(400).json({ success: false, message: "Mot invalide." });
+    }
     const lang  = language === "french" ? "french" : "english";
     const key   = cacheKey(clean, lang);
 
@@ -297,12 +301,17 @@ Return exactly:
   }
 });
 
-/* ── Cache flush (dev: GET /api/dictionary/flush) ─────────────────── */
-router.get("/flush", authMiddleware, (_req, res) => {
+/* ── Cache flush — teacher only: GET /api/dictionary/flush ───────── */
+router.get("/flush", authMiddleware, (req, res) => {
+  // FIX 4: restrict flush to teachers — any logged-in student could
+  // previously call this and wipe the entire cache.
+  if (req.user.role !== "teacher") {
+    return res.status(403).json({ success: false, message: "Accès réservé aux enseignants." });
+  }
   const size = cache.size;
   cache.clear();
-  verseCache.clear(); // also flush the in-process verse cache
-  console.log(`[Dict] cache flushed (${size} entries)`);
+  verseCache.clear();
+  console.log(`[Dict] cache flushed by ${req.user.username} (${size} entries)`);
   res.json({ success: true, flushed: size });
 });
 

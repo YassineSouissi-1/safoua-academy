@@ -227,36 +227,51 @@ const EMPTY_FORM = {
 function pad(n) { return String(n).padStart(2, "0"); }
 function toDateStr(y, m, d) { return `${y}-${pad(m)}-${pad(d)}`; }
 
+// FIX: detect MongoDB ObjectId (24 hex chars) for display in teacher panel
+function isMongoId(s) { return typeof s === "string" && /^[0-9a-f]{24}$/i.test(s); }
+function studentDisplay(s) { return isMongoId(s) ? `Étudiant …${s.slice(-4)}` : s; }
+
 /* ── ISLAMIC EVENTS CACHE ───────────────────────────────────────── */
 const islamicEventsCache = {};
 
+/**
+ * FIX: was making 1 API call PER DAY (up to 31 per month).
+ * Now uses the gToHCalendar endpoint → 1 call per month total.
+ * This eliminates the 429 Too Many Requests and CORS errors.
+ */
 async function fetchIslamicEventsForMonth(gYear, gMonth) {
   const key = `${gYear}-${gMonth}`;
   if (islamicEventsCache[key]) return islamicEventsCache[key];
 
   const events = {};
-  const daysInMonth = new Date(gYear, gMonth, 0).getDate();
 
   try {
-    const promises = [];
-    for (let d = 1; d <= daysInMonth; d++) {
-      promises.push(
-        fetch(`https://api.aladhan.com/v1/gToH/${pad(d)}-${pad(gMonth)}-${gYear}`)
-          .then(r => r.json())
-          .then(data => ({ d, hijri: data.data?.hijri }))
-      );
-    }
-    const results = await Promise.all(promises);
+    const res = await fetch(
+      `https://api.aladhan.com/v1/gToHCalendar/${gYear}/${gMonth}`
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (json.code !== 200 || !Array.isArray(json.data))
+      throw new Error("Réponse API inattendue");
 
-    results.forEach(({ d, hijri }) => {
-      if (!hijri) return;
+    json.data.forEach((item) => {
+      const hijri     = item.hijri;
+      const gregorian = item.gregorian;
+      if (!hijri || !gregorian) return;
+
       const hDay   = parseInt(hijri.day);
       const hMonth = parseInt(hijri.month.number);
-      const dateStr = toDateStr(gYear, gMonth, d);
+
+      // Gregorian date from API is "DD-MM-YYYY"
+      const [gd, gm, gy] = gregorian.date.split("-");
+      const dateStr = `${gy}-${gm}-${gd}`;
 
       const add = (label, type, desc) => {
         if (!events[dateStr]) events[dateStr] = [];
-        events[dateStr].push({ label, type, desc });
+        // Avoid duplicates (some months span two hijri months with same hDay)
+        if (!events[dateStr].some(e => e.label === label)) {
+          events[dateStr].push({ label, type, desc });
+        }
       };
 
       // ── Muharram ────────────────────────────────────────────────
@@ -615,6 +630,7 @@ function MiniCalendar({ sessions, roleColor }) {
   useEffect(() => {
     setLoadingEvents(true);
     setTooltip(null);
+    // FIX: now 1 API call instead of 31
     fetchIslamicEventsForMonth(year, month + 1)
       .then(evts => {
         setIslamicEvents(evts);
@@ -664,7 +680,6 @@ function MiniCalendar({ sessions, roleColor }) {
 
   return (
     <div>
-      {/* Month navigation */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
         <button onClick={prevMonth} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 6px" }}>‹</button>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -680,14 +695,12 @@ function MiniCalendar({ sessions, roleColor }) {
         <button onClick={nextMonth} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "2px 6px" }}>›</button>
       </div>
 
-      {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 4 }}>
         {DAYS.map(d => (
           <div key={d} style={{ textAlign: "center", fontSize: 9, fontWeight: 700, color: C.dim, textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>{d}</div>
         ))}
       </div>
 
-      {/* Day cells */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
         {cells.map((d, i) => {
           if (!d) return <div key={i} />;
@@ -727,7 +740,6 @@ function MiniCalendar({ sessions, roleColor }) {
         })}
       </div>
 
-      {/* Tooltip */}
       <AnimatePresence>
         {tooltip && (
           <motion.div
@@ -762,7 +774,6 @@ function MiniCalendar({ sessions, roleColor }) {
         )}
       </AnimatePresence>
 
-      {/* Legend */}
       <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: "5px 10px" }}>
         {LEGEND.map(({ type, label }) => (
           <div key={type} style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -776,9 +787,11 @@ function MiniCalendar({ sessions, roleColor }) {
 }
 
 /* ── SESSION CARD ───────────────────────────────────────────────── */
-function SessionCard({ session, currentUsername, role, onBook, onCancel, onDelete, onEdit }) {
+// FIX: now accepts currentUserId (MongoDB ID) instead of username string
+function SessionCard({ session, currentUserId, role, onBook, onCancel, onDelete, onEdit }) {
   const [expanded, setExpanded] = useState(false);
-  const isEnrolled = session.enrolledStudents?.includes(currentUsername);
+  // FIX: compare against user ID, not username
+  const isEnrolled = session.enrolledStudents?.includes(currentUserId);
   const isFull     = session.enrolledStudents?.length >= session.maxStudents;
   const spotsLeft  = session.maxStudents - (session.enrolledStudents?.length || 0);
   const isPast     = session.status === "past";
@@ -986,8 +999,11 @@ function TeacherStats({ sessions, username }) {
 }
 
 /* ── STUDENT STATS ──────────────────────────────────────────────── */
-function StudentStats({ sessions, username, completedCount, points }) {
-  const enrolled = sessions.filter(s => s.enrolledStudents?.includes(username) && s.status !== "past").length;
+// FIX: now uses currentUserId (not username) to count enrolled sessions
+function StudentStats({ sessions, currentUserId, completedCount, points }) {
+  const enrolled = sessions.filter(
+    s => s.enrolledStudents?.includes(currentUserId) && s.status !== "past"
+  ).length;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
       {[
@@ -1065,6 +1081,7 @@ function BadgesPanel({ completedCount, completedLessons }) {
     </GlassCard>
   );
 }
+
 /* ── ISLAMIC NOTIFICATIONS BELL ─────────────────────────────────── */
 function IslamicNotificationsBell() {
   const [open, setOpen]       = useState(false);
@@ -1079,14 +1096,17 @@ function IslamicNotificationsBell() {
   }, []);
 
   useEffect(() => {
+    // FIX: now 3 API calls total (1 per month) instead of up to 93
     const load = async () => {
       const now = new Date();
       const months = Array.from({ length: 3 }, (_, i) => {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         return { y: d.getFullYear(), m: d.getMonth() + 1 };
       });
-      const results = await Promise.all(months.map(({ y, m }) => fetchIslamicEventsForMonth(y, m)));
-      const merged  = Object.assign({}, ...results);
+      const results = await Promise.all(
+        months.map(({ y, m }) => fetchIslamicEventsForMonth(y, m))
+      );
+      const merged = Object.assign({}, ...results);
 
       const todayStr  = toDateStr(now.getFullYear(), now.getMonth() + 1, now.getDate());
       const cutoff    = new Date(now); cutoff.setDate(cutoff.getDate() + 90);
@@ -1116,10 +1136,10 @@ function IslamicNotificationsBell() {
 
   const todayCount = events.filter(e => e.diffDays === 0).length;
   const badge      = (d) => {
-    if (d === 0) return { text: "Aujourd'hui", bg: `${C.teal}22`,              color: C.tealL };
-    if (d === 1) return { text: "Demain",      bg: `${C.gold}18`,              color: C.goldL };
-    if (d <= 7)  return { text: `Dans ${d} j`, bg: `${C.gold}14`,              color: C.gold  };
-    return              { text: `Dans ${d} j`, bg: "rgba(255,255,255,0.06)",   color: C.muted };
+    if (d === 0) return { text: "Aujourd'hui", bg: `${C.teal}22`,            color: C.tealL };
+    if (d === 1) return { text: "Demain",      bg: `${C.gold}18`,            color: C.goldL };
+    if (d <= 7)  return { text: `Dans ${d} j`, bg: `${C.gold}14`,            color: C.gold  };
+    return              { text: `Dans ${d} j`, bg: "rgba(255,255,255,0.06)", color: C.muted };
   };
 
   const todayEvts = events.filter(e => e.diffDays === 0);
@@ -1155,7 +1175,6 @@ function IslamicNotificationsBell() {
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      {/* Bell button */}
       <motion.button
         onClick={() => setOpen(p => !p)}
         whileHover={{ scale: 1.06 }}
@@ -1170,7 +1189,6 @@ function IslamicNotificationsBell() {
         }}
       >
         <Globe size={16} />
-        {/* Red dot badge */}
         {!loading && events.length > 0 && (
           <div style={{
             position: "absolute", top: 7, right: 7,
@@ -1181,7 +1199,6 @@ function IslamicNotificationsBell() {
         )}
       </motion.button>
 
-      {/* Dropdown panel */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -1199,7 +1216,6 @@ function IslamicNotificationsBell() {
               overflow: "hidden",
             }}
           >
-            {/* Header */}
             <div style={{ padding: "14px 16px 10px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <Globe size={13} color={C.gold} />
@@ -1211,8 +1227,6 @@ function IslamicNotificationsBell() {
                 {events.length} à venir
               </span>
             </div>
-
-            {/* Body */}
             <div style={{ padding: "4px 16px 14px", maxHeight: 420, overflowY: "auto" }}>
               {loading ? (
                 <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.4, repeat: Infinity }}
@@ -1225,8 +1239,8 @@ function IslamicNotificationsBell() {
                 </div>
               ) : (
                 <>
-                  {todayEvts.length > 0  && <><SectionLabel>Aujourd'hui</SectionLabel>  {todayEvts.map((e,i)  => <NotifRow key={i} evt={e} />)}</>}
-                  {soonEvts.length  > 0  && <><SectionLabel>Cette semaine</SectionLabel> {soonEvts.map((e,i)   => <NotifRow key={i} evt={e} />)}</>}
+                  {todayEvts.length > 0  && <><SectionLabel>Aujourd'hui</SectionLabel>   {todayEvts.map((e,i)  => <NotifRow key={i} evt={e} />)}</>}
+                  {soonEvts.length  > 0  && <><SectionLabel>Cette semaine</SectionLabel>  {soonEvts.map((e,i)   => <NotifRow key={i} evt={e} />)}</>}
                   {laterEvts.length > 0  && <><SectionLabel>Ce mois &amp; suivants</SectionLabel>{laterEvts.map((e,i) => <NotifRow key={i} evt={e} />)}</>}
                 </>
               )}
@@ -1237,6 +1251,7 @@ function IslamicNotificationsBell() {
     </div>
   );
 }
+
 /* ═══════════════════════════════════════════════════════════════════
    MAIN DASHBOARD
 ═══════════════════════════════════════════════════════════════════ */
@@ -1253,7 +1268,9 @@ export default function Dashboard() {
   const tokenUser  = getUser();
   const role       = tokenUser?.role || "student";
   const isTeacher  = role === "teacher";
+  // FIX: keep both the display name and the ID separate
   const username   = userData.username;
+  const currentUserId = tokenUser?.id || "";
   const avatar     = username ? username[0].toUpperCase() : "U";
   const roleColor  = isTeacher ? C.purple : C.teal;
 
@@ -1329,10 +1346,13 @@ export default function Dashboard() {
     } catch (err) { alert(err.response?.data?.error || "Erreur lors de l'annulation."); }
   };
 
+  // FIX: filter "mine" uses currentUserId for students, username for teachers
   const filteredSessions = sessions.filter(s => {
     if (filter === "upcoming") return s.status !== "past";
     if (filter === "past")     return s.status === "past";
-    if (filter === "mine")     return isTeacher ? s.teacher === username : s.enrolledStudents?.includes(username);
+    if (filter === "mine")     return isTeacher
+      ? s.teacher === username
+      : s.enrolledStudents?.includes(currentUserId);
     return true;
   });
 
@@ -1374,22 +1394,26 @@ export default function Dashboard() {
               </p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-    <IslamicNotificationsBell />   {/* ← ADD THIS */}
-
-            {isTeacher && (
-              <motion.button onClick={() => { setEditTarget(null); setShowModal(true); }}
-                whileHover={{ scale: 1.03, boxShadow: `0 0 28px ${C.purple}40` }}
-                whileTap={{ scale: 0.97 }}
-                style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", borderRadius: 14, background: `linear-gradient(135deg, ${C.purple}, ${C.teal})`, color: "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
-                <Plus size={15} /> Créer une session
-              </motion.button>
-            )}
+              <IslamicNotificationsBell />
+              {isTeacher && (
+                <motion.button onClick={() => { setEditTarget(null); setShowModal(true); }}
+                  whileHover={{ scale: 1.03, boxShadow: `0 0 28px ${C.purple}40` }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 22px", borderRadius: 14, background: `linear-gradient(135deg, ${C.purple}, ${C.teal})`, color: "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
+                  <Plus size={15} /> Créer une session
+                </motion.button>
+              )}
+            </div>
           </div>
-        </div>
 
           {isTeacher
             ? <TeacherStats sessions={sessions} username={username} />
-            : <StudentStats sessions={sessions} username={username} completedCount={completedCount} points={points} />
+            : <StudentStats
+                sessions={sessions}
+                currentUserId={currentUserId}
+                completedCount={completedCount}
+                points={points}
+              />
           }
         </motion.header>
 
@@ -1461,9 +1485,16 @@ export default function Dashboard() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <AnimatePresence>
                     {filteredSessions.map(session => (
-                      <SessionCard key={session._id} session={session} currentUsername={username}
-                        role={role} onBook={handleBook} onCancel={handleCancel}
-                        onDelete={handleDeleteSession} onEdit={s => { setEditTarget(s); setShowModal(true); }} />
+                      <SessionCard
+                        key={session._id}
+                        session={session}
+                        currentUserId={currentUserId}   // FIX: pass ID not username
+                        role={role}
+                        onBook={handleBook}
+                        onCancel={handleCancel}
+                        onDelete={handleDeleteSession}
+                        onEdit={s => { setEditTarget(s); setShowModal(true); }}
+                      />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -1476,19 +1507,27 @@ export default function Dashboard() {
                 {sessions.filter(s => s.teacher === username && s.status !== "past" && s.enrolledStudents?.length > 0).length === 0 ? (
                   <p style={{ fontSize: 13, color: C.muted, textAlign: "center", padding: "12px 0", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>Aucun étudiant inscrit pour l'instant.</p>
                 ) : (
-                  sessions.filter(s => s.teacher === username && s.status !== "past" && s.enrolledStudents?.length > 0).map(s => (
-                    <div key={s._id} style={{ marginBottom: 16 }}>
-                      <p style={{ fontSize: 12, fontWeight: 700, color: s.accent, marginBottom: 8, fontFamily: "'Cormorant Garamond', serif" }}>{s.title}</p>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {s.enrolledStudents.map(st => (
-                          <div key={st} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 99, background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}` }}>
-                            <div style={{ width: 20, height: 20, borderRadius: "50%", background: s.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 900, color: "#fff", fontFamily: "'Cormorant Garamond', serif" }}>{st[0]?.toUpperCase()}</div>
-                            <span style={{ fontSize: 11, fontWeight: 600, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>{st}</span>
-                          </div>
-                        ))}
+                  sessions
+                    .filter(s => s.teacher === username && s.status !== "past" && s.enrolledStudents?.length > 0)
+                    .map(s => (
+                      <div key={s._id} style={{ marginBottom: 16 }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, color: s.accent, marginBottom: 8, fontFamily: "'Cormorant Garamond', serif" }}>{s.title}</p>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                          {s.enrolledStudents.map(st => {
+                            // FIX: studentDisplay handles both MongoDB IDs and legacy usernames
+                            const name = studentDisplay(st);
+                            return (
+                              <div key={st} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 99, background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}` }}>
+                                <div style={{ width: 20, height: 20, borderRadius: "50%", background: s.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 900, color: "#fff", fontFamily: "'Cormorant Garamond', serif" }}>
+                                  {name[0]?.toUpperCase()}
+                                </div>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>{name}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))
                 )}
               </GlassCard>
             )}
