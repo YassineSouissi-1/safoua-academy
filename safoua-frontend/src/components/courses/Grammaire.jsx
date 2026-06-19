@@ -1,64 +1,103 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { speakArabic } from "../../utils/arabicTTS";
+
+// ════════════════════════════════════════════════════════════════════════════
+// Stand-in TTS — replace this block with:  import { speakArabic } from "../../utils/arabicTTS";
+// ════════════════════════════════════════════════════════════════════════════
+function speakArabic(text) {
+  try {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ar-SA";
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* no-op */ }
+}
 
 // ─── Global Styles ────────────────────────────────────────────────────────────
 const GS = `
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0c0e14;
-  --bg2:#111318;
-  --bg3:#161920;
-  --surface:#1a1d26;
-  --surface2:#1f2230;
-  --border:rgba(255,255,255,.07);
-  --border2:rgba(255,255,255,.13);
-  --text:#e8eaf0;
-  --text2:#9499b0;
-  --text3:#5c6080;
-  --gold:#e2b96a;
-  --gold2:#f5d48a;
-  --gold-dim:rgba(226,185,106,.12);
-  --teal:#3ecfbf;
-  --teal2:#5ee8d8;
-  --teal-dim:rgba(62,207,191,.1);
-  --violet:#9b7ff4;
-  --violet-dim:rgba(155,127,244,.1);
-  --rose:#f07070;
-  --rose-dim:rgba(240,112,112,.1);
-  --green:#5dd68c;
-  --green-dim:rgba(93,214,140,.1);
-  --r:10px;--r2:16px;--r3:22px;
+  --paper:#f6efe0;
+  --paper2:#eee3c9;
+  --paper3:#e8dab8;
+  --panel:#fbf6ea;
+  --ink:#2c2417;
+  --ink-soft:#6e5f47;
+  --ink-faint:#a4926e;
+  --line:rgba(44,36,23,.12);
+  --line2:rgba(44,36,23,.2);
+  --zellige:#1f6f63;
+  --zellige2:#2f8c7d;
+  --zellige-dim:rgba(31,111,99,.1);
+  --terracotta:#c1622d;
+  --terracotta-dim:rgba(193,98,45,.1);
+  --gold:#a8782e;
+  --gold2:#c99a3f;
+  --gold-dim:rgba(168,120,46,.12);
+  --rose:#a8493f;
+  --rose-dim:rgba(168,73,63,.1);
+  --green:#3f7d4a;
+  --green-dim:rgba(63,125,74,.1);
+  --r:9px;--r2:15px;--r3:20px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:4px}
-.arabic{font-family:'Noto Naskh Arabic',serif;direction:rtl;line-height:2}
-.mono{font-family:'JetBrains Mono',monospace}
-.serif{font-family:'Crimson Pro',Georgia,serif}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--ink-faint);border-radius:4px}
+.arabic{font-family:'Amiri',serif;direction:rtl;line-height:2}
+.display{font-family:'Fraunces',Georgia,serif}
+.mono{font-family:'Inter',sans-serif;letter-spacing:.02em}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes glow{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 20px 4px rgba(62,207,191,.25)}}
-@keyframes recordPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.7}}
-@keyframes waveBar{0%,100%{height:4px}50%{height:18px}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes scoreIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes drawLine{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
-@keyframes correctBounce{0%{transform:scale(1)}30%{transform:scale(1.08)}60%{transform:scale(.96)}100%{transform:scale(1)}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-@keyframes particleFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-60px) scale(0);opacity:0}}
-.fade-up{animation:fadeUp .3s ease both}
-.fade-in{animation:fadeIn .2s ease both}
+@keyframes recordPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.75}}
+@keyframes waveBar{0%,100%{height:4px}50%{height:16px}}
+@keyframes scoreIn{from{transform:scale(.7) rotate(-6deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+@keyframes correctBounce{0%{transform:scale(1)}30%{transform:scale(1.06)}60%{transform:scale(.97)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes starSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes starTwinkle{0%,100%{opacity:.5;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes inkReveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.fade-up{animation:fadeUp .35s ease both}
+.fade-in{animation:fadeIn .25s ease both}
 `;
+
+// ─── 8-point star SVG (signature motif) ───────────────────────────────────────
+function Khatim({ size = 20, color = "var(--gold)", fill = "none", spin = false, style = {} }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0, animation: spin ? "starSpin 16s linear infinite" : "none", ...style }}>
+      <g transform="translate(20,20)">
+        {[0, 45].map((rot, gi) => (
+          <polygon key={gi}
+            points="0,-17 4,-4 17,0 4,4 0,17 -4,4 -17,0 -4,-4"
+            transform={`rotate(${rot})`}
+            fill={gi === 0 ? (fill === "none" ? "none" : fill) : "none"}
+            stroke={color} strokeWidth="1.3" strokeLinejoin="round"
+            opacity={gi === 0 ? 1 : 0.55}
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+function StarDivider({ color = "var(--gold)" }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "26px 0" }}>
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${color}50)` }} />
+      <Khatim size={16} color={color} />
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${color}50, transparent)` }} />
+    </div>
+  );
+}
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const MODULES = [
   {
     id:0, num:"١", title:"الاسم والفعل", subtitle:"Nom & Verbe",
-    color:"#3ecfbf", colorDim:"rgba(62,207,191,.1)", emoji:"📖",
+    color:"#1f6f63", colorDim:"rgba(31,111,99,.1)", emoji:"📖",
     description:"Les deux piliers de l'arabe : le nom اسم et le verbe فعل.",
     lessons:[
       {
@@ -127,7 +166,7 @@ const MODULES = [
   },
   {
     id:1, num:"٢", title:"المبتدأ والخبر", subtitle:"Sujet & Prédicat",
-    color:"#9b7ff4", colorDim:"rgba(155,127,244,.1)", emoji:"⚖️",
+    color:"#a8782e", colorDim:"rgba(168,120,46,.1)", emoji:"⚖️",
     description:"La phrase nominale sans verbe 'être' et le système de cas (الإعراب).",
     lessons:[
       {
@@ -192,7 +231,7 @@ const MODULES = [
   },
   {
     id:2, num:"٣", title:"التذكير والتأنيث", subtitle:"Masculin & Féminin",
-    color:"#f07070", colorDim:"rgba(240,112,112,.1)", emoji:"🔤",
+    color:"#a8493f", colorDim:"rgba(168,73,63,.1)", emoji:"🔤",
     description:"Les genres en arabe et le nombre dual (مثنى) pour parler de deux entités.",
     lessons:[
       {
@@ -258,7 +297,7 @@ const MODULES = [
   },
   {
     id:3, num:"٤", title:"الجمع", subtitle:"Le Pluriel",
-    color:"#e2b96a", colorDim:"rgba(226,185,106,.1)", emoji:"🔢",
+    color:"#c1622d", colorDim:"rgba(193,98,45,.1)", emoji:"🔢",
     description:"Le pluriel sain (جمع سالم) et le pluriel brisé (جمع تكسير) qui restructure le mot.",
     lessons:[
       {
@@ -337,17 +376,14 @@ function scoreMatch(target, spoken) {
   let common = 0;
   set1.forEach(c => { if(set2.has(c)) common++; });
   const jaccard = common / (set1.size + set2.size - common);
-  // also check substring
   const subScore = (t.includes(s) || s.includes(t)) ? 40 : 0;
   return Math.min(100, Math.round(jaccard * 100 + subScore));
 }
-function speak(text) {
-  speakArabic(text);
-}
+function speak(text) { speakArabic(text); }
 
 // ─── Hook: Speech Recognition ────────────────────────────────────────────────
 function useSpeech() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
   const supported = !!SR;
   const recRef = useRef(null);
   const [listening, setListening] = useState(false);
@@ -379,7 +415,7 @@ function useSpeech() {
 // ─── PronunciationLab ─────────────────────────────────────────────────────────
 function PronunciationLab({ items, color }) {
   const [current, setCurrent] = useState(0);
-  const [phase, setPhase] = useState("listen"); // listen | record | result
+  const [phase, setPhase] = useState("listen");
   const [score, setScore] = useState(null);
   const speech = useSpeech();
   const item = items[current];
@@ -403,80 +439,90 @@ function PronunciationLab({ items, color }) {
   const handleRetry = () => { setPhase("record"); setScore(null); speech.reset(); };
 
   const getScoreData = (s) => {
-    if (s >= 80) return { label: "Excellent !", emoji: "🏆", color: "#5dd68c" };
-    if (s >= 55) return { label: "Bien !", emoji: "⭐", color: "#e2b96a" };
-    if (s >= 30) return { label: "Continuez", emoji: "💪", color: "#9b7ff4" };
-    return { label: "Réessayez", emoji: "🔄", color: "#f07070" };
+    if (s >= 80) return { label: "Excellent !", emoji: "🏆", color: "#3f7d4a" };
+    if (s >= 55) return { label: "Bien !", emoji: "⭐", color: "#a8782e" };
+    if (s >= 30) return { label: "Continuez", emoji: "💪", color: color };
+    return { label: "Réessayez", emoji: "🔄", color: "#a8493f" };
   };
 
   return (
-    <div style={{ padding: "28px 24px" }}>
-      {/* Progress dots */}
-      <div style={{ display:"flex", gap:6, justifyContent:"center", marginBottom:28 }}>
+    <div style={{ padding: "30px 26px" }}>
+      <div style={{ display:"flex", gap:8, justifyContent:"center", marginBottom:30 }}>
         {items.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)} style={{
-            width: i===current ? 20 : 8, height:8, borderRadius:4,
-            background: i===current ? color : i<current ? color+"60" : "var(--surface2)",
+          <button key={i} onClick={() => setCurrent(i)} aria-label={`Mot ${i+1}`} style={{
+            width: i===current ? 22 : 9, height:9, borderRadius:5,
+            background: i===current ? color : i<current ? color+"70" : "var(--paper3)",
             border:"none", cursor:"pointer", transition:"all .3s"
           }} />
         ))}
       </div>
 
-      {/* Card */}
       <div style={{
-        background:"var(--surface)", borderRadius:"var(--r3)", padding:"32px",
-        border:`1px solid ${color}30`, textAlign:"center",
-        boxShadow:`0 0 40px ${color}10`
+        background:"var(--panel)", borderRadius:"var(--r3)", padding:"36px 28px",
+        border:`1.5px solid ${color}35`, textAlign:"center", position:"relative",
+        boxShadow:`0 14px 36px -18px ${color}50, 0 1px 0 var(--line) inset`
       }}>
-        {/* Arabic word — huge */}
-        <div className="arabic" style={{ fontSize:52, fontWeight:700, color:"var(--text)", letterSpacing:4, marginBottom:8 }}>
+        <Khatim size={18} color={color} style={{ position:"absolute", top:18, left:18 }} />
+        <Khatim size={18} color={color} style={{ position:"absolute", top:18, right:18 }} />
+
+        <div className="arabic" style={{ fontSize:54, fontWeight:700, color:"var(--ink)", letterSpacing:2, marginBottom:10 }}>
           {item.ar}
         </div>
-        <div className="mono" style={{ fontSize:13, color: color, marginBottom:4 }}>{item.tr}</div>
-        <div style={{ fontSize:12, color:"var(--text3)", marginBottom:28 }}>
-          Syllabes : <span style={{ color:"var(--text2)", letterSpacing:2 }}>{item.hint}</span>
+        <div className="display" style={{ fontSize:14, fontStyle:"italic", color: color, marginBottom:6 }}>{item.tr}</div>
+        <div style={{ fontSize:12, color:"var(--ink-faint)", marginBottom:30 }}>
+          Syllabes : <span style={{ color:"var(--ink-soft)", letterSpacing:2 }}>{item.hint}</span>
         </div>
 
-        {/* Phase: listen */}
         {phase === "listen" && (
           <div className="fade-in">
-            <p style={{ fontSize:13, color:"var(--text2)", marginBottom:20 }}>
-              Étape 1 — Écoutez la prononciation native, puis répétez
+            <p style={{ fontSize:13, color:"var(--ink-soft)", marginBottom:22 }}>
+              Étape 1 — Écoutez la prononciation, puis répétez
             </p>
-            <button onClick={handleListen} style={{
-              width:80, height:80, borderRadius:"50%", border:`2px solid ${color}`,
-              background:`${color}15`, color:color, fontSize:32, cursor:"pointer",
+            <button onClick={handleListen} aria-label="Écouter" style={{
+              width:84, height:84, borderRadius:"50%", border:`2px solid ${color}`,
+              background:`${color}14`, color:color, fontSize:30, cursor:"pointer",
               display:"inline-flex", alignItems:"center", justifyContent:"center",
-              transition:"all .2s", boxShadow:`0 0 0 0 ${color}40`
+              transition:"all .2s"
             }}
-            onMouseEnter={e => e.target.style.boxShadow=`0 0 20px 6px ${color}30`}
-            onMouseLeave={e => e.target.style.boxShadow="none"}
+            onMouseEnter={e => e.currentTarget.style.boxShadow=`0 0 0 8px ${color}18`}
+            onMouseLeave={e => e.currentTarget.style.boxShadow="none"}
             >🔊</button>
           </div>
         )}
 
-        {/* Phase: record */}
         {phase === "record" && (
           <div className="fade-in">
-            <p style={{ fontSize:13, color:"var(--text2)", marginBottom:20 }}>
+            <p style={{ fontSize:13, color:"var(--ink-soft)", marginBottom:22 }}>
               Étape 2 — Prononcez le mot à haute voix
             </p>
             {speech.error && (
-              <div style={{ fontSize:12, color:"var(--rose)", marginBottom:12, padding:"8px 14px", background:"var(--rose-dim)", borderRadius:"var(--r)" }}>
+              <div style={{ fontSize:12, color:"var(--rose)", marginBottom:14, padding:"9px 14px", background:"var(--rose-dim)", borderRadius:"var(--r)" }}>
                 {speech.error}
               </div>
             )}
-            <button onClick={handleRecord} style={{
-              width:80, height:80, borderRadius:"50%", border:`2px solid ${speech.listening ? "var(--rose)" : color}`,
-              background: speech.listening ? "var(--rose-dim)" : `${color}15`,
-              color: speech.listening ? "var(--rose)" : color,
-              fontSize:32, cursor:"pointer",
-              display:"inline-flex", alignItems:"center", justifyContent:"center",
-              animation: speech.listening ? "recordPulse 1s infinite" : "none",
-              transition:"all .2s"
-            }}>🎤</button>
+            <div style={{ position:"relative", width:84, height:84, margin:"0 auto" }}>
+              <svg width="84" height="84" viewBox="0 0 84 84" style={{ position:"absolute", top:0, left:0 }}>
+                <g transform="translate(42,42)">
+                  {[0, 45].map((rot, gi) => (
+                    <polygon key={gi}
+                      points="0,-37 9,-9 37,0 9,9 0,37 -9,9 -37,0 -9,-9"
+                      transform={`rotate(${rot})`}
+                      fill={speech.listening ? "var(--rose-dim)" : `${color}14`}
+                      stroke={speech.listening ? "var(--rose)" : color} strokeWidth="2"
+                      opacity={gi === 0 ? 1 : .5}
+                    />
+                  ))}
+                </g>
+              </svg>
+              <button onClick={handleRecord} aria-label="Enregistrer" style={{
+                position:"absolute", inset:0, borderRadius:"50%", border:"none", background:"transparent",
+                color: speech.listening ? "var(--rose)" : color, fontSize:28, cursor:"pointer",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                animation: speech.listening ? "recordPulse 1s infinite" : "none",
+              }}>🎤</button>
+            </div>
             {speech.listening && (
-              <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:16, alignItems:"flex-end", height:24 }}>
+              <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:18, alignItems:"flex-end", height:20 }}>
                 {[0,1,2,3,4,5].map(i => (
                   <div key={i} style={{
                     width:4, borderRadius:2, background:color,
@@ -486,38 +532,37 @@ function PronunciationLab({ items, color }) {
                 ))}
               </div>
             )}
-            <p style={{ fontSize:11, color:"var(--text3)", marginTop:12 }}>
-              {speech.listening ? "Parlez maintenant... (cliquez pour arrêter)" : "Cliquez pour parler"}
+            <p style={{ fontSize:11, color:"var(--ink-faint)", marginTop:14 }}>
+              {speech.listening ? "Parlez maintenant… (cliquez pour arrêter)" : "Cliquez pour parler"}
             </p>
             {!speech.supported && (
-              <p style={{ fontSize:11, color:"var(--text3)", marginTop:8 }}>⚠️ Ouvrez dans Chrome pour activer le micro</p>
+              <p style={{ fontSize:11, color:"var(--ink-faint)", marginTop:8 }}>⚠️ Ouvrez dans Chrome pour activer le micro</p>
             )}
           </div>
         )}
 
-        {/* Phase: result */}
         {phase === "result" && score !== null && (
-          <div className="fade-in" style={{ animation:"scoreIn .4s cubic-bezier(.34,1.56,.64,1) both" }}>
+          <div className="fade-in" style={{ animation:"scoreIn .45s cubic-bezier(.34,1.56,.64,1) both" }}>
             {(() => {
               const sd = getScoreData(score);
               return (
                 <>
-                  <div style={{ fontSize:56, marginBottom:8 }}>{sd.emoji}</div>
-                  <div style={{ fontSize:48, fontWeight:700, color:sd.color, marginBottom:4, fontFamily:"'Space Grotesk',sans-serif" }}>{score}%</div>
-                  <div style={{ fontSize:16, fontWeight:600, color:sd.color, marginBottom:12 }}>{sd.label}</div>
+                  <div style={{ fontSize:54, marginBottom:8 }}>{sd.emoji}</div>
+                  <div className="display" style={{ fontSize:46, fontWeight:600, color:sd.color, marginBottom:4 }}>{score}%</div>
+                  <div style={{ fontSize:16, fontWeight:600, color:sd.color, marginBottom:14 }}>{sd.label}</div>
                   {speech.transcript && (
-                    <div style={{ fontSize:13, color:"var(--text3)", marginBottom:20 }}>
-                      Vous avez dit : <span className="arabic" style={{ fontSize:18, color:"var(--text2)" }}>«{speech.transcript}»</span>
+                    <div style={{ fontSize:13, color:"var(--ink-faint)", marginBottom:22 }}>
+                      Vous avez dit : <span className="arabic" style={{ fontSize:18, color:"var(--ink-soft)" }}>«{speech.transcript}»</span>
                     </div>
                   )}
                   <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
                     <button onClick={handleRetry} style={{
-                      padding:"10px 20px", borderRadius:"var(--r)", border:`1.5px solid ${color}40`,
+                      padding:"11px 20px", borderRadius:"var(--r)", border:`1.5px solid ${color}45`,
                       background:"transparent", color:color, cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:500
                     }}>↺ Réessayer</button>
                     <button onClick={handleNext} style={{
-                      padding:"10px 22px", borderRadius:"var(--r)", border:"none",
-                      background:color, color:"#0c0e14", cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:600
+                      padding:"11px 24px", borderRadius:"var(--r)", border:"none",
+                      background:color, color:"var(--panel)", cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:600
                     }}>{current < items.length-1 ? "Suivant →" : "Recommencer ↺"}</button>
                   </div>
                 </>
@@ -530,36 +575,35 @@ function PronunciationLab({ items, color }) {
   );
 }
 
-// ─── TraceLab (Canvas Drawing) ────────────────────────────────────────────────
+// ─── TraceLab ─────────────────────────────────────────────────────────────────
 function TraceLab({ words, color }) {
   const [idx, setIdx] = useState(0);
   const [drawing, setDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [cleared, setCleared] = useState(false);
   const [rating, setRating] = useState(null);
   const canvasRef = useRef(null);
   const lastPos = useRef(null);
   const word = words[idx];
 
-  // Canvas setup
+  const paintBase = (ctx, canvas) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "rgba(44,36,23,.07)";
+    for (let x = 22; x < canvas.width; x += 28) {
+      for (let y = 22; y < canvas.height; y += 28) {
+        ctx.beginPath(); ctx.arc(x, y, 1.3, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    const cy = canvas.height * 0.58;
+    ctx.strokeStyle = `${color}35`;
+    ctx.lineWidth = 1; ctx.setLineDash([5,7]);
+    ctx.beginPath(); ctx.moveTo(20, cy); ctx.lineTo(canvas.width-20, cy); ctx.stroke();
+    ctx.setLineDash([]);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Grid dots
-    ctx.fillStyle = "rgba(255,255,255,.06)";
-    for (let x = 20; x < canvas.width; x += 30) {
-      for (let y = 20; y < canvas.height; y += 30) {
-        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI*2); ctx.fill();
-      }
-    }
-    // Baseline
-    const cy = canvas.height * 0.58;
-    ctx.strokeStyle = `${color}30`;
-    ctx.lineWidth = 1; ctx.setLineDash([6,6]);
-    ctx.beginPath(); ctx.moveTo(20, cy); ctx.lineTo(canvas.width-20, cy); ctx.stroke();
-    ctx.setLineDash([]);
+    paintBase(canvas.getContext("2d"), canvas);
     setHasDrawn(false); setRating(null);
   }, [idx]);
 
@@ -575,7 +619,6 @@ function TraceLab({ words, color }) {
     lastPos.current = getPos(e, canvas);
     setDrawing(true); setHasDrawn(true); setRating(null);
   };
-
   const draw = (e) => {
     e.preventDefault();
     if (!drawing) return;
@@ -591,29 +634,15 @@ function TraceLab({ words, color }) {
     ctx.stroke();
     lastPos.current = pos;
   };
-
   const endDraw = () => setDrawing(false);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // redraw dots + baseline
-    ctx.fillStyle = "rgba(255,255,255,.06)";
-    for (let x = 20; x < canvas.width; x += 30) {
-      for (let y = 20; y < canvas.height; y += 30) {
-        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI*2); ctx.fill();
-      }
-    }
-    const cy = canvas.height * 0.58;
-    ctx.strokeStyle = `${color}30`; ctx.lineWidth = 1; ctx.setLineDash([6,6]);
-    ctx.beginPath(); ctx.moveTo(20, cy); ctx.lineTo(canvas.width-20, cy); ctx.stroke();
-    ctx.setLineDash([]);
+    paintBase(canvas.getContext("2d"), canvas);
     setHasDrawn(false); setRating(null);
   };
 
   const submitTrace = () => {
-    // Simulate scoring based on coverage (pixels drawn)
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -627,38 +656,35 @@ function TraceLab({ words, color }) {
   };
 
   const ratings = {
-    great: { label:"Belle calligraphie ! 🎨", color:"#5dd68c", tip:"Continuez ainsi, votre tracé est bien couvert." },
-    good:  { label:"Bon tracé !", color:"#e2b96a", tip:"Essayez de soigner les connexions entre les lettres." },
-    light: { label:"Tracé léger", color:"#9b7ff4", tip:"Appuyez un peu plus et couvrez tout le mot." },
-    empty: { label:"Dessin trop court", color:"var(--rose)", tip:"Tracez le mot complet avant de valider." },
+    great: { label:"Belle calligraphie ! 🎨", color:"#3f7d4a", tip:"Continuez ainsi, votre tracé est bien couvert." },
+    good:  { label:"Bon tracé !", color:"#a8782e", tip:"Essayez de soigner les connexions entre les lettres." },
+    light: { label:"Tracé léger", color:"#8a6fae", tip:"Appuyez un peu plus et couvrez tout le mot." },
+    empty: { label:"Dessin trop court", color:"#a8493f", tip:"Tracez le mot complet avant de valider." },
   };
 
   return (
-    <div style={{ padding:"24px" }}>
-      {/* Word selector */}
-      <div style={{ display:"flex", gap:8, justifyContent:"center", marginBottom:24 }}>
+    <div style={{ padding:"26px" }}>
+      <div style={{ display:"flex", gap:8, justifyContent:"center", marginBottom:24, flexWrap:"wrap" }}>
         {words.map((w,i) => (
           <button key={i} onClick={() => { setIdx(i); setRating(null); setHasDrawn(false); }} style={{
-            padding:"8px 16px", borderRadius:"var(--r)", border:`1.5px solid ${i===idx ? color : "var(--border2)"}`,
-            background: i===idx ? `${color}18` : "transparent",
-            color: i===idx ? color : "var(--text2)",
+            padding:"9px 16px", borderRadius:"var(--r)", border:`1.5px solid ${i===idx ? color : "var(--line2)"}`,
+            background: i===idx ? `${color}14` : "var(--panel)",
+            color: i===idx ? color : "var(--ink-soft)",
             cursor:"pointer", fontFamily:"inherit", fontSize:12, fontWeight:500, transition:"all .2s"
           }}>
             <span className="arabic" style={{ fontSize:16 }}>{w.ar}</span>
-            <span style={{ display:"block", fontSize:10, color:"var(--text3)", marginTop:2 }}>{w.meaning}</span>
+            <span style={{ display:"block", fontSize:10, color:"var(--ink-faint)", marginTop:3 }}>{w.meaning}</span>
           </button>
         ))}
       </div>
 
-      {/* Reference */}
-      <div style={{ textAlign:"center", marginBottom:16 }}>
-        <p style={{ fontSize:11, color:"var(--text3)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Modèle à reproduire</p>
-        <div className="arabic" style={{ fontSize:56, fontWeight:700, color:`${color}70`, letterSpacing:6, userSelect:"none" }}>{word.ar}</div>
-        <p style={{ fontSize:11, color:"var(--text3)", marginTop:4 }}>Tracez ce mot ci-dessous</p>
+      <div style={{ textAlign:"center", marginBottom:18 }}>
+        <p style={{ fontSize:11, color:"var(--ink-faint)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:8 }}>Modèle à reproduire</p>
+        <div className="arabic" style={{ fontSize:58, fontWeight:700, color:`${color}80`, letterSpacing:4, userSelect:"none" }}>{word.ar}</div>
+        <p style={{ fontSize:11, color:"var(--ink-faint)", marginTop:6 }}>Tracez ce mot ci-dessous</p>
       </div>
 
-      {/* Canvas */}
-      <div style={{ position:"relative", borderRadius:"var(--r2)", overflow:"hidden", border:`1.5px solid ${color}30`, background:"var(--bg2)", marginBottom:14, touchAction:"none" }}>
+      <div style={{ position:"relative", borderRadius:"var(--r2)", overflow:"hidden", border:`1.5px solid ${color}35`, background:"var(--panel)", marginBottom:16, touchAction:"none" }}>
         <canvas
           ref={canvasRef} width={560} height={180}
           style={{ display:"block", width:"100%", cursor:"crosshair", touchAction:"none" }}
@@ -667,33 +693,32 @@ function TraceLab({ words, color }) {
         />
         {!hasDrawn && (
           <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", pointerEvents:"none" }}>
-            <span style={{ fontSize:13, color:"var(--text3)" }}>✏️ Tracez ici avec la souris ou le doigt</span>
+            <span style={{ fontSize:13, color:"var(--ink-faint)" }}>✏️ Tracez ici avec la souris ou le doigt</span>
           </div>
         )}
       </div>
 
-      {/* Controls */}
       <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
         <button onClick={clearCanvas} style={{
-          padding:"9px 18px", borderRadius:"var(--r)", border:"1.5px solid var(--border2)",
-          background:"transparent", color:"var(--text2)", cursor:"pointer", fontSize:13, fontFamily:"inherit"
+          padding:"10px 18px", borderRadius:"var(--r)", border:"1.5px solid var(--line2)",
+          background:"var(--panel)", color:"var(--ink-soft)", cursor:"pointer", fontSize:13, fontFamily:"inherit"
         }}>🗑️ Effacer</button>
         {hasDrawn && !rating && (
           <button onClick={submitTrace} style={{
-            padding:"9px 20px", borderRadius:"var(--r)", border:"none",
-            background:color, color:"#0c0e14", cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:600
+            padding:"10px 20px", borderRadius:"var(--r)", border:"none",
+            background:color, color:"var(--panel)", cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:600
           }}>✓ Valider mon tracé</button>
         )}
         {rating && ratings[rating] && (
-          <div className="fade-in" style={{ display:"flex", alignItems:"center", gap:10, flex:1, padding:"10px 16px", borderRadius:"var(--r)", background:`${ratings[rating].color}12`, border:`1px solid ${ratings[rating].color}30` }}>
+          <div className="fade-in" style={{ display:"flex", alignItems:"center", gap:10, flex:1, padding:"11px 16px", borderRadius:"var(--r)", background:`${ratings[rating].color}12`, border:`1px solid ${ratings[rating].color}35` }}>
             <div>
               <div style={{ fontSize:13, fontWeight:600, color:ratings[rating].color }}>{ratings[rating].label}</div>
-              <div style={{ fontSize:11, color:"var(--text3)" }}>{ratings[rating].tip}</div>
+              <div style={{ fontSize:11, color:"var(--ink-faint)" }}>{ratings[rating].tip}</div>
             </div>
           </div>
         )}
         <button onClick={() => speak(word.ar)} style={{
-          padding:"9px 18px", marginLeft:"auto", borderRadius:"var(--r)", border:`1.5px solid ${color}40`,
+          padding:"10px 18px", marginLeft:"auto", borderRadius:"var(--r)", border:`1.5px solid ${color}45`,
           background:"transparent", color:color, cursor:"pointer", fontSize:13, fontFamily:"inherit"
         }}>🔊 Écouter</button>
       </div>
@@ -732,18 +757,17 @@ function MatchGame({ examples, color }) {
   const reset = () => { setLeftSel(null); setRightSel(null); setMatched([]); setWrong(null); setDone(false); };
 
   if (done) return (
-    <div style={{ textAlign:"center", padding:"40px 20px" }}>
-      <div style={{ fontSize:56, marginBottom:12 }}>🎯</div>
-      <div style={{ fontSize:22, fontWeight:700, color, marginBottom:8 }}>Parfait ! Tout associé !</div>
-      <button onClick={reset} style={{ padding:"10px 24px", borderRadius:"var(--r)", border:"none", background:color, color:"#0c0e14", cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:600 }}>Rejouer</button>
+    <div style={{ textAlign:"center", padding:"44px 20px" }}>
+      <Khatim size={48} color={color} fill={`${color}18`} />
+      <div className="display" style={{ fontSize:22, fontWeight:600, color, margin:"16px 0 10px" }}>Parfait ! Tout associé</div>
+      <button onClick={reset} style={{ padding:"11px 26px", borderRadius:"var(--r)", border:"none", background:color, color:"var(--panel)", cursor:"pointer", fontSize:13, fontFamily:"inherit", fontWeight:600 }}>Rejouer</button>
     </div>
   );
 
   return (
-    <div style={{ padding:"24px" }}>
-      <p style={{ fontSize:12, color:"var(--text3)", textAlign:"center", marginBottom:20 }}>Associez chaque phrase arabe à sa traduction française</p>
+    <div style={{ padding:"26px" }}>
+      <p style={{ fontSize:12, color:"var(--ink-faint)", textAlign:"center", marginBottom:22 }}>Associez chaque phrase arabe à sa traduction française</p>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-        {/* Left: Arabic */}
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
           {pairs.map(p => {
             const isMatched = matched.includes(p.id);
@@ -752,11 +776,11 @@ function MatchGame({ examples, color }) {
             return (
               <button key={p.id} onClick={() => { if(!isMatched) setLeftSel(p.id); }}
                 style={{
-                  padding:"14px 16px", borderRadius:"var(--r)", border:`1.5px solid ${isMatched ? color : isSel ? color : isWrong ? "var(--rose)" : "var(--border2)"}`,
-                  background: isMatched ? `${color}18` : isSel ? `${color}12` : isWrong ? "var(--rose-dim)" : "var(--surface)",
-                  color: isMatched ? color : "var(--text)", cursor: isMatched ? "default" : "pointer",
-                  textAlign:"right", fontFamily:"'Noto Naskh Arabic',serif", fontSize:16, direction:"rtl",
-                  opacity: isMatched ? .7 : 1, transition:"all .2s",
+                  padding:"15px 16px", borderRadius:"var(--r)", border:`1.5px solid ${isMatched ? color : isSel ? color : isWrong ? "var(--rose)" : "var(--line2)"}`,
+                  background: isMatched ? `${color}14` : isSel ? `${color}0c` : isWrong ? "var(--rose-dim)" : "var(--panel)",
+                  color: isMatched ? color : "var(--ink)", cursor: isMatched ? "default" : "pointer",
+                  textAlign:"right", fontFamily:"'Amiri',serif", fontSize:17, direction:"rtl",
+                  opacity: isMatched ? .75 : 1, transition:"all .2s",
                   animation: isWrong ? "shake .3s ease" : isMatched ? "correctBounce .3s ease" : "none",
                   lineHeight:1.8
                 }}>
@@ -765,7 +789,6 @@ function MatchGame({ examples, color }) {
             );
           })}
         </div>
-        {/* Right: French */}
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
           {shuffledRight.map(p => {
             const isMatched = matched.includes(p.id);
@@ -774,11 +797,11 @@ function MatchGame({ examples, color }) {
             return (
               <button key={p.id} onClick={() => { if(!isMatched) setRightSel(p.id); }}
                 style={{
-                  padding:"14px 16px", borderRadius:"var(--r)", border:`1.5px solid ${isMatched ? color : isSel ? color : isWrong ? "var(--rose)" : "var(--border2)"}`,
-                  background: isMatched ? `${color}18` : isSel ? `${color}12` : isWrong ? "var(--rose-dim)" : "var(--surface)",
-                  color: isMatched ? color : "var(--text)", cursor: isMatched ? "default" : "pointer",
-                  textAlign:"left", fontFamily:"'Space Grotesk',sans-serif", fontSize:13,
-                  opacity: isMatched ? .7 : 1, transition:"all .2s",
+                  padding:"15px 16px", borderRadius:"var(--r)", border:`1.5px solid ${isMatched ? color : isSel ? color : isWrong ? "var(--rose)" : "var(--line2)"}`,
+                  background: isMatched ? `${color}14` : isSel ? `${color}0c` : isWrong ? "var(--rose-dim)" : "var(--panel)",
+                  color: isMatched ? color : "var(--ink)", cursor: isMatched ? "default" : "pointer",
+                  textAlign:"left", fontFamily:"'Inter',sans-serif", fontSize:13,
+                  opacity: isMatched ? .75 : 1, transition:"all .2s",
                   animation: isWrong ? "shake .3s ease" : isMatched ? "correctBounce .3s ease" : "none",
                 }}>
                 {isMatched ? "✓ " : ""}{p.fr}
@@ -792,48 +815,47 @@ function MatchGame({ examples, color }) {
 }
 
 // ─── FlashCards ───────────────────────────────────────────────────────────────
-function FlashCards({ tableRows, tableHeaders, color }) {
+function FlashCards({ tableRows, color }) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const row = tableRows[idx];
 
   return (
-    <div style={{ padding:"24px", textAlign:"center" }}>
-      <p style={{ fontSize:11, color:"var(--text3)", textTransform:"uppercase", letterSpacing:1, marginBottom:20 }}>
+    <div style={{ padding:"26px", textAlign:"center" }}>
+      <p style={{ fontSize:11, color:"var(--ink-faint)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:22 }}>
         Carte {idx+1} / {tableRows.length} — Cliquez pour révéler
       </p>
-      {/* Card */}
       <div onClick={() => setFlipped(f => !f)} style={{
-        background: flipped ? "var(--surface2)" : "var(--surface)",
-        border:`1.5px solid ${color}30`, borderRadius:"var(--r3)",
-        padding:"36px 28px", cursor:"pointer", minHeight:160,
+        background: flipped ? "var(--paper2)" : "var(--panel)",
+        border:`1.5px solid ${color}35`, borderRadius:"var(--r3)",
+        padding:"38px 28px", cursor:"pointer", minHeight:170,
         display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
-        transition:"all .25s", boxShadow:`0 0 30px ${color}10`,
-        marginBottom:20
+        transition:"all .25s", boxShadow:`0 14px 34px -20px ${color}45`,
+        marginBottom:22, position:"relative"
       }}>
+        <Khatim size={14} color={color} style={{ position:"absolute", top:14, right:14, opacity:.6 }} />
         {!flipped ? (
-          <div className="arabic fade-in" style={{ fontSize:44, fontWeight:700, color:"var(--text)", letterSpacing:4 }}>
+          <div className="arabic fade-in" style={{ fontSize:46, fontWeight:700, color:"var(--ink)", letterSpacing:3 }}>
             {row[1]}
           </div>
         ) : (
-          <div className="fade-in" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
-            <div className="arabic" style={{ fontSize:36, fontWeight:600, color }}>
+          <div className="fade-in" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:9 }}>
+            <div className="arabic" style={{ fontSize:38, fontWeight:600, color }}>
               {row[1]}
             </div>
-            <div className="mono" style={{ fontSize:14, color:"var(--text2)" }}>{row[2]}</div>
-            <div style={{ fontSize:18, fontWeight:600, color:"var(--text)", marginTop:4 }}>{row[3]}</div>
-            {row[0] && <div style={{ fontSize:11, padding:"3px 10px", borderRadius:20, background:`${color}15`, color, marginTop:4 }}>{row[0]}</div>}
+            <div className="display" style={{ fontSize:14, fontStyle:"italic", color:"var(--ink-soft)" }}>{row[2]}</div>
+            <div style={{ fontSize:18, fontWeight:600, color:"var(--ink)", marginTop:4 }}>{row[3]}</div>
+            {row[0] && <div style={{ fontSize:11, padding:"4px 12px", borderRadius:20, background:`${color}14`, color, marginTop:4 }}>{row[0]}</div>}
           </div>
         )}
       </div>
-      {/* Controls */}
       <div style={{ display:"flex", gap:8, justifyContent:"center" }}>
         <button onClick={() => { setIdx(i => (i-1+tableRows.length)%tableRows.length); setFlipped(false); }}
-          style={{ padding:"9px 18px", borderRadius:"var(--r)", border:"1.5px solid var(--border2)", background:"transparent", color:"var(--text2)", cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>← Préc.</button>
+          style={{ padding:"10px 18px", borderRadius:"var(--r)", border:"1.5px solid var(--line2)", background:"var(--panel)", color:"var(--ink-soft)", cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>← Préc.</button>
         <button onClick={() => { speak(row[1]); }}
-          style={{ padding:"9px 18px", borderRadius:"var(--r)", border:`1.5px solid ${color}40`, background:"transparent", color, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>🔊 Écouter</button>
+          style={{ padding:"10px 18px", borderRadius:"var(--r)", border:`1.5px solid ${color}45`, background:"transparent", color, cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>🔊 Écouter</button>
         <button onClick={() => { setIdx(i => (i+1)%tableRows.length); setFlipped(false); }}
-          style={{ padding:"9px 18px", borderRadius:"var(--r)", border:"1.5px solid var(--border2)", background:"transparent", color:"var(--text2)", cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Suiv. →</button>
+          style={{ padding:"10px 18px", borderRadius:"var(--r)", border:"1.5px solid var(--line2)", background:"var(--panel)", color:"var(--ink-soft)", cursor:"pointer", fontSize:13, fontFamily:"inherit" }}>Suiv. →</button>
       </div>
     </div>
   );
@@ -860,58 +882,54 @@ function ExercisePanel({ exercises, color }) {
 
   if (done) {
     const pct = Math.round((score/exercises.length)*100);
-    const emoji = pct===100?"🏆":pct>=60?"⭐":"💪";
     return (
-      <div style={{ textAlign:"center", padding:"40px 20px" }}>
-        <div style={{ fontSize:64, marginBottom:12 }}>{emoji}</div>
-        <div style={{ fontSize:40, fontWeight:700, color, marginBottom:4 }}>{score}/{exercises.length}</div>
-        <div style={{ fontSize:15, color:"var(--text2)", marginBottom:24 }}>
+      <div style={{ textAlign:"center", padding:"44px 20px" }}>
+        <Khatim size={56} color={color} fill={pct===100 ? `${color}22` : "none"} />
+        <div className="display" style={{ fontSize:42, fontWeight:600, color, margin:"16px 0 6px" }}>{score}/{exercises.length}</div>
+        <div style={{ fontSize:15, color:"var(--ink-soft)", marginBottom:26 }}>
           {pct===100?"Module parfaitement maîtrisé !":pct>=60?"Bon résultat ! Revoyez les erreurs.":"Continuez à pratiquer !"}
         </div>
-        <button onClick={reset} style={{ padding:"11px 28px", borderRadius:"var(--r)", border:"none", background:color, color:"#0c0e14", cursor:"pointer", fontSize:14, fontFamily:"inherit", fontWeight:600 }}>Recommencer</button>
+        <button onClick={reset} style={{ padding:"12px 30px", borderRadius:"var(--r)", border:"none", background:color, color:"var(--panel)", cursor:"pointer", fontSize:14, fontFamily:"inherit", fontWeight:600 }}>Recommencer</button>
       </div>
     );
   }
 
   return (
     <div className="fade-up">
-      {/* Progress */}
-      <div style={{ display:"flex", gap:5, marginBottom:20 }}>
+      <div style={{ display:"flex", gap:5, marginBottom:22 }}>
         {exercises.map((_,i) => (
-          <div key={i} style={{ flex:1, height:4, borderRadius:4, background: i<step ? color : i===step ? color : "var(--surface2)", opacity: i===step ? 1 : i<step ? .6 : 1, transition:"all .3s" }} />
+          <div key={i} style={{ flex:1, height:4, borderRadius:4, background: i<=step ? color : "var(--paper3)", opacity: i===step ? 1 : i<step ? .6 : 1, transition:"all .3s" }} />
         ))}
       </div>
-      {/* Question */}
-      <div style={{ background:"var(--surface)", borderRadius:"var(--r2)", padding:"20px 22px", marginBottom:14, border:"1px solid var(--border)" }}>
-        <div style={{ fontSize:11, color, fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Q{step+1}</div>
-        <p style={{ fontSize:16, fontWeight:500, color:"var(--text)", lineHeight:1.7 }}
-          dangerouslySetInnerHTML={{ __html: ex.q.replace(/([^\s]*[\u0600-\u06FF][^\s]*)/g, `<span style="font-family:'Noto Naskh Arabic',serif;font-size:22px;color:var(--text)">$1</span>`) }} />
+      <div style={{ background:"var(--panel)", borderRadius:"var(--r2)", padding:"22px 22px", marginBottom:16, border:"1px solid var(--line)" }}>
+        <div style={{ fontSize:11, color, fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Question {step+1}</div>
+        <p style={{ fontSize:16, fontWeight:500, color:"var(--ink)", lineHeight:1.7 }}
+          dangerouslySetInnerHTML={{ __html: ex.q.replace(/([^\s]*[\u0600-\u06FF][^\s]*)/g, `<span style="font-family:'Amiri',serif;font-size:23px;color:var(--ink)">$1</span>`) }} />
       </div>
-      {/* Options */}
-      <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:14 }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:9, marginBottom:16 }}>
         {ex.opts.map((opt,i) => {
-          let bg="var(--surface)", bc="var(--border2)", tc="var(--text)";
+          let bg="var(--panel)", bc="var(--line2)", tc="var(--ink)";
           if (sel!==null) {
-            if (i===ex.ans) { bg="rgba(93,214,140,.1)"; bc="#5dd68c"; tc="#5dd68c"; }
-            else if (i===sel) { bg="rgba(240,112,112,.08)"; bc="var(--rose)"; tc="var(--rose)"; }
+            if (i===ex.ans) { bg="rgba(63,125,74,.1)"; bc="#3f7d4a"; tc="#3f7d4a"; }
+            else if (i===sel) { bg="rgba(168,73,63,.08)"; bc="var(--rose)"; tc="var(--rose)"; }
           }
           return (
             <button key={i} onClick={() => pick(i)} disabled={sel!==null}
-              style={{ background:bg, border:`1.5px solid ${bc}`, color:tc, borderRadius:"var(--r)", padding:"13px 18px", cursor:sel!==null?"default":"pointer", textAlign:"left", fontSize:14, fontFamily:"inherit", fontWeight:400, display:"flex", alignItems:"center", gap:10, transition:"all .2s" }}>
-              <span style={{ width:24,height:24,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:600, background: sel!==null&&i===ex.ans?"#5dd68c":sel!==null&&i===sel?"var(--rose)":"var(--surface2)", color: sel!==null&&(i===ex.ans||i===sel)?"#0c0e14":tc }}>
+              style={{ background:bg, border:`1.5px solid ${bc}`, color:tc, borderRadius:"var(--r)", padding:"14px 18px", cursor:sel!==null?"default":"pointer", textAlign:"left", fontSize:14, fontFamily:"inherit", fontWeight:400, display:"flex", alignItems:"center", gap:12, transition:"all .2s" }}>
+              <span style={{ width:25,height:25,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:600, background: sel!==null&&i===ex.ans?"#3f7d4a":sel!==null&&i===sel?"var(--rose)":"var(--paper3)", color: sel!==null&&(i===ex.ans||i===sel)?"var(--panel)":tc }}>
                 {sel!==null&&i===ex.ans?"✓":sel!==null&&i===sel?"✗":String.fromCharCode(65+i)}
               </span>
-              <span style={opt.match(/[\u0600-\u06FF]/)?{fontFamily:"'Noto Naskh Arabic',serif",fontSize:18}:{}}>{opt}</span>
+              <span style={opt.match(/[\u0600-\u06FF]/)?{fontFamily:"'Amiri',serif",fontSize:18}:{}}>{opt}</span>
             </button>
           );
         })}
       </div>
       {sel!==null && (
         <>
-          <div className="fade-in" style={{ padding:"12px 16px",borderRadius:"var(--r)",marginBottom:14,background:sel===ex.ans?"rgba(93,214,140,.08)":"rgba(226,185,106,.08)",border:`1px solid ${sel===ex.ans?"rgba(93,214,140,.25)":"rgba(226,185,106,.3)"}`,fontSize:13,color:"var(--text2)",lineHeight:1.7 }}>
-            <span style={{ fontWeight:600,color:sel===ex.ans?"#5dd68c":"var(--gold)" }}>{sel===ex.ans?"✅ Correct ! ":"💡 "}</span>{ex.exp}
+          <div className="fade-in" style={{ padding:"13px 16px",borderRadius:"var(--r)",marginBottom:16,background:sel===ex.ans?"rgba(63,125,74,.08)":"rgba(168,120,46,.08)",border:`1px solid ${sel===ex.ans?"rgba(63,125,74,.25)":"rgba(168,120,46,.3)"}`,fontSize:13,color:"var(--ink-soft)",lineHeight:1.7 }}>
+            <span style={{ fontWeight:600,color:sel===ex.ans?"#3f7d4a":"var(--gold)" }}>{sel===ex.ans?"✅ Correct ! ":"💡 "}</span>{ex.exp}
           </div>
-          <button onClick={next} style={{ padding:"10px 22px",borderRadius:"var(--r)",border:"none",background:color,color:"#0c0e14",cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:600 }}>
+          <button onClick={next} style={{ padding:"11px 24px",borderRadius:"var(--r)",border:"none",background:color,color:"var(--panel)",cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:600 }}>
             {step+1>=exercises.length?"Terminer →":"Suivante →"}
           </button>
         </>
@@ -923,26 +941,26 @@ function ExercisePanel({ exercises, color }) {
 // ─── GrammarTable ─────────────────────────────────────────────────────────────
 function GrammarTable({ headers, rows, color }) {
   return (
-    <div style={{ overflowX:"auto", borderRadius:"var(--r2)", border:"1px solid var(--border)", marginBottom:20 }}>
+    <div style={{ overflowX:"auto", borderRadius:"var(--r2)", border:"1px solid var(--line)", marginBottom:22 }}>
       <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
         <thead>
-          <tr style={{ background:"var(--surface2)" }}>
+          <tr style={{ background:"var(--paper2)" }}>
             {headers.map((h,i) => (
-              <th key={i} style={{ padding:"10px 14px", textAlign:"left", color:"var(--text3)", fontWeight:600, borderBottom:"1px solid var(--border2)", fontFamily:"'Space Grotesk',sans-serif", fontSize:11, letterSpacing:".5px", textTransform:"uppercase" }}>{h}</th>
+              <th key={i} style={{ padding:"11px 14px", textAlign:"left", color:"var(--ink-soft)", fontWeight:600, borderBottom:"1px solid var(--line2)", fontFamily:"'Inter',sans-serif", fontSize:11, letterSpacing:".5px", textTransform:"uppercase" }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row,ri) => (
-            <tr key={ri} style={{ background: ri%2===0?"var(--surface)":"var(--bg3)" }}>
+            <tr key={ri} style={{ background: ri%2===0?"var(--panel)":"var(--paper)" }}>
               {row.map((cell,ci) => {
                 const isAr = cell.match(/[\u0600-\u06FF]/);
                 return (
-                  <td key={ci} style={{ padding:"11px 14px", borderBottom:"1px solid var(--border)", color:"var(--text2)", fontFamily:isAr?"'Noto Naskh Arabic',serif":"inherit", direction:isAr?"rtl":"ltr", fontSize:isAr?17:13 }}>
+                  <td key={ci} style={{ padding:"12px 14px", borderBottom:"1px solid var(--line)", color:"var(--ink-soft)", fontFamily:isAr?"'Amiri',serif":"inherit", direction:isAr?"rtl":"ltr", fontSize:isAr?18:13 }}>
                     {isAr ? (
                       <span style={{ display:"flex", alignItems:"center", justifyContent:"flex-end", gap:8 }}>
                         {cell}
-                        <button onClick={() => speak(cell)} style={{ background:"none",border:"none",cursor:"pointer",fontSize:11,opacity:.4,padding:2,color:"var(--text)" }}>🔊</button>
+                        <button onClick={() => speak(cell)} style={{ background:"none",border:"none",cursor:"pointer",fontSize:11,opacity:.4,padding:2,color:"var(--ink)" }}>🔊</button>
                       </span>
                     ) : cell}
                   </td>
@@ -967,52 +985,48 @@ function LessonView({ lesson, color }) {
     { id:"voice",  label:"🎤 Prononciation" },
   ];
   return (
-    <div style={{ background:"var(--surface)", border:`1px solid ${color}20`, borderRadius:"var(--r3)", marginBottom:20, overflow:"hidden" }}>
-      {/* Lesson header */}
-      <div style={{ padding:"20px 24px", borderBottom:"1px solid var(--border)", display:"flex", alignItems:"center", gap:14 }}>
-        <div style={{ width:44,height:44,borderRadius:"var(--r2)",background:`${color}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>{lesson.icon}</div>
+    <div style={{ background:"var(--panel)", border:`1.5px solid ${color}25`, borderRadius:"var(--r3)", marginBottom:22, overflow:"hidden", boxShadow:"0 16px 40px -28px rgba(44,36,23,.35)" }}>
+      <div style={{ padding:"22px 26px", borderBottom:"1px solid var(--line)", display:"flex", alignItems:"center", gap:16, background:"var(--paper2)" }}>
+        <div style={{ width:46,height:46,borderRadius:"var(--r2)",background:`${color}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0,border:`1px solid ${color}30` }}>{lesson.icon}</div>
         <div style={{ flex:1 }}>
-          <h3 style={{ fontSize:17,fontWeight:600,color:"var(--text)",marginBottom:2 }}>{lesson.title}</h3>
-          <p style={{ fontSize:12,color:"var(--text3)" }}>5 modes d'apprentissage interactifs</p>
+          <h3 className="display" style={{ fontSize:18,fontWeight:600,color:"var(--ink)",marginBottom:2 }}>{lesson.title}</h3>
+          <p style={{ fontSize:12,color:"var(--ink-faint)" }}>Cinq façons d'apprendre ce mot</p>
         </div>
       </div>
-      {/* Tabs */}
-      <div style={{ display:"flex", gap:2, padding:"8px 12px", borderBottom:"1px solid var(--border)", overflowX:"auto", background:"var(--bg3)" }}>
+      <div style={{ display:"flex", gap:2, padding:"10px 14px", borderBottom:"1px solid var(--line)", overflowX:"auto", background:"var(--paper)" }}>
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            padding:"7px 14px", borderRadius:"var(--r)", border:"none", cursor:"pointer",
-            background: tab===t.id ? `${color}20` : "transparent",
-            color: tab===t.id ? color : "var(--text3)",
+            padding:"8px 15px", borderRadius:"var(--r)", border:"none", cursor:"pointer",
+            background: tab===t.id ? `${color}1c` : "transparent",
+            color: tab===t.id ? color : "var(--ink-faint)",
             fontFamily:"inherit", fontSize:12, fontWeight:tab===t.id?600:400,
-            borderBottom: tab===t.id ? `2px solid ${color}` : "2px solid transparent",
             whiteSpace:"nowrap", transition:"all .15s"
           }}>{t.label}</button>
         ))}
       </div>
-      {/* Tab content */}
       {tab==="theory" && (
-        <div className="fade-in" style={{ padding:"24px" }}>
-          <p style={{ fontSize:14,color:"var(--text2)",lineHeight:1.85,marginBottom:22,padding:"14px 18px",background:`${color}0c`,borderRadius:"var(--r)",borderLeft:`3px solid ${color}` }}>{lesson.theory}</p>
+        <div className="fade-in" style={{ padding:"26px" }}>
+          <p style={{ fontSize:14,color:"var(--ink-soft)",lineHeight:1.85,marginBottom:24,padding:"16px 20px",background:`${color}0a`,borderRadius:"var(--r)",borderLeft:`3px solid ${color}` }}>{lesson.theory}</p>
           <GrammarTable headers={lesson.tableHeaders} rows={lesson.tableRows} color={color} />
-          {/* Examples */}
+          <StarDivider color={color} />
           <div>
             {lesson.examples.map((ex,i) => (
-              <div key={i} style={{ display:"flex",alignItems:"center",gap:14,padding:"13px 16px",background:"var(--bg3)",borderRadius:"var(--r)",marginBottom:8,border:"1px solid var(--border)" }}>
-                <button onClick={() => speak(ex.ar)} style={{ width:34,height:34,borderRadius:"50%",background:`${color}15`,border:`1.5px solid ${color}30`,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>🔊</button>
+              <div key={i} style={{ display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:"var(--paper)",borderRadius:"var(--r)",marginBottom:9,border:"1px solid var(--line)" }}>
+                <button onClick={() => speak(ex.ar)} style={{ width:36,height:36,borderRadius:"50%",background:`${color}14`,border:`1.5px solid ${color}30`,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>🔊</button>
                 <div style={{ flex:1 }}>
-                  <div className="arabic" style={{ fontSize:20,fontWeight:600,color:"var(--text)" }}>{ex.ar}</div>
-                  <div style={{ display:"flex",gap:10,alignItems:"center",marginTop:2 }}>
-                    <span className="mono" style={{ fontSize:11,color:"var(--text3)",fontStyle:"italic" }}>{ex.tr}</span>
-                    <span style={{ fontSize:12,color:"var(--text2)" }}>— {ex.fr}</span>
+                  <div className="arabic" style={{ fontSize:21,fontWeight:600,color:"var(--ink)" }}>{ex.ar}</div>
+                  <div style={{ display:"flex",gap:10,alignItems:"center",marginTop:3,flexWrap:"wrap" }}>
+                    <span className="display" style={{ fontSize:12,color:"var(--ink-faint)",fontStyle:"italic" }}>{ex.tr}</span>
+                    <span style={{ fontSize:12,color:"var(--ink-soft)" }}>— {ex.fr}</span>
                   </div>
                 </div>
-                <span style={{ padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:600,background:`${color}15`,color,border:`1px solid ${color}25` }}>{ex.tag}</span>
+                <span style={{ padding:"4px 11px",borderRadius:20,fontSize:11,fontWeight:600,background:`${color}14`,color,border:`1px solid ${color}28` }}>{ex.tag}</span>
               </div>
             ))}
           </div>
         </div>
       )}
-      {tab==="flash"  && <FlashCards tableRows={lesson.tableRows} tableHeaders={lesson.tableHeaders} color={color} />}
+      {tab==="flash"  && <FlashCards tableRows={lesson.tableRows} color={color} />}
       {tab==="match"  && <MatchGame examples={lesson.examples} color={color} />}
       {tab==="trace"  && <TraceLab words={lesson.traceWords} color={color} />}
       {tab==="voice"  && <PronunciationLab items={lesson.pronounce} color={color} />}
@@ -1028,117 +1042,151 @@ export default function Grammaire() {
   const mod = MODULES.find(m => m.id === modId);
 
   return (
-    <div style={{ minHeight:"100vh", background:"var(--bg)", paddingTop:80 }}>
+    <div style={{ minHeight:"100vh", background:"var(--paper)", paddingTop:0 }}>
       <style>{GS}</style>
 
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <div style={{ background:"var(--bg2)", borderBottom:"1px solid var(--border)", padding:"30px 32px 24px" }}>
-        <div style={{ maxWidth:1100, margin:"0 auto" }}>
-          <div style={{ fontSize:11,color:"var(--text3)",marginBottom:12,display:"flex",alignItems:"center",gap:6 }}>
-            <span>Safoua Academy</span><span style={{ opacity:.4 }}>›</span>
-            <span>Arabe</span><span style={{ opacity:.4 }}>›</span>
-            <span style={{ color:"var(--text2)" }}>Grammaire Tome 1</span>
+      {/* ── Manuscript header band ───────────────────────────────────────── */}
+      <div style={{
+        background: "linear-gradient(180deg, var(--paper2), var(--paper))",
+        borderBottom: "1px solid var(--line2)",
+        padding: "34px 32px 26px",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        {/* corner ornaments */}
+        <Khatim size={26} color="var(--gold)" style={{ position:"absolute", top:18, left:18, opacity:.5 }} />
+        <Khatim size={26} color="var(--gold)" style={{ position:"absolute", top:18, right:18, opacity:.5 }} />
+
+        <div style={{ maxWidth:1120, margin:"0 auto", position:"relative" }}>
+          <div style={{ fontSize:11,color:"var(--ink-faint)",marginBottom:14,display:"flex",alignItems:"center",gap:7,letterSpacing:".3px" }}>
+            <span>Safoua Academy</span><span style={{ opacity:.5 }}>·</span>
+            <span>Arabe</span><span style={{ opacity:.5 }}>·</span>
+            <span style={{ color:"var(--ink-soft)" }}>Grammaire — Tome 1</span>
           </div>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:18 }}>
-              <div style={{ width:60,height:60,borderRadius:"var(--r2)",background:"var(--gold-dim)",border:`2px solid var(--gold)30`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"serif",fontSize:30,color:"var(--gold)",flexShrink:0 }}>ن</div>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:18 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:20 }}>
+              <div style={{
+                width:64,height:64,borderRadius:"var(--r3)",
+                background:"radial-gradient(circle at 35% 30%, var(--gold-dim), var(--paper3))",
+                border:"2px solid var(--gold)", display:"flex",alignItems:"center",justifyContent:"center",
+                fontFamily:"'Amiri',serif",fontSize:32,color:"var(--gold)",flexShrink:0,
+                boxShadow:"0 8px 22px -10px rgba(168,120,46,.45)"
+              }}>ن</div>
               <div>
-                <h1 className="arabic" style={{ fontSize:26,fontWeight:700,color:"var(--text)" }}>قواعد اللغة العربية</h1>
-                <p style={{ fontSize:13,color:"var(--text3)",marginTop:2 }}>Grammaire Arabe · Tome 1 de Médine · Dr. Amira</p>
+                <h1 className="arabic" style={{ fontSize:30,fontWeight:700,color:"var(--ink)" }}>قواعد اللغة العربية</h1>
+                <p className="display" style={{ fontSize:14,fontStyle:"italic",color:"var(--ink-soft)",marginTop:3 }}>Grammaire Arabe · Tome 1 de Médine · Dr. Amira</p>
               </div>
             </div>
             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
               {[{v:MODULES.length,l:"Modules"},{v:MODULES.reduce((s,m)=>s+m.exercises.length,0),l:"Exercices"},{v:"2.1k",l:"Étudiants"},{v:`${completed.length}/${MODULES.length}`,l:"Complétés"}].map(s => (
-                <div key={s.l} style={{ background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"var(--r)",padding:"10px 18px",textAlign:"center" }}>
-                  <div style={{ fontSize:20,fontWeight:700,color:"var(--gold)" }}>{s.v}</div>
-                  <div style={{ fontSize:10,color:"var(--text3)",marginTop:2 }}>{s.l}</div>
+                <div key={s.l} style={{ background:"var(--panel)",border:"1px solid var(--line2)",borderRadius:"var(--r)",padding:"11px 18px",textAlign:"center" }}>
+                  <div className="display" style={{ fontSize:20,fontWeight:600,color:"var(--gold)" }}>{s.v}</div>
+                  <div style={{ fontSize:10,color:"var(--ink-faint)",marginTop:3 }}>{s.l}</div>
                 </div>
               ))}
             </div>
           </div>
-          {/* Progress bar */}
-          <div style={{ marginTop:20,display:"flex",alignItems:"center",gap:12 }}>
-            <div style={{ flex:1,height:4,borderRadius:4,background:"var(--surface2)" }}>
-              <div style={{ height:"100%",borderRadius:4,background:`linear-gradient(90deg,var(--gold),var(--teal))`,width:`${(completed.length/MODULES.length)*100}%`,transition:"width .5s" }} />
+
+          {/* Star-based progress */}
+          <div style={{ marginTop:22, display:"flex", alignItems:"center", gap:14 }}>
+            <div style={{ display:"flex", gap:8 }}>
+              {MODULES.map(m => (
+                <Khatim key={m.id} size={20} color={completed.includes(m.id) ? "var(--gold)" : "var(--ink-faint)"}
+                  fill={completed.includes(m.id) ? "var(--gold)" : "none"} />
+              ))}
             </div>
-            <span style={{ fontSize:11,color:"var(--text3)" }}>{Math.round((completed.length/MODULES.length)*100)}%</span>
+            <span style={{ fontSize:11,color:"var(--ink-faint)" }}>{completed.length} module{completed.length===1?"":"s"} maîtrisé{completed.length===1?"":"s"} sur {MODULES.length}</span>
           </div>
         </div>
       </div>
 
-      {/* ── Layout ────────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth:1100,margin:"0 auto",padding:"24px",display:"grid",gridTemplateColumns:"240px 1fr",gap:24 }}>
-        {/* Sidebar */}
-        <aside style={{ position:"sticky",top:100,height:"fit-content" }}>
-          <div style={{ fontSize:10,fontWeight:700,letterSpacing:2,color:"var(--text3)",textTransform:"uppercase",marginBottom:12 }}>MODULES</div>
+      {/* ── Bookmark-style module nav ────────────────────────────────────── */}
+      <div style={{ maxWidth:1120, margin:"0 auto", padding:"22px 24px 0" }}>
+        <div style={{ display:"flex", gap:10, overflowX:"auto", paddingBottom:4 }}>
           {MODULES.map(m => {
             const active = modId===m.id;
             const done = completed.includes(m.id);
             return (
               <button key={m.id} onClick={() => { setModId(m.id); setMainTab("cours"); }} style={{
-                display:"flex",alignItems:"center",gap:12,width:"100%",padding:"12px 14px",
-                borderRadius:"var(--r2)",border:`1.5px solid ${active ? m.color+"50":"transparent"}`,
-                background: active ? `${m.color}0c` : "transparent",
-                cursor:"pointer",marginBottom:4,textAlign:"left",transition:"all .2s"
+                display:"flex", alignItems:"center", gap:11, flexShrink:0,
+                padding:"13px 18px 13px 14px",
+                borderRadius:"14px 14px 0 0",
+                border:`1.5px solid ${active ? m.color+"55":"var(--line2)"}`,
+                borderBottom: active ? `1.5px solid ${m.color}` : "1.5px solid var(--line2)",
+                background: active ? "var(--panel)" : "var(--paper2)",
+                cursor:"pointer", transition:"all .2s",
+                position:"relative", top: active ? 1 : 0,
+                boxShadow: active ? `0 -6px 18px -10px ${m.color}40` : "none"
               }}>
-                <div style={{ width:36,height:36,borderRadius:"var(--r)",flexShrink:0,background:active?`${m.color}25`:"var(--surface)",border:`1.5px solid ${active?m.color+"60":"var(--border2)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Noto Naskh Arabic',serif",fontSize:16,color:active?m.color:"var(--text3)" }}>
+                <div style={{ width:32,height:32,borderRadius:"50%",flexShrink:0,
+                  background: done ? "var(--gold)" : active?`${m.color}22`:"var(--paper3)",
+                  border:`1.5px solid ${active?m.color+"70":"var(--line2)"}`,
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  fontFamily:"'Amiri',serif",fontSize:14,
+                  color: done ? "var(--panel)" : (active?m.color:"var(--ink-faint)") }}>
                   {done?"✓":m.num}
                 </div>
-                <div style={{ flex:1,minWidth:0 }}>
-                  <div style={{ fontSize:13,fontWeight:600,color:active?m.color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis" }}>{m.subtitle}</div>
-                  <div style={{ fontSize:10,color:"var(--text3)" }}>{m.lessons.length} leçons · {m.exercises.length} exercices</div>
+                <div style={{ textAlign:"left" }}>
+                  <div style={{ fontSize:13,fontWeight:600,color:active?m.color:"var(--ink-soft)",whiteSpace:"nowrap" }}>{m.subtitle}</div>
+                  <div style={{ fontSize:10,color:"var(--ink-faint)",whiteSpace:"nowrap" }}>{m.lessons.length} leçons</div>
                 </div>
-                {active && <div style={{ width:6,height:6,borderRadius:"50%",background:m.color,flexShrink:0 }} />}
               </button>
             );
           })}
+        </div>
+      </div>
 
-          {/* Activity legend */}
-          <div style={{ marginTop:20,padding:"14px 16px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"var(--r2)" }}>
-            <div style={{ fontSize:10,fontWeight:700,color:"var(--text3)",textTransform:"uppercase",letterSpacing:1,marginBottom:10 }}>Activités</div>
-            {[["📚","Théorie & tableaux"],["🃏","Flashcards"],["🎯","Jeu d'association"],["✏️","Calligraphie canvas"],["🎤","Test de prononciation"],["✏️","Quiz interactif"]].map(([icon,label]) => (
-              <div key={label} style={{ display:"flex",alignItems:"center",gap:8,marginBottom:7 }}>
-                <span style={{ fontSize:13 }}>{icon}</span>
-                <span style={{ fontSize:11,color:"var(--text3)" }}>{label}</span>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Main */}
-        <main>
+      {/* ── Open page panel ──────────────────────────────────────────────── */}
+      <div style={{ maxWidth:1120, margin:"0 auto", padding:"0 24px 60px" }}>
+        <div style={{
+          background:"var(--panel)", borderRadius:"0 var(--r3) var(--r3) var(--r3)",
+          border:"1px solid var(--line2)", borderTop:"none",
+          padding:"32px 36px", boxShadow:"0 24px 60px -36px rgba(44,36,23,.4)",
+          position:"relative"
+        }}>
           {/* Module header */}
-          <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:24,flexWrap:"wrap" }}>
+          <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:26,flexWrap:"wrap" }}>
             <div style={{ flex:1 }}>
-              <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:4 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:11,marginBottom:6,flexWrap:"wrap" }}>
                 <span style={{ fontSize:26 }}>{mod.emoji}</span>
-                <h2 style={{ fontSize:22,fontWeight:700,color:"var(--text)" }}>{mod.subtitle}</h2>
-                <span className="arabic" style={{ fontSize:20,color:mod.color }}>{mod.title}</span>
+                <h2 className="display" style={{ fontSize:23,fontWeight:600,color:"var(--ink)" }}>{mod.subtitle}</h2>
+                <span className="arabic" style={{ fontSize:21,color:mod.color }}>{mod.title}</span>
               </div>
-              <p style={{ fontSize:12,color:"var(--text3)",maxWidth:500 }}>{mod.description}</p>
+              <p style={{ fontSize:12.5,color:"var(--ink-faint)",maxWidth:520 }}>{mod.description}</p>
             </div>
-            <div style={{ display:"flex",gap:4,background:"var(--surface2)",borderRadius:"var(--r)",padding:4 }}>
+            <div style={{ display:"flex",gap:4,background:"var(--paper2)",borderRadius:"var(--r)",padding:4,border:"1px solid var(--line)" }}>
               {[{id:"cours",label:"📖 Cours"},{id:"quiz",label:"✏️ Quiz"}].map(t => (
                 <button key={t.id} onClick={() => setMainTab(t.id)} style={{
-                  padding:"8px 18px",borderRadius:8,border:"none",cursor:"pointer",
-                  background: mainTab===t.id ? `${mod.color}25` : "transparent",
-                  color: mainTab===t.id ? mod.color : "var(--text3)",
+                  padding:"9px 19px",borderRadius:8,border:"none",cursor:"pointer",
+                  background: mainTab===t.id ? "var(--panel)" : "transparent",
+                  color: mainTab===t.id ? mod.color : "var(--ink-faint)",
                   fontFamily:"inherit",fontSize:13,fontWeight:mainTab===t.id?600:400,
+                  boxShadow: mainTab===t.id ? "0 1px 4px rgba(44,36,23,.12)" : "none",
                   transition:"all .2s"
                 }}>{t.label}</button>
               ))}
             </div>
           </div>
 
+          <StarDivider color={mod.color} />
+
           {mainTab==="cours" && (
             <div>
               {mod.lessons.map(lesson => <LessonView key={lesson.id} lesson={lesson} color={mod.color} />)}
-              <div style={{ padding:"22px 28px",borderRadius:"var(--r3)",background:`${mod.color}0a`,border:`1.5px solid ${mod.color}20`,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:14 }}>
-                <div>
-                  <div style={{ fontSize:16,fontWeight:600,color:"var(--text)",marginBottom:4 }}>Prêt pour le quiz ?</div>
-                  <p style={{ fontSize:12,color:"var(--text3)" }}>{mod.exercises.length} questions · Explications détaillées</p>
+              <div style={{
+                padding:"24px 30px",borderRadius:"var(--r3)",
+                background:`linear-gradient(135deg, ${mod.color}10, ${mod.color}04)`,
+                border:`1.5px solid ${mod.color}28`,
+                display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:16
+              }}>
+                <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                  <Khatim size={32} color={mod.color} />
+                  <div>
+                    <div className="display" style={{ fontSize:17,fontWeight:600,color:"var(--ink)",marginBottom:3 }}>Prêt pour le quiz ?</div>
+                    <p style={{ fontSize:12,color:"var(--ink-faint)" }}>{mod.exercises.length} questions · explications détaillées</p>
+                  </div>
                 </div>
-                <button onClick={() => setMainTab("quiz")} style={{ padding:"10px 24px",borderRadius:"var(--r)",border:"none",background:mod.color,color:"#0c0e14",cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:600 }}>
+                <button onClick={() => setMainTab("quiz")} style={{ padding:"12px 26px",borderRadius:"var(--r)",border:"none",background:mod.color,color:"var(--panel)",cursor:"pointer",fontSize:13,fontFamily:"inherit",fontWeight:600,whiteSpace:"nowrap" }}>
                   Démarrer le quiz →
                 </button>
               </div>
@@ -1146,18 +1194,18 @@ export default function Grammaire() {
           )}
 
           {mainTab==="quiz" && (
-            <div style={{ background:"var(--surface)",border:`1px solid ${mod.color}20`,borderRadius:"var(--r3)",padding:"28px 32px" }}>
-              <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:24,paddingBottom:18,borderBottom:"1px solid var(--border)" }}>
-                <div style={{ width:44,height:44,borderRadius:"var(--r2)",background:`${mod.color}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22 }}>✏️</div>
+            <div style={{ background:"var(--paper)",border:`1px solid ${mod.color}25`,borderRadius:"var(--r3)",padding:"30px 34px" }}>
+              <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:26,paddingBottom:20,borderBottom:"1px solid var(--line)" }}>
+                <div style={{ width:46,height:46,borderRadius:"var(--r2)",background:`${mod.color}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,border:`1px solid ${mod.color}30` }}>✏️</div>
                 <div>
-                  <div style={{ fontSize:16,fontWeight:600,color:"var(--text)" }}>Quiz — {mod.subtitle}</div>
-                  <div style={{ fontSize:12,color:"var(--text3)" }}>{mod.exercises.length} questions · réponse expliquée à chaque fois</div>
+                  <div className="display" style={{ fontSize:17,fontWeight:600,color:"var(--ink)" }}>Quiz — {mod.subtitle}</div>
+                  <div style={{ fontSize:12,color:"var(--ink-faint)" }}>{mod.exercises.length} questions · réponse expliquée à chaque fois</div>
                 </div>
               </div>
               <ExercisePanel exercises={mod.exercises} color={mod.color} />
             </div>
           )}
-        </main>
+        </div>
       </div>
     </div>
   );

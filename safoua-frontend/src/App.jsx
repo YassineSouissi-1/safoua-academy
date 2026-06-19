@@ -29,6 +29,8 @@ import Dashboard  from './components/Dashboard';
 import CourseDetail from './components/CourseDetail';
 import Dictionary from './components/Dictionary';
 import NotFound   from './components/NotFound';
+import QuranReader from './components/QuranReader';
+
 
 // ── Course views ───────────────────────────────────────────────────
 import AlphabetArabe        from './components/courses/AlphabetArabe';
@@ -74,6 +76,8 @@ function AppInner() {
             {/* Public */}
             <Route path="/"         element={<Home />} />
             <Route path="/courses"  element={<Courses />} />
+            <Route path="/quran" element={<QuranReader />} />
+
 
             {/* Auth — redirect if already logged in */}
             <Route path="/login"    element={loggedIn ? <Navigate to="/dashboard" replace /> : <Login />} />
