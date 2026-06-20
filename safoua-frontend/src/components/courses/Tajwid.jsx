@@ -366,12 +366,12 @@ const RULES = [
         ]
       },
     ],
-    testWord: "مِن بَعْدِ",
-    testTranslit: "mim ba'-di",
-    testInstruction: "Prononcez « mim ba'-di » — lèvres fermées, son nasal avant le بَ",
+    testWord: "لَيُنبَذَنَّ",
+    testTranslit: "la-yum-ba-dha-nan",
+    testInstruction: "Prononcez « la-yum-ba-dha-nan » — lèvres fermées, son مْ nasal avant le بَ",
     testHint: "Les lèvres se ferment brièvement comme pour 'mmm' avant d'ouvrir sur 'ba'. 2 temps.",
     testType: "nasal",
-    testUrl: "https://everyayah.com/data/Alafasy_128kbps/002145.mp3",
+    testUrl: "https://everyayah.com/data/Alafasy_128kbps/104004.mp3",
   },
   {
     id: "waqf",
@@ -982,7 +982,7 @@ function VoiceTest({ rule, audio }) {
 
   return (
     <div style={{ background: C.panel, border: `1.5px solid ${C.border}`, borderRadius: 16, padding: 20, marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
         <div style={{ width: 34, height: 34, borderRadius: "50%", background: `${rule.color}22`, border: `1.5px solid ${rule.color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🎤</div>
         <div>
           <div style={{ fontWeight: 800, fontSize: 13, color: C.cream }}>Test de Voix</div>
@@ -990,18 +990,30 @@ function VoiceTest({ rule, audio }) {
         </div>
       </div>
 
-      {/* Word to pronounce */}
-      <div style={{ textAlign: "center", background: C.surface, borderRadius: 12, padding: "14px 20px", marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Amiri',serif", fontSize: "2rem", color: rule.color, marginBottom: 4, lineHeight: 1.4 }}>{rule.testWord}</div>
-        <button
-          onClick={() => speakArabic(rule.testWord, { rate: 0.72 })}
-          style={{ background: rule.color + "22", border: "1.5px solid " + rule.color + "55", color: rule.color, borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 8 }}
-        >
-          🔊 Écouter la prononciation
-        </button>
-        <div style={{ fontSize: 13, color: C.mutedLt, fontWeight: 700, marginBottom: 6, letterSpacing: 1, fontStyle: "italic" }}>{rule.testTranslit}</div>
-        <div style={{ fontSize: 12, color: C.text, fontWeight: 600, lineHeight: 1.7 }}>{rule.testInstruction}</div>
-        <div style={{ fontSize: 11, color: C.muted, marginTop: 6, fontStyle: "italic" }}>💡 {rule.testHint}</div>
+      {/* WHAT TO PRONOUNCE — main focus */}
+      <div style={{ background: C.surface, borderRadius: 14, padding: "16px 20px", marginBottom: 14, border: `1.5px solid ${rule.color}44` }}>
+        <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: rule.color, textTransform: "uppercase", marginBottom: 10 }}>
+          📢 À PRONONCER
+        </div>
+
+        {/* The Arabic word(s) to say — large and clear */}
+        <div style={{ fontFamily: "'Amiri',serif", fontSize: "2.4rem", color: rule.color, lineHeight: 1.5, textAlign: "center", marginBottom: 6, direction: "rtl" }}>
+          {rule.testWord}
+        </div>
+        <div style={{ textAlign: "center", fontSize: 14, color: C.cream, fontWeight: 700, letterSpacing: 1, marginBottom: 4 }}>
+          {rule.testTranslit}
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: 40, height: 1, background: C.border, margin: "10px auto" }} />
+
+        {/* Instruction */}
+        <div style={{ fontSize: 13, color: C.text, textAlign: "center", lineHeight: 1.7, marginBottom: 8 }}>
+          {rule.testInstruction}
+        </div>
+        <div style={{ fontSize: 11, color: C.muted, textAlign: "center", fontStyle: "italic" }}>
+          💡 {rule.testHint}
+        </div>
       </div>
 
       {/* Step 1: listen */}
