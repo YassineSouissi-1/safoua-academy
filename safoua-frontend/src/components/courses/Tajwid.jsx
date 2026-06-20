@@ -52,6 +52,8 @@ const RULES = [
         ar: "قُلْ هُوَ اللَّهُ أَحَدٌ",
         note: "Madd Ṭabī'ī sur اللَّهُ (alif prolongé) — 2 temps",
         url: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "قُلْ", translit: "Qul", en: "Say", rule: "qalqala", label: "Qalqala" },
           { w: "هُوَ", translit: "hu-wa", en: "He is", rule: null },
@@ -63,6 +65,8 @@ const RULES = [
         ar: "اللَّهُ الصَّمَدُ",
         note: "Madd Ṭabī'ī sur اللَّهُ — alif prolongé 2 temps",
         url: "https://everyayah.com/data/Alafasy_128kbps/112002.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "اللَّهُ", translit: "Al-lā-hu", en: "Allah", rule: "madd", label: "Madd 2t" },
           { w: "الصَّمَدُ", translit: "aṣ-Ṣa-mad", en: "the Eternal", rule: "waqf", label: "Waqf" },
@@ -94,6 +98,8 @@ const RULES = [
         ar: "إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ",
         note: "Ghunnah sur إِنَّا — نّ avec Shaddah, 2 temps de son nasal",
         url: "https://everyayah.com/data/Alafasy_128kbps/108001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "إِنَّا", translit: "In-nā", en: "Indeed We", rule: "ghunnah", label: "Ghunnah 2t" },
           { w: "أَعْطَيْنَاكَ", translit: "a'-ṭay-nā-ka", en: "have given you", rule: "madd", label: "Madd" },
@@ -104,6 +110,8 @@ const RULES = [
         ar: "قُلْ أَعُوذُ بِرَبِّ النَّاسِ",
         note: "Ghunnah sur النَّاسِ — نّ avec Shaddah",
         url: "https://everyayah.com/data/Alafasy_128kbps/114001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "قُلْ", translit: "Qul", en: "Say", rule: "qalqala", label: "Qalqala" },
           { w: "أَعُوذُ", translit: "a-'ū-dhu", en: "I seek refuge", rule: "madd", label: "Madd" },
@@ -134,19 +142,26 @@ const RULES = [
     ],
     examples: [
       {
-        ar: "مَن يَعْمَلْ مِثْقَالَ",
-        note: "Idgham bi-Ghunnah: نْ + ي — fusion avec son nasal",
+        ar: "فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ",
+        note: "Idgham bi-Ghunnah: نْ + ي — fusion avec son nasal (مَن + يَعْمَلْ)",
         url: "https://everyayah.com/data/Alafasy_128kbps/099007.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
-          { w: "مَن", translit: "man", en: "whoever", rule: "idgham", label: "Idgham bi-G" },
+          { w: "فَمَن", translit: "fa-man", en: "so whoever", rule: "idgham", label: "Idgham bi-G" },
           { w: "يَعْمَلْ", translit: "ya'-mal", en: "does", rule: null },
           { w: "مِثْقَالَ", translit: "mith-qā-la", en: "the weight", rule: "madd", label: "Madd" },
+          { w: "ذَرَّةٍ", translit: "dhar-ra-tin", en: "of an atom", rule: null },
+          { w: "خَيْرًا", translit: "khay-ran", en: "of good", rule: null },
+          { w: "يَرَهُ", translit: "ya-ra-hu", en: "will see it", rule: "waqf", label: "Waqf" },
         ]
       },
       {
         ar: "لَمْ يَلِدْ وَلَمْ يُولَدْ",
         note: "Idgham bilā Ghunnah : مْ + يَ — fusion sans son nasal",
         url: "https://everyayah.com/data/Alafasy_128kbps/112003.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "لَمْ", translit: "lam", en: "He has not", rule: "idgham", label: "Idgham blG" },
           { w: "يَلِدْ", translit: "ya-lid", en: "begotten", rule: "qalqala", label: "Qalqala" },
@@ -180,6 +195,8 @@ const RULES = [
         ar: "إِنَّ الْإِنسَانَ لَفِي خُسْرٍ",
         note: "Ikhfā': نْ + سَ dans الْإِنسَانَ — voilement devant س",
         url: "https://everyayah.com/data/Alafasy_128kbps/103002.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "إِنَّ", translit: "in-na", en: "Indeed", rule: "ghunnah", label: "Ghunnah" },
           { w: "الْإِنسَانَ", translit: "al-in-sā-na", en: "mankind", rule: "ikhfa", label: "Ikhfa" },
@@ -191,6 +208,8 @@ const RULES = [
         ar: "أَلَمْ نَشْرَحْ لَكَ صَدْرَكَ",
         note: "Ikhfā' Shafawī : مْ + نَ — Mīm sākin voilé devant نَ",
         url: "https://everyayah.com/data/Alafasy_128kbps/094001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "أَلَمْ", translit: "a-lam", en: "Did We not", rule: "ikhfa", label: "Ikhfa Shaf." },
           { w: "نَشْرَحْ", translit: "nash-raḥ", en: "expand", rule: null },
@@ -224,6 +243,8 @@ const RULES = [
         ar: "قُلْ هُوَ اللَّهُ أَحَدٌ",
         note: "Qalqala Kubrā sur قُلْ — forte vibration sur قْ en fin de syllabe",
         url: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "قُلْ", translit: "Qul", en: "Say", rule: "qalqala", label: "Qalqala Kubrā" },
           { w: "هُوَ", translit: "hu-wa", en: "He is", rule: null },
@@ -235,6 +256,8 @@ const RULES = [
         ar: "لَمْ يَلِدْ وَلَمْ يُولَدْ",
         note: "Qalqala Ṣughrā sur يَلِدْ — Qalqala Kubrā sur يُولَدْ en fin d'ayah",
         url: "https://everyayah.com/data/Alafasy_128kbps/112003.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "لَمْ", translit: "lam", en: "He has not", rule: null },
           { w: "يَلِدْ", translit: "ya-lid", en: "begotten", rule: "qalqala", label: "Qalqala Ṣughrā" },
@@ -264,19 +287,29 @@ const RULES = [
     ],
     examples: [
       {
-        ar: "مِن كُلِّ أَمْرٍ",
-        note: "Izhar : نْ + كُ — Nūn sākin clair devant ك (lettre gutturale proche)",
+        ar: "تَنَزَّلُ الْمَلَائِكَةُ وَالرُّوحُ فِيهَا بِإِذْنِ رَبِّهِم مِّن كُلِّ أَمْرٍ",
+        note: "Izhar : نْ + كُ — Nūn sākin clair devant ك, dans مِّن كُلِّ",
         url: "https://everyayah.com/data/Alafasy_128kbps/097004.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
-          { w: "مِن", translit: "min", en: "of every", rule: "izhar", label: "Izhar" },
+          { w: "تَنَزَّلُ", translit: "ta-naz-za-lu", en: "descend", rule: null },
+          { w: "الْمَلَائِكَةُ", translit: "al-ma-lā-i-ka-tu", en: "the angels", rule: "madd", label: "Madd" },
+          { w: "وَالرُّوحُ", translit: "wa-r-rū-ḥu", en: "and the Spirit", rule: "madd", label: "Madd" },
+          { w: "فِيهَا", translit: "fī-hā", en: "therein", rule: "madd", label: "Madd" },
+          { w: "بِإِذْنِ", translit: "bi-idh-ni", en: "by permission", rule: null },
+          { w: "رَبِّهِم", translit: "rab-bi-him", en: "of their Lord", rule: null },
+          { w: "مِّن", translit: "min", en: "for every", rule: "izhar", label: "Izhar" },
           { w: "كُلِّ", translit: "kul-li", en: "every", rule: null },
           { w: "أَمْرٍ", translit: "am-r", en: "matter", rule: "waqf", label: "Waqf" },
         ]
       },
       {
         ar: "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ",
-        note: "Izhar : pas de nasalité entre رَبِّ et الْفَلَقِ",
+        note: "Izhar : Nūn sākin clair — pas de nasalité",
         url: "https://everyayah.com/data/Alafasy_128kbps/113001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "قُلْ", translit: "Qul", en: "Say", rule: "qalqala", label: "Qalqala" },
           { w: "أَعُوذُ", translit: "a-'ū-dhu", en: "I seek refuge", rule: "madd", label: "Madd" },
@@ -306,20 +339,24 @@ const RULES = [
     ],
     examples: [
       {
-        ar: "مِن بَعْدِ مَا جَاءَكَ",
-        note: "Iqlab : نْ + بَ → son مْ nasal, 2 temps",
-        url: "https://everyayah.com/data/Alafasy_128kbps/002145.mp3",
+        ar: "كَلَّا لَيُنبَذَنَّ فِي الْحُطَمَةِ",
+        note: "Iqlab : نْ + بَ dans لَيُنبَذَنَّ → son مْ nasal 2 temps",
+        url: "https://everyayah.com/data/Alafasy_128kbps/104004.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
-          { w: "مِن", translit: "mim", en: "after", rule: "iqlab", label: "Iqlab" },
-          { w: "بَعْدِ", translit: "ba'-di", en: "after", rule: null },
-          { w: "مَا", translit: "mā", en: "what", rule: "madd", label: "Madd" },
-          { w: "جَاءَكَ", translit: "jā-'a-ka", en: "has come to you", rule: "madd", label: "Madd" },
+          { w: "كَلَّا", translit: "kal-lā", en: "No!", rule: "madd", label: "Madd" },
+          { w: "لَيُنبَذَنَّ", translit: "la-yum-ba-dha-nan", en: "he will surely be thrown", rule: "iqlab", label: "Iqlab" },
+          { w: "فِي", translit: "fī", en: "into", rule: "madd", label: "Madd" },
+          { w: "الْحُطَمَةِ", translit: "al-ḥu-ṭa-ma", en: "the Crusher", rule: "waqf", label: "Waqf" },
         ]
       },
       {
         ar: "لَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
-        note: "Iqlab absent ici — mais مْ + يَ = Idgham bilā Ghunnah",
+        note: "Comparaison — مْ + يَ ici = Idgham bilā Ghunnah (pas d'Iqlab car pas de بَ)",
         url: "https://everyayah.com/data/Alafasy_128kbps/112004.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "لَمْ", translit: "lam", en: "There is not", rule: "idgham", label: "Idgham blG" },
           { w: "يَكُن", translit: "ya-kun", en: "for Him", rule: null },
@@ -356,6 +393,8 @@ const RULES = [
         ar: "قُلْ هُوَ اللَّهُ أَحَدٌ",
         note: "Waqf Tāmm sur أَحَدٌ — voyelle finale disparaît : 'aḥad' pas 'aḥadun'",
         url: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "قُلْ", translit: "Qul", en: "Say", rule: "qalqala", label: "Qalqala" },
           { w: "هُوَ", translit: "hu-wa", en: "He is", rule: null },
@@ -367,6 +406,8 @@ const RULES = [
         ar: "اللَّهُ الصَّمَدُ",
         note: "Waqf Tāmm sur الصَّمَدُ — 'aṣ-Ṣamad' (sans -u final)",
         url: "https://everyayah.com/data/Alafasy_128kbps/112002.mp3",
+        clipDuration: 0,
+        startTime: 0,
         words: [
           { w: "اللَّهُ", translit: "Al-lā-hu", en: "Allah", rule: "madd", label: "Madd" },
           { w: "الصَّمَدُ", translit: "aṣ-Ṣa-mad", en: "the Eternal", rule: "waqf", label: "Waqf Tāmm" },
@@ -475,9 +516,9 @@ function useAudio() {
     setState({ playing: null, loading: null, error: null, progress: 0, wordIdx: -1 });
   }, []);
 
-  // maxDuration: clip playback to N ms (for reference snippets — everyayah serves full ayahs)
-  const play = useCallback((url, wordCount = 0, maxDuration = 0) => {
-    if (state.playing === url) { stop(); return; }
+  // maxDuration: clip playback to N ms. startTime: seek to this offset in seconds before playing.
+  const play = useCallback((url, wordCount = 0, maxDuration = 0, startTime = 0) => {
+    if (state.playing === url && startTime === 0) { stop(); return; }
     stop();
     setState(s => ({ ...s, loading: url, error: null }));
     const audio = new Audio(url);
@@ -486,12 +527,21 @@ function useAudio() {
 
     audio.addEventListener("timeupdate", () => {
       if (audio.duration) {
-        const clampDur = maxDuration > 0 ? Math.min(audio.duration, maxDuration / 1000) : audio.duration;
-        setState(s => ({ ...s, progress: audio.currentTime / clampDur }));
+        const base = startTime || 0;
+        const clampDur = maxDuration > 0 ? maxDuration / 1000 : audio.duration - base;
+        const elapsed = Math.max(0, audio.currentTime - base);
+        setState(s => ({ ...s, progress: Math.min(1, elapsed / clampDur) }));
+        // Stop if we've gone past startTime + maxDuration
+        if (maxDuration > 0 && audio.currentTime >= base + maxDuration / 1000) {
+          audio.pause();
+          setState(s => ({ ...s, playing: null, wordIdx: -1, progress: 1 }));
+          clearT();
+        }
       }
     });
 
     audio.oncanplaythrough = () => {
+      if (startTime > 0) audio.currentTime = startTime;
       setState(s => ({ ...s, loading: null, playing: url }));
       audio.play().catch(() => setState(s => ({ ...s, error: url, loading: null, playing: null })));
     };
@@ -499,13 +549,11 @@ function useAudio() {
     audio.onplay = () => {
       // Auto-stop after maxDuration ms if set
       if (maxDuration > 0) {
-        clipTimer.current = setTimeout(() => stop(), maxDuration);
+        clipTimer.current = setTimeout(() => stop(), maxDuration + 200);
       }
       if (wordCount > 0) {
         const schedule = () => {
-          const totalDur = maxDuration > 0
-            ? Math.min((audio.duration || 4) * 1000, maxDuration)
-            : (audio.duration || 4) * 1000;
+          const totalDur = maxDuration > 0 ? maxDuration : (audio.duration - (startTime || 0)) * 1000;
           const interval = totalDur / wordCount;
           for (let i = 0; i < wordCount; i++) {
             const t = setTimeout(() => setState(s => ({ ...s, wordIdx: i })), i * interval);
@@ -559,117 +607,188 @@ function useMic() {
     // Adaptive noise floor: median of bottom 25% is ambient noise
     const sorted = [...rmsValues].sort((a, b) => a - b);
     const noiseFloor = sorted[Math.floor(sorted.length * 0.25)] || 0;
-    // Speech threshold: clearly above noise (at least 2x noise, min 3)
-    const speechThreshold = Math.max(noiseFloor * 2, 3);
+    // Speech threshold: clearly above noise (at least 3x noise, min 4)
+    const speechThreshold = Math.max(noiseFloor * 3, 4);
 
     const speechFrames = frames.filter(f => f.rms > speechThreshold);
     const speechRatio = speechFrames.length / frames.length;
 
-    if (maxRms < 2.5 || speechFrames.length < 4) {
+    // Strict: must have meaningful signal
+    if (maxRms < 4 || speechFrames.length < 6) {
       return { score: 0, feedback: "Micro non détecté ou son trop faible.", tip: "Vérifiez les permissions micro et parlez clairement.", good: false, speechRatio: 0 };
     }
-    if (speechRatio < 0.12) {
-      return { score: 25, feedback: "Prononciation trop courte ou silencieuse.", tip: "Parlez dès que l'enregistrement commence, maintenez le son.", good: false, speechRatio };
+    if (speechRatio < 0.15) {
+      return { score: 15, feedback: "Prononciation trop courte ou silencieuse.", tip: "Parlez dès que l'enregistrement commence, maintenez le son.", good: false, speechRatio };
     }
 
     const avgRms = speechFrames.reduce((s, f) => s + f.rms, 0) / speechFrames.length;
     const rmsStd = Math.sqrt(speechFrames.reduce((s, f) => s + (f.rms - avgRms) ** 2, 0) / speechFrames.length);
-    // Steadiness 0–1: lower std relative to mean = steadier
     const steadiness = Math.max(0, Math.min(1, 1 - rmsStd / (avgRms + 0.5)));
     const avgNasalRatio = speechFrames.reduce((s, f) => s + f.nasalRatio, 0) / speechFrames.length;
-    // Duration score 0–1: 50% speech = full score (recording is 4s, word takes ~1-2s)
     const durationScore = Math.min(1, speechRatio / 0.5);
+    const avgHighFreq = speechFrames.reduce((s, f) => s + f.highFreq, 0) / speechFrames.length;
 
-    // BASE SCORE — any clear speech attempt gets at least 55
-    // This prevents the system from penalizing people who simply speak normally
-    const basePresence = Math.min(40, speechRatio * 80);      // up to 40 pts for speech presence
-    const baseVolume = Math.min(20, avgRms * 1.5);            // up to 20 pts for good volume
-    const baseScore = Math.round(basePresence + baseVolume);  // 0–60 base
+    // STRICT BASE: no longer give free points for just speaking.
+    // The base only rewards moderate volume; feature checks must pass to score high.
+    const volumeScore = Math.min(25, (avgRms / 15) * 25);  // up to 25 pts for good volume
 
     let score = 0, feedback = "", tip = "";
 
     if (testType === "duration") {
-      // Reward: sustained sound. Need speechRatio ≥ 0.45 for full marks.
-      const sustain = Math.min(1, speechRatio / 0.45);
-      const steady = steadiness;
-      score = Math.round(baseScore * 0.4 + sustain * 40 + steady * 20);
-      score = Math.min(100, Math.max(25, score));
+      // Madd: MUST sustain sound ≥ 0.55 of recording. Steadiness rewarded. 
+      // Random short sounds will fail the sustain check.
+      const sustain = Math.min(1, speechRatio / 0.55);
+      const sustainBonus = speechRatio >= 0.55 ? 40 : speechRatio >= 0.35 ? 20 : 0;
+      const steadyBonus = steadiness >= 0.6 ? 20 : steadiness >= 0.4 ? 10 : 0;
+      score = Math.round(volumeScore + sustainBonus + steadyBonus);
+      score = Math.min(100, Math.max(10, score));
+
       if (speechRatio < 0.35) {
-        feedback = "Maintenez le son plus longtemps — au moins 1,5 seconde.";
-        tip = "Inspirez bien, puis tenez 'Al-laaaa-hu' sans couper.";
-      } else if (steadiness < 0.35) {
+        feedback = "Son trop court — le Madd exige une voyelle tenue longtemps.";
+        tip = "Inspirez bien, puis tenez 'Al-laaaa-hu' au moins 1,5 seconde sans couper.";
+      } else if (speechRatio < 0.55) {
+        feedback = "Allongement insuffisant — continuez à tenir la voyelle plus longtemps.";
+        tip = "La voyelle 'aa' doit durer comme une note tenue, sans interruption.";
+      } else if (steadiness < 0.4) {
         feedback = "Son présent mais instable — volume irrégulier.";
         tip = "Maintenez une pression d'air constante pendant toute la voyelle.";
       } else {
-        feedback = score >= 80 ? "Excellent ! Madd clair et bien soutenu." : score >= 65 ? "Bien — allongez encore légèrement." : "Continuez à pratiquer la prolongation.";
-        tip = score < 80 ? "La voyelle 'aa' doit durer comme une note tenue." : "";
+        feedback = score >= 80 ? "Excellent ! Madd clair et bien soutenu." : "Bien — allongez encore légèrement pour un Madd complet.";
+        tip = score < 80 ? "La voyelle 'aa' doit durer régulièrement, comme une note de musique." : "";
       }
 
     } else if (testType === "nasal") {
-      // Nasal: reward nasalRatio > 0.25 AND speech presence. Most people get this with "Inn-aa".
-      // Microphone variation is huge so we're generous — if they spoke AND have any nasal, pass.
-      const nasalPresent = avgNasalRatio > 0.2 ? 1 : avgNasalRatio / 0.2;
-      score = Math.round(baseScore * 0.5 + nasalPresent * 30 + durationScore * 20);
-      score = Math.min(100, Math.max(25, score));
-      if (speechRatio >= 0.15 && avgNasalRatio < 0.15) {
-        feedback = "Son prononcé mais résonance nasale peu marquée.";
-        tip = "Bloquez légèrement le nez en prononçant — le son doit changer. Humm puis parlez.";
-      } else if (speechRatio >= 0.15) {
-        feedback = score >= 75 ? "Bonne Ghunnah ! Résonance nasale présente." : score >= 55 ? "Son nasal détecté — accentuez-le encore." : "Laissez vibrer le 'nnn' dans les narines.";
-        tip = score < 75 ? "La résonance nasale doit être clairement audible pendant 2 temps." : "";
+      // Ghunnah / Iqlab: MUST have nasal resonance > 0.30 AND good duration
+      // Random speech will fail the nasal check unless the person actually hums nasally
+      const nasalOk = avgNasalRatio >= 0.30;
+      const nasalGood = avgNasalRatio >= 0.45;
+      const durationOk = speechRatio >= 0.25;
+
+      if (!durationOk) {
+        score = 15;
+        feedback = "Prononciation trop brève — maintenez le son nasal.";
+        tip = "Tenez le 'nnn' dans les narines pendant au moins 1 seconde.";
+      } else if (!nasalOk) {
+        score = 25;
+        feedback = "Aucune résonance nasale détectée — le son doit vibrer dans le nez.";
+        tip = "Bloquez légèrement le flux d'air par le nez en prononçant 'Inn'. Le son doit changer si vous pincez le nez.";
       } else {
-        feedback = "Prononciation trop brève pour analyser la nasalité.";
-        tip = "Maintenez le son 'Inn-nnn-aa' en tenant le 'nnn'.";
+        const nasalBonus = nasalGood ? 45 : 30;
+        const durationBonus = Math.min(30, speechRatio * 60);
+        score = Math.round(volumeScore * 0.5 + nasalBonus + durationBonus);
+        score = Math.min(100, Math.max(30, score));
+        feedback = score >= 80 ? "Bonne Ghunnah ! Résonance nasale bien présente." : score >= 60 ? "Son nasal détecté — accentuez encore la résonance." : "Nasalité insuffisante — faites vibrer le nez.";
+        tip = score < 80 ? "La résonance nasale doit être clairement audible pendant 2 temps." : "";
       }
 
     } else if (testType === "echo") {
-      // Qalqala: short sharp sound — any clear short utterance scores well
-      // Penalize only if speech is too faint or too long (dragged out)
-      const isSharp = speechRatio < 0.4 ? 1 : Math.max(0, 1 - (speechRatio - 0.4) * 2);
-      score = Math.round(baseScore * 0.6 + isSharp * 25 + steadiness * 15);
-      score = Math.min(100, Math.max(25, score));
-      feedback = score >= 75 ? "Bonne Qalqala ! Rebond net." : score >= 55 ? "Son correct — ajoutez un léger rebond sur قْ." : "Prononcez plus fort avec un petit rebond.";
-      tip = score < 75 ? "Comme claquer la langue : blocage bref de l'air puis explosion sur قْ." : "";
+      // Qalqala: needs a sharp, short, bouncy sound — not sustained.
+      // Penalise if too long (dragged), reward sharpness and clear attack.
+      const isShort = speechRatio <= 0.35;
+      const hasAttack = maxRms > 10; // needs a clear sharp onset
+      const tooLong = speechRatio > 0.6;
+
+      if (!hasAttack) {
+        score = 20;
+        feedback = "Son trop doux — la Qalqala nécessite une attaque franche.";
+        tip = "Prononcez 'Qul' avec un coup sec sur le قْ, comme un rebond brusque.";
+      } else if (tooLong) {
+        score = 30;
+        feedback = "Son trop prolongé — la Qalqala est un rebond court et net.";
+        tip = "Dites 'Qul' brièvement, avec un petit rebond sur le قْ. Pas de voyelle traînante.";
+      } else {
+        const sharpBonus = isShort ? 40 : 25;
+        const attackBonus = Math.min(30, (maxRms / 20) * 30);
+        score = Math.round(volumeScore * 0.5 + sharpBonus + attackBonus);
+        score = Math.min(100, Math.max(20, score));
+        feedback = score >= 80 ? "Bonne Qalqala ! Rebond net et précis." : score >= 55 ? "Son correct — ajoutez un rebond plus marqué sur قْ." : "Prononcez plus fort avec un rebond plus net.";
+        tip = score < 80 ? "Comme claquer la langue : blocage bref de l'air puis explosion nette sur قْ." : "";
+      }
 
     } else if (testType === "blend") {
-      // Smooth transition — steady volume = good blend. Just reward clear present speech.
-      score = Math.round(baseScore * 0.5 + steadiness * 30 + durationScore * 20);
-      score = Math.min(100, Math.max(25, score));
-      feedback = score >= 75 ? "Fusion lisse ! Transition réussie." : score >= 55 ? "Correct — évitez toute pause entre les sons." : "Liez les sons sans aucune coupure ni silence.";
-      tip = score < 75 ? "Prononcez d'une seule traite, sans reprendre votre souffle entre les deux sons." : "";
+      // Idgham / Ikhfa: smooth transition — no pause, steady, moderate duration
+      const hasPause = !steadiness || steadiness < 0.25; // very unsteady = paused
+      const durationOk = speechRatio >= 0.30;
+
+      if (!durationOk) {
+        score = 20;
+        feedback = "Trop court — prononcez les deux syllabes d'une traite.";
+        tip = "Enchaînez les deux sons sans reprendre votre souffle ni marquer de pause.";
+      } else if (hasPause) {
+        score = 25;
+        feedback = "Pause détectée — les deux sons doivent se fondre sans interruption.";
+        tip = "Prononcez d'une seule traite, sans aucune coupure entre les deux sons.";
+      } else {
+        const steadyBonus = Math.min(40, steadiness * 50);
+        const durationBonus = Math.min(25, speechRatio * 50);
+        score = Math.round(volumeScore * 0.5 + steadyBonus + durationBonus);
+        score = Math.min(100, Math.max(20, score));
+        feedback = score >= 80 ? "Fusion lisse ! Transition parfaitement réussie." : score >= 55 ? "Correct — évitez toute pause entre les sons." : "Liez les sons sans aucune coupure ni silence.";
+        tip = score < 80 ? "Prononcez d'une seule traite, sans reprendre votre souffle entre les deux sons." : "";
+      }
 
     } else if (testType === "stop") {
-      // Clean stop: look for clear dropoff at end vs beginning
+      // Waqf: clear dropoff at end — must speak then stop cleanly
       const midpoint = Math.floor(speechFrames.length * 0.6);
       const firstHalf = speechFrames.slice(0, midpoint);
-      const lastQuarter = frames.slice(-Math.ceil(frames.length * 0.2));
+      const lastQuarter = frames.slice(-Math.ceil(frames.length * 0.25));
       const firstAvg = firstHalf.length ? firstHalf.reduce((s, f) => s + f.rms, 0) / firstHalf.length : 0;
       const lastAvg = lastQuarter.reduce((s, f) => s + f.rms, 0) / lastQuarter.length;
-      // Good stop = last part is much quieter than first
-      const dropoff = firstAvg > 0 ? Math.min(1, Math.max(0, 1 - lastAvg / (firstAvg + 0.1))) : 0.5;
-      score = Math.round(baseScore * 0.4 + dropoff * 40 + durationScore * 20);
-      score = Math.min(100, Math.max(25, score));
-      feedback = score >= 75 ? "Arrêt net ! Waqf bien exécuté." : score >= 55 ? "Bon arrêt — coupez plus franchement à la fin." : "Terminez le son brusquement sans traîner.";
-      tip = score < 75 ? "Prononcez 'a-ḥad' puis fermez la bouche net — pas de '-un' final." : "";
+      const dropoff = firstAvg > 4 ? Math.min(1, Math.max(0, 1 - lastAvg / (firstAvg + 0.5))) : 0;
+
+      const hasContent = firstAvg > 4 && speechRatio > 0.2;
+      const cleanStop = dropoff >= 0.65;
+
+      if (!hasContent) {
+        score = 15;
+        feedback = "Prononciation trop faible ou absente.";
+        tip = "Prononcez 'a-ḥad' clairement puis arrêtez net.";
+      } else if (!cleanStop) {
+        score = 30;
+        feedback = "Arrêt non net — la fin traîne encore.";
+        tip = "Prononcez 'a-ḥad' puis fermez la bouche immédiatement. Coupure franche, pas de '-un' qui traîne.";
+      } else {
+        const dropBonus = Math.min(45, dropoff * 55);
+        const durationBonus = Math.min(20, speechRatio * 40);
+        score = Math.round(volumeScore * 0.5 + dropBonus + durationBonus);
+        score = Math.min(100, Math.max(20, score));
+        feedback = score >= 80 ? "Arrêt net ! Waqf parfaitement exécuté." : "Bon arrêt — coupez encore plus franchement à la fin.";
+        tip = score < 80 ? "Prononcez 'a-ḥad' puis fermez la bouche net — pas de '-un' final." : "";
+      }
 
     } else if (testType === "clear") {
-      // Clear articulation: high-freq consonants + absence of excessive nasality
-      const avgHighFreq = speechFrames.reduce((s, f) => s + f.highFreq, 0) / speechFrames.length;
-      const crispness = Math.min(1, avgHighFreq / 35);
-      const notNasal = avgNasalRatio < 0.35 ? 1 : Math.max(0, 1 - (avgNasalRatio - 0.35) * 3);
-      score = Math.round(baseScore * 0.4 + crispness * 35 + notNasal * 25);
-      score = Math.min(100, Math.max(25, score));
-      feedback = score >= 75 ? "Prononciation claire et nette !" : score >= 55 ? "Correct — articulez encore plus distinctement." : "Prononcez le نْ net, sans résonance nasale.";
-      tip = score < 75 ? "Articulez clairement chaque consonne — langue active, pas de traîne nasale." : "";
+      // Izhar: clear consonants, absence of nasal resonance
+      const crispness = Math.min(1, avgHighFreq / 40);
+      const notNasal = avgNasalRatio < 0.25 ? 1 : avgNasalRatio < 0.40 ? (0.40 - avgNasalRatio) / 0.15 : 0;
+      const durationOk = speechRatio >= 0.20;
+
+      if (!durationOk) {
+        score = 15;
+        feedback = "Prononciation trop brève.";
+        tip = "Prononcez les deux syllabes complètes : 'min kul-li'.";
+      } else if (avgNasalRatio >= 0.40) {
+        score = 20;
+        feedback = "Résonance nasale détectée — l'Izhar doit être totalement clair, sans nasalité.";
+        tip = "Articulation nette : langue active, bouche ouverte, aucun 'mm' ou 'ng'.";
+      } else {
+        const crispBonus = Math.min(35, crispness * 40);
+        const nasalPenaltyBonus = Math.round(notNasal * 30);
+        score = Math.round(volumeScore * 0.5 + crispBonus + nasalPenaltyBonus);
+        score = Math.min(100, Math.max(15, score));
+        feedback = score >= 80 ? "Prononciation claire et nette !" : score >= 55 ? "Correct — articulez encore plus distinctement chaque consonne." : "Prononcez le نْ net, sans résonance nasale.";
+        tip = score < 80 ? "Articulez clairement chaque consonne — langue active, pas de traîne nasale." : "";
+      }
 
     } else {
-      score = Math.round(baseScore * 0.6 + steadiness * 25 + durationScore * 15);
-      score = Math.min(100, Math.max(25, score));
-      feedback = score >= 65 ? "Bonne récitation !" : "Continuez à pratiquer.";
-      tip = "";
+      const steadyBonus = Math.min(35, steadiness * 40);
+      const durationBonus = Math.min(25, speechRatio * 45);
+      score = Math.round(volumeScore * 0.5 + steadyBonus + durationBonus);
+      score = Math.min(100, Math.max(10, score));
+      feedback = score >= 70 ? "Bonne récitation !" : "Continuez à pratiquer — écoutez d'abord la référence.";
+      tip = score < 70 ? "Écoutez attentivement la référence avant de répéter." : "";
     }
 
-    return { score, feedback, tip, good: score >= 70, speechRatio, speechFrames: speechFrames.length };
+    return { score, feedback, tip, good: score >= 75, speechRatio, speechFrames: speechFrames.length };
   }, []);
 
   const record = useCallback(async (durationMs = 4000, testType = "duration") => {
@@ -1017,8 +1136,8 @@ function RuleDetail({ rule, onBack, audio, isDone, onMarkDone }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {rule.examples.map((ex, i) => {
               const isP = audio.playing === ex.url;
-              // 7s clip — each everyayah.com file is one ayah; 7s covers even longer ayahs cleanly
-              const handlePlay = () => audio.play(ex.url, ex.words ? ex.words.length : 0, 7000);
+              // Use per-example clipDuration/startTime to play only the relevant portion of the ayah
+              const handlePlay = () => audio.play(ex.url, ex.words ? ex.words.length : 0, ex.clipDuration || 0, ex.startTime || 0);
               const activeWord = isP && audio.wordIdx >= 0 && audio.wordIdx < (ex.words ? ex.words.length : 0)
                 ? ex.words[audio.wordIdx] : null;
 
@@ -1211,9 +1330,36 @@ function ReciterPlayer({ audio }) {
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
+function CourseIntro() {
+  return (
+    <div style={{ borderBottom: `1px solid ${C.border}`, paddingBottom: 24, marginBottom: 24 }}>
+      <div style={{ marginBottom: 10 }}>
+        <span style={{ fontSize: 11, color: C.muted, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>LA SCIENCE DE LA RÉCITATION</span>
+      </div>
+      <p style={{ fontSize: 13, color: C.mutedLt, lineHeight: 1.85, maxWidth: 640, marginBottom: 16 }}>
+        Le Tajwid enseigne comment réciter le Coran tel qu'il fut révélé — chaque lettre prononcée avec ses attributs propres. Ce cours couvre les <strong style={{ color: C.cream }}>8 règles fondamentales</strong> : Madd, Ghunnah, Idgham, Ikhfā', Qalqala, Izhar, Iqlab et Waqf.
+      </p>
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+        {[
+          ["📖", "Apprends la règle"],
+          ["🎧", "Écoute le récitant"],
+          ["🎤", "Teste ta prononciation"],
+        ].map(([icon, label], i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: C.muted, fontWeight: 700 }}>
+            <span>{icon}</span>
+            {i < 2 && <span style={{ color: C.border }}>→</span>}
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Home({ onSelectRule, audio, completedRules = new Set() }) {
   return (
     <div style={{ animation: "fadeIn 0.3s ease" }}>
+      <CourseIntro />
       <ReciterPlayer audio={audio} />
       <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", color: C.muted, marginBottom: 16 }}>
         8 Règles du Tajwid — {completedRules.size}/8 complétées

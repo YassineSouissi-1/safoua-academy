@@ -111,6 +111,7 @@ export default function Navbar() {
             <NavLink to="/" end style={navLinkStyle}>Accueil</NavLink>
             <NavLink to="/courses" style={navLinkStyle}>Cours</NavLink>
             <NavLink to="/dictionary" style={navLinkStyle}>Dictionnaire</NavLink>
+            <NavLink to="/quran" end style={navLinkStyle}>Quran</NavLink>
             
             
             <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.1)' }} />
