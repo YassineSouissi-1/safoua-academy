@@ -60,120 +60,120 @@ const JUZAA = [
 
 /* ── ALL 114 SURAHS ──────────────────────────────────────────── */
 const ALL_SURAHS = [
-  {n:1,ar:"الفاتحة",en:"Al-Fatiha",meaning:"The Opening",verses:7,type:"Meccan",revelation:"مكية",juz:1,fr:"al-faa-ti-HA"},
-  {n:2,ar:"البقرة",en:"Al-Baqarah",meaning:"The Cow",verses:286,type:"Medinan",revelation:"مدنية",juz:1,fr:"al-ba-QA-ra"},
-  {n:3,ar:"آل عمران",en:"Al-Imran",meaning:"Family of Imran",verses:200,type:"Medinan",revelation:"مدنية",juz:3,fr:"a-li 'im-RAAN"},
-  {n:4,ar:"النساء",en:"An-Nisa",meaning:"The Women",verses:176,type:"Medinan",revelation:"مدنية",juz:4,fr:"an-ni-SAA"},
-  {n:5,ar:"المائدة",en:"Al-Ma'idah",meaning:"The Table Spread",verses:120,type:"Medinan",revelation:"مدنية",juz:6,fr:"al-maa-'i-DA"},
-  {n:6,ar:"الأنعام",en:"Al-An'am",meaning:"The Cattle",verses:165,type:"Meccan",revelation:"مكية",juz:7,fr:"al-an-'AAM"},
-  {n:7,ar:"الأعراف",en:"Al-A'raf",meaning:"The Heights",verses:206,type:"Meccan",revelation:"مكية",juz:8,fr:"al-a'-RAAF"},
-  {n:8,ar:"الأنفال",en:"Al-Anfal",meaning:"The Spoils of War",verses:75,type:"Medinan",revelation:"مدنية",juz:9,fr:"al-an-FAAL"},
-  {n:9,ar:"التوبة",en:"At-Tawbah",meaning:"The Repentance",verses:129,type:"Medinan",revelation:"مدنية",juz:10,fr:"at-taw-BA"},
-  {n:10,ar:"يونس",en:"Yunus",meaning:"Jonah",verses:109,type:"Meccan",revelation:"مكية",juz:11,fr:"YOU-nous"},
-  {n:11,ar:"هود",en:"Hud",meaning:"Hud",verses:123,type:"Meccan",revelation:"مكية",juz:11,fr:"HOUD"},
+  {n:1,ar:"الفاتحة",en:"Al-Fatiha",meaning:"L'Ouverture",verses:7,type:"Meccan",revelation:"مكية",juz:1,fr:"al-faa-ti-HA"},
+  {n:2,ar:"البقرة",en:"Al-Baqarah",meaning:"La Vache",verses:286,type:"Medinan",revelation:"مدنية",juz:1,fr:"al-ba-QA-ra"},
+  {n:3,ar:"آل عمران",en:"Al-Imran",meaning:"La Famille d'Imrân",verses:200,type:"Medinan",revelation:"مدنية",juz:3,fr:"a-li 'im-RAAN"},
+  {n:4,ar:"النساء",en:"An-Nisa",meaning:"Les Femmes",verses:176,type:"Medinan",revelation:"مدنية",juz:4,fr:"an-ni-SAA"},
+  {n:5,ar:"المائدة",en:"Al-Ma'idah",meaning:"La Table Servie",verses:120,type:"Medinan",revelation:"مدنية",juz:6,fr:"al-maa-'i-DA"},
+  {n:6,ar:"الأنعام",en:"Al-An'am",meaning:"Les Bestiaux",verses:165,type:"Meccan",revelation:"مكية",juz:7,fr:"al-an-'AAM"},
+  {n:7,ar:"الأعراف",en:"Al-A'raf",meaning:"Les Murailles",verses:206,type:"Meccan",revelation:"مكية",juz:8,fr:"al-a'-RAAF"},
+  {n:8,ar:"الأنفال",en:"Al-Anfal",meaning:"Les Butins",verses:75,type:"Medinan",revelation:"مدنية",juz:9,fr:"al-an-FAAL"},
+  {n:9,ar:"التوبة",en:"At-Tawbah",meaning:"Le Repentir",verses:129,type:"Medinan",revelation:"مدنية",juz:10,fr:"at-taw-BA"},
+  {n:10,ar:"يونس",en:"Yunus",meaning:"Jonas",verses:109,type:"Meccan",revelation:"مكية",juz:11,fr:"YOU-nous"},
+  {n:11,ar:"هود",en:"Hud",meaning:"Houd",verses:123,type:"Meccan",revelation:"مكية",juz:11,fr:"HOUD"},
   {n:12,ar:"يوسف",en:"Yusuf",meaning:"Joseph",verses:111,type:"Meccan",revelation:"مكية",juz:12,fr:"YOU-souf"},
-  {n:13,ar:"الرعد",en:"Ar-Ra'd",meaning:"The Thunder",verses:43,type:"Medinan",revelation:"مدنية",juz:13,fr:"ar-RA'd"},
-  {n:14,ar:"إبراهيم",en:"Ibrahim",meaning:"Abraham",verses:52,type:"Meccan",revelation:"مكية",juz:13,fr:"ib-raa-HEEM"},
-  {n:15,ar:"الحجر",en:"Al-Hijr",meaning:"The Rocky Tract",verses:99,type:"Meccan",revelation:"مكية",juz:14,fr:"al-HIJR"},
-  {n:16,ar:"النحل",en:"An-Nahl",meaning:"The Bee",verses:128,type:"Meccan",revelation:"مكية",juz:14,fr:"an-NAHL"},
-  {n:17,ar:"الإسراء",en:"Al-Isra",meaning:"The Night Journey",verses:111,type:"Meccan",revelation:"مكية",juz:15,fr:"al-is-RAA"},
-  {n:18,ar:"الكهف",en:"Al-Kahf",meaning:"The Cave",verses:110,type:"Meccan",revelation:"مكية",juz:15,fr:"al-KAHF"},
-  {n:19,ar:"مريم",en:"Maryam",meaning:"Mary",verses:98,type:"Meccan",revelation:"مكية",juz:16,fr:"MAR-yam"},
-  {n:20,ar:"طه",en:"Ta-Ha",meaning:"Ta-Ha",verses:135,type:"Meccan",revelation:"مكية",juz:16,fr:"TAA-HAA"},
-  {n:21,ar:"الأنبياء",en:"Al-Anbiya",meaning:"The Prophets",verses:112,type:"Meccan",revelation:"مكية",juz:17,fr:"al-an-bi-YAA"},
-  {n:22,ar:"الحج",en:"Al-Hajj",meaning:"The Pilgrimage",verses:78,type:"Medinan",revelation:"مدنية",juz:17,fr:"al-HAJJ"},
-  {n:23,ar:"المؤمنون",en:"Al-Mu'minun",meaning:"The Believers",verses:118,type:"Meccan",revelation:"مكية",juz:18,fr:"al-mou'-mi-NOUN"},
-  {n:24,ar:"النور",en:"An-Nur",meaning:"The Light",verses:64,type:"Medinan",revelation:"مدنية",juz:18,fr:"an-NOUR"},
-  {n:25,ar:"الفرقان",en:"Al-Furqan",meaning:"The Criterion",verses:77,type:"Meccan",revelation:"مكية",juz:18,fr:"al-four-QAAN"},
-  {n:26,ar:"الشعراء",en:"Ash-Shu'ara",meaning:"The Poets",verses:227,type:"Meccan",revelation:"مكية",juz:19,fr:"ach-chou-'a-RAA"},
-  {n:27,ar:"النمل",en:"An-Naml",meaning:"The Ant",verses:93,type:"Meccan",revelation:"مكية",juz:19,fr:"an-NAML"},
-  {n:28,ar:"القصص",en:"Al-Qasas",meaning:"The Stories",verses:88,type:"Meccan",revelation:"مكية",juz:20,fr:"al-qa-SASS"},
-  {n:29,ar:"العنكبوت",en:"Al-Ankabut",meaning:"The Spider",verses:69,type:"Meccan",revelation:"مكية",juz:20,fr:"al-'an-ka-BOUT"},
-  {n:30,ar:"الروم",en:"Ar-Rum",meaning:"The Romans",verses:60,type:"Meccan",revelation:"مكية",juz:21,fr:"ar-ROUM"},
-  {n:31,ar:"لقمان",en:"Luqman",meaning:"Luqman",verses:34,type:"Meccan",revelation:"مكية",juz:21,fr:"louk-MAAN"},
-  {n:32,ar:"السجدة",en:"As-Sajdah",meaning:"The Prostration",verses:30,type:"Meccan",revelation:"مكية",juz:21,fr:"as-saj-DA"},
-  {n:33,ar:"الأحزاب",en:"Al-Ahzab",meaning:"The Confederates",verses:73,type:"Medinan",revelation:"مدنية",juz:21,fr:"al-ah-ZAAB"},
-  {n:34,ar:"سبأ",en:"Saba",meaning:"Sheba",verses:54,type:"Meccan",revelation:"مكية",juz:22,fr:"sa-BA"},
-  {n:35,ar:"فاطر",en:"Fatir",meaning:"Originator",verses:45,type:"Meccan",revelation:"مكية",juz:22,fr:"FAA-tir"},
-  {n:36,ar:"يس",en:"Ya-Sin",meaning:"Ya-Sin",verses:83,type:"Meccan",revelation:"مكية",juz:22,fr:"YAA-SEEN"},
-  {n:37,ar:"الصافات",en:"As-Saffat",meaning:"Those Who Set The Ranks",verses:182,type:"Meccan",revelation:"مكية",juz:23,fr:"as-saa-FAAT"},
-  {n:38,ar:"ص",en:"Sad",meaning:"The Letter Sad",verses:88,type:"Meccan",revelation:"مكية",juz:23,fr:"SAAD"},
-  {n:39,ar:"الزمر",en:"Az-Zumar",meaning:"The Troops",verses:75,type:"Meccan",revelation:"مكية",juz:23,fr:"az-ZOU-mar"},
-  {n:40,ar:"غافر",en:"Ghafir",meaning:"The Forgiver",verses:85,type:"Meccan",revelation:"مكية",juz:24,fr:"GHAA-fir"},
-  {n:41,ar:"فصلت",en:"Fussilat",meaning:"Explained In Detail",verses:54,type:"Meccan",revelation:"مكية",juz:24,fr:"fouss-si-LAT"},
-  {n:42,ar:"الشورى",en:"Ash-Shura",meaning:"The Consultation",verses:53,type:"Meccan",revelation:"مكية",juz:25,fr:"ach-CHOU-raa"},
-  {n:43,ar:"الزخرف",en:"Az-Zukhruf",meaning:"The Ornaments of Gold",verses:89,type:"Meccan",revelation:"مكية",juz:25,fr:"az-ZOUKHROUF"},
-  {n:44,ar:"الدخان",en:"Ad-Dukhan",meaning:"The Smoke",verses:59,type:"Meccan",revelation:"مكية",juz:25,fr:"ad-dou-KHAAN"},
-  {n:45,ar:"الجاثية",en:"Al-Jathiyah",meaning:"The Crouching",verses:37,type:"Meccan",revelation:"مكية",juz:25,fr:"al-jaa-thi-YA"},
-  {n:46,ar:"الأحقاف",en:"Al-Ahqaf",meaning:"The Wind-Curved Sandhills",verses:35,type:"Meccan",revelation:"مكية",juz:26,fr:"al-ah-QAAF"},
+  {n:13,ar:"الرعد",en:"Ar-Ra'd",meaning:"Le Tonnerre",verses:43,type:"Medinan",revelation:"مدنية",juz:13,fr:"ar-RA'd"},
+  {n:14,ar:"إبراهيم",en:"Ibrahim",meaning:"Ibrahim",verses:52,type:"Meccan",revelation:"مكية",juz:13,fr:"ib-raa-HEEM"},
+  {n:15,ar:"الحجر",en:"Al-Hijr",meaning:"Al-Hijr",verses:99,type:"Meccan",revelation:"مكية",juz:14,fr:"al-HIJR"},
+  {n:16,ar:"النحل",en:"An-Nahl",meaning:"L'Abeille",verses:128,type:"Meccan",revelation:"مكية",juz:14,fr:"an-NAHL"},
+  {n:17,ar:"الإسراء",en:"Al-Isra",meaning:"Le Voyage Nocturne",verses:111,type:"Meccan",revelation:"مكية",juz:15,fr:"al-is-RAA"},
+  {n:18,ar:"الكهف",en:"Al-Kahf",meaning:"La Caverne",verses:110,type:"Meccan",revelation:"مكية",juz:15,fr:"al-KAHF"},
+  {n:19,ar:"مريم",en:"Maryam",meaning:"Marie",verses:98,type:"Meccan",revelation:"مكية",juz:16,fr:"MAR-yam"},
+  {n:20,ar:"طه",en:"Ta-Ha",meaning:"Tâ-Hâ",verses:135,type:"Meccan",revelation:"مكية",juz:16,fr:"TAA-HAA"},
+  {n:21,ar:"الأنبياء",en:"Al-Anbiya",meaning:"Les Prophètes",verses:112,type:"Meccan",revelation:"مكية",juz:17,fr:"al-an-bi-YAA"},
+  {n:22,ar:"الحج",en:"Al-Hajj",meaning:"Le Pèlerinage",verses:78,type:"Medinan",revelation:"مدنية",juz:17,fr:"al-HAJJ"},
+  {n:23,ar:"المؤمنون",en:"Al-Mu'minun",meaning:"Les Croyants",verses:118,type:"Meccan",revelation:"مكية",juz:18,fr:"al-mou'-mi-NOUN"},
+  {n:24,ar:"النور",en:"An-Nur",meaning:"La Lumière",verses:64,type:"Medinan",revelation:"مدنية",juz:18,fr:"an-NOUR"},
+  {n:25,ar:"الفرقان",en:"Al-Furqan",meaning:"Le Discernement",verses:77,type:"Meccan",revelation:"مكية",juz:18,fr:"al-four-QAAN"},
+  {n:26,ar:"الشعراء",en:"Ash-Shu'ara",meaning:"Les Poètes",verses:227,type:"Meccan",revelation:"مكية",juz:19,fr:"ach-chou-'a-RAA"},
+  {n:27,ar:"النمل",en:"An-Naml",meaning:"La Fourmi",verses:93,type:"Meccan",revelation:"مكية",juz:19,fr:"an-NAML"},
+  {n:28,ar:"القصص",en:"Al-Qasas",meaning:"Les Récits",verses:88,type:"Meccan",revelation:"مكية",juz:20,fr:"al-qa-SASS"},
+  {n:29,ar:"العنكبوت",en:"Al-Ankabut",meaning:"L'Araignée",verses:69,type:"Meccan",revelation:"مكية",juz:20,fr:"al-'an-ka-BOUT"},
+  {n:30,ar:"الروم",en:"Ar-Rum",meaning:"Les Romains",verses:60,type:"Meccan",revelation:"مكية",juz:21,fr:"ar-ROUM"},
+  {n:31,ar:"لقمان",en:"Luqman",meaning:"Luqmân",verses:34,type:"Meccan",revelation:"مكية",juz:21,fr:"louk-MAAN"},
+  {n:32,ar:"السجدة",en:"As-Sajdah",meaning:"La Prosternation",verses:30,type:"Meccan",revelation:"مكية",juz:21,fr:"as-saj-DA"},
+  {n:33,ar:"الأحزاب",en:"Al-Ahzab",meaning:"Les Coalisés",verses:73,type:"Medinan",revelation:"مدنية",juz:21,fr:"al-ah-ZAAB"},
+  {n:34,ar:"سبأ",en:"Saba",meaning:"Saba'",verses:54,type:"Meccan",revelation:"مكية",juz:22,fr:"sa-BA"},
+  {n:35,ar:"فاطر",en:"Fatir",meaning:"Le Créateur",verses:45,type:"Meccan",revelation:"مكية",juz:22,fr:"FAA-tir"},
+  {n:36,ar:"يس",en:"Ya-Sin",meaning:"Yâ-Sîn",verses:83,type:"Meccan",revelation:"مكية",juz:22,fr:"YAA-SEEN"},
+  {n:37,ar:"الصافات",en:"As-Saffat",meaning:"Ceux qui font des rangs",verses:182,type:"Meccan",revelation:"مكية",juz:23,fr:"as-saa-FAAT"},
+  {n:38,ar:"ص",en:"Sad",meaning:"La Lettre Sâd",verses:88,type:"Meccan",revelation:"مكية",juz:23,fr:"SAAD"},
+  {n:39,ar:"الزمر",en:"Az-Zumar",meaning:"Les Groupes",verses:75,type:"Meccan",revelation:"مكية",juz:23,fr:"az-ZOU-mar"},
+  {n:40,ar:"غافر",en:"Ghafir",meaning:"Le Pardonneur",verses:85,type:"Meccan",revelation:"مكية",juz:24,fr:"GHAA-fir"},
+  {n:41,ar:"فصلت",en:"Fussilat",meaning:"Détaillés",verses:54,type:"Meccan",revelation:"مكية",juz:24,fr:"fouss-si-LAT"},
+  {n:42,ar:"الشورى",en:"Ash-Shura",meaning:"La Consultation",verses:53,type:"Meccan",revelation:"مكية",juz:25,fr:"ach-CHOU-raa"},
+  {n:43,ar:"الزخرف",en:"Az-Zukhruf",meaning:"Les Ornements d'or",verses:89,type:"Meccan",revelation:"مكية",juz:25,fr:"az-ZOUKHROUF"},
+  {n:44,ar:"الدخان",en:"Ad-Dukhan",meaning:"La Fumée",verses:59,type:"Meccan",revelation:"مكية",juz:25,fr:"ad-dou-KHAAN"},
+  {n:45,ar:"الجاثية",en:"Al-Jathiyah",meaning:"L'Agenouillée",verses:37,type:"Meccan",revelation:"مكية",juz:25,fr:"al-jaa-thi-YA"},
+  {n:46,ar:"الأحقاف",en:"Al-Ahqaf",meaning:"Les Dunes",verses:35,type:"Meccan",revelation:"مكية",juz:26,fr:"al-ah-QAAF"},
   {n:47,ar:"محمد",en:"Muhammad",meaning:"Muhammad",verses:38,type:"Medinan",revelation:"مدنية",juz:26,fr:"mo-HAM-mad"},
-  {n:48,ar:"الفتح",en:"Al-Fath",meaning:"The Victory",verses:29,type:"Medinan",revelation:"مدنية",juz:26,fr:"al-FATH"},
-  {n:49,ar:"الحجرات",en:"Al-Hujurat",meaning:"The Rooms",verses:18,type:"Medinan",revelation:"مدنية",juz:26,fr:"al-hou-jou-RAAT"},
-  {n:50,ar:"ق",en:"Qaf",meaning:"The Letter Qaf",verses:45,type:"Meccan",revelation:"مكية",juz:26,fr:"QAAF"},
-  {n:51,ar:"الذاريات",en:"Adh-Dhariyat",meaning:"The Winnowing Winds",verses:60,type:"Meccan",revelation:"مكية",juz:26,fr:"adh-dhaa-ri-YAAT"},
-  {n:52,ar:"الطور",en:"At-Tur",meaning:"The Mount",verses:49,type:"Meccan",revelation:"مكية",juz:27,fr:"at-TOUR"},
-  {n:53,ar:"النجم",en:"An-Najm",meaning:"The Star",verses:62,type:"Meccan",revelation:"مكية",juz:27,fr:"an-NAJM"},
-  {n:54,ar:"القمر",en:"Al-Qamar",meaning:"The Moon",verses:55,type:"Meccan",revelation:"مكية",juz:27,fr:"al-QA-mar"},
-  {n:55,ar:"الرحمن",en:"Ar-Rahman",meaning:"The Beneficent",verses:78,type:"Medinan",revelation:"مدنية",juz:27,fr:"ar-rah-MAAN"},
-  {n:56,ar:"الواقعة",en:"Al-Waqi'ah",meaning:"The Inevitable",verses:96,type:"Meccan",revelation:"مكية",juz:27,fr:"al-waa-qi-'A"},
-  {n:57,ar:"الحديد",en:"Al-Hadid",meaning:"The Iron",verses:29,type:"Medinan",revelation:"مدنية",juz:27,fr:"al-ha-DEED"},
-  {n:58,ar:"المجادلة",en:"Al-Mujadila",meaning:"The Pleading Woman",verses:22,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-mou-jaa-di-LA"},
-  {n:59,ar:"الحشر",en:"Al-Hashr",meaning:"The Exile",verses:24,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-HACHR"},
-  {n:60,ar:"الممتحنة",en:"Al-Mumtahanah",meaning:"She That Is To Be Examined",verses:13,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-moum-ta-HA-na"},
-  {n:61,ar:"الصف",en:"As-Saf",meaning:"The Ranks",verses:14,type:"Medinan",revelation:"مدنية",juz:28,fr:"as-SAFF"},
-  {n:62,ar:"الجمعة",en:"Al-Jumu'ah",meaning:"The Congregation",verses:11,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-jou-MOU-'a"},
-  {n:63,ar:"المنافقون",en:"Al-Munafiqun",meaning:"The Hypocrites",verses:11,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-mou-naa-fi-QOUN"},
-  {n:64,ar:"التغابن",en:"At-Taghabun",meaning:"The Mutual Disillusion",verses:18,type:"Medinan",revelation:"مدنية",juz:28,fr:"at-ta-GHAA-boun"},
-  {n:65,ar:"الطلاق",en:"At-Talaq",meaning:"The Divorce",verses:12,type:"Medinan",revelation:"مدنية",juz:28,fr:"at-ta-LAAQ"},
-  {n:66,ar:"التحريم",en:"At-Tahrim",meaning:"The Prohibition",verses:12,type:"Medinan",revelation:"مدنية",juz:28,fr:"at-tah-REEM"},
-  {n:67,ar:"الملك",en:"Al-Mulk",meaning:"The Sovereignty",verses:30,type:"Meccan",revelation:"مكية",juz:29,fr:"al-MOULK"},
-  {n:68,ar:"القلم",en:"Al-Qalam",meaning:"The Pen",verses:52,type:"Meccan",revelation:"مكية",juz:29,fr:"al-QA-lam"},
-  {n:69,ar:"الحاقة",en:"Al-Haqqah",meaning:"The Reality",verses:52,type:"Meccan",revelation:"مكية",juz:29,fr:"al-haaq-QA"},
-  {n:70,ar:"المعارج",en:"Al-Ma'arij",meaning:"The Ascending Stairways",verses:44,type:"Meccan",revelation:"مكية",juz:29,fr:"al-ma-'AA-rij"},
-  {n:71,ar:"نوح",en:"Nuh",meaning:"Noah",verses:28,type:"Meccan",revelation:"مكية",juz:29,fr:"NOUH"},
-  {n:72,ar:"الجن",en:"Al-Jinn",meaning:"The Jinn",verses:28,type:"Meccan",revelation:"مكية",juz:29,fr:"al-JINN"},
-  {n:73,ar:"المزمل",en:"Al-Muzzammil",meaning:"The Enshrouded One",verses:20,type:"Meccan",revelation:"مكية",juz:29,fr:"al-mouz-ZAM-mil"},
-  {n:74,ar:"المدثر",en:"Al-Muddaththir",meaning:"The Cloaked One",verses:56,type:"Meccan",revelation:"مكية",juz:29,fr:"al-mou-DATH-thir"},
-  {n:75,ar:"القيامة",en:"Al-Qiyamah",meaning:"The Resurrection",verses:40,type:"Meccan",revelation:"مكية",juz:29,fr:"al-qi-YAA-ma"},
-  {n:76,ar:"الإنسان",en:"Al-Insan",meaning:"The Man",verses:31,type:"Medinan",revelation:"مدنية",juz:29,fr:"al-in-SAAN"},
-  {n:77,ar:"المرسلات",en:"Al-Mursalat",meaning:"The Emissaries",verses:50,type:"Meccan",revelation:"مكية",juz:29,fr:"al-mour-sa-LAAT"},
-  {n:78,ar:"النبأ",en:"An-Naba",meaning:"The Tidings",verses:40,type:"Meccan",revelation:"مكية",juz:30,fr:"an-NA-ba"},
-  {n:79,ar:"النازعات",en:"An-Nazi'at",meaning:"Those Who Drag Forth",verses:46,type:"Meccan",revelation:"مكية",juz:30,fr:"an-naa-zi-'AAT"},
-  {n:80,ar:"عبس",en:"Abasa",meaning:"He Frowned",verses:42,type:"Meccan",revelation:"مكية",juz:30,fr:"'a-BA-sa"},
-  {n:81,ar:"التكوير",en:"At-Takwir",meaning:"The Overthrowing",verses:29,type:"Meccan",revelation:"مكية",juz:30,fr:"at-tak-WEER"},
-  {n:82,ar:"الانفطار",en:"Al-Infitar",meaning:"The Cleaving",verses:19,type:"Meccan",revelation:"مكية",juz:30,fr:"al-in-fi-TAAR"},
-  {n:83,ar:"المطففين",en:"Al-Mutaffifin",meaning:"The Defrauding",verses:36,type:"Meccan",revelation:"مكية",juz:30,fr:"al-mou-taf-fi-FEEN"},
-  {n:84,ar:"الانشقاق",en:"Al-Inshiqaq",meaning:"The Sundering",verses:25,type:"Meccan",revelation:"مكية",juz:30,fr:"al-inch-qi-QAAQ"},
-  {n:85,ar:"البروج",en:"Al-Buruj",meaning:"The Mansions of the Stars",verses:22,type:"Meccan",revelation:"مكية",juz:30,fr:"al-bou-ROUJ"},
-  {n:86,ar:"الطارق",en:"At-Tariq",meaning:"The Morning Star",verses:17,type:"Meccan",revelation:"مكية",juz:30,fr:"at-TAA-riq"},
-  {n:87,ar:"الأعلى",en:"Al-A'la",meaning:"The Most High",verses:19,type:"Meccan",revelation:"مكية",juz:30,fr:"al-a'-LAA"},
-  {n:88,ar:"الغاشية",en:"Al-Ghashiyah",meaning:"The Overwhelming",verses:26,type:"Meccan",revelation:"مكية",juz:30,fr:"al-ghaa-chi-YA"},
-  {n:89,ar:"الفجر",en:"Al-Fajr",meaning:"The Dawn",verses:30,type:"Meccan",revelation:"مكية",juz:30,fr:"al-FAJR"},
-  {n:90,ar:"البلد",en:"Al-Balad",meaning:"The City",verses:20,type:"Meccan",revelation:"مكية",juz:30,fr:"al-BA-lad"},
-  {n:91,ar:"الشمس",en:"Ash-Shams",meaning:"The Sun",verses:15,type:"Meccan",revelation:"مكية",juz:30,fr:"ach-CHAMS"},
-  {n:92,ar:"الليل",en:"Al-Layl",meaning:"The Night",verses:21,type:"Meccan",revelation:"مكية",juz:30,fr:"al-LAYL"},
-  {n:93,ar:"الضحى",en:"Ad-Duha",meaning:"The Morning Hours",verses:11,type:"Meccan",revelation:"مكية",juz:30,fr:"ad-dou-HAA"},
-  {n:94,ar:"الشرح",en:"Ash-Sharh",meaning:"The Relief",verses:8,type:"Meccan",revelation:"مكية",juz:30,fr:"ach-CHARH"},
-  {n:95,ar:"التين",en:"At-Tin",meaning:"The Fig",verses:8,type:"Meccan",revelation:"مكية",juz:30,fr:"at-TEEN"},
-  {n:96,ar:"العلق",en:"Al-Alaq",meaning:"The Clot",verses:19,type:"Meccan",revelation:"مكية",juz:30,fr:"al-'a-LAQ"},
-  {n:97,ar:"القدر",en:"Al-Qadr",meaning:"The Power",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-QA-dr"},
-  {n:98,ar:"البينة",en:"Al-Bayyinah",meaning:"The Clear Proof",verses:8,type:"Medinan",revelation:"مدنية",juz:30,fr:"al-bay-yi-NA"},
-  {n:99,ar:"الزلزلة",en:"Az-Zalzalah",meaning:"The Earthquake",verses:8,type:"Medinan",revelation:"مدنية",juz:30,fr:"az-zal-ZA-la"},
-  {n:100,ar:"العاديات",en:"Al-Adiyat",meaning:"The Courser",verses:11,type:"Meccan",revelation:"مكية",juz:30,fr:"al-'aa-di-YAAT"},
-  {n:101,ar:"القارعة",en:"Al-Qari'ah",meaning:"The Calamity",verses:11,type:"Meccan",revelation:"مكية",juz:30,fr:"al-qaa-ri-'A"},
-  {n:102,ar:"التكاثر",en:"At-Takathur",meaning:"The Rivalry",verses:8,type:"Meccan",revelation:"مكية",juz:30,fr:"at-ta-KA-thour"},
-  {n:103,ar:"العصر",en:"Al-Asr",meaning:"The Declining Day",verses:3,type:"Meccan",revelation:"مكية",juz:30,fr:"al-'ASR"},
-  {n:104,ar:"الهمزة",en:"Al-Humazah",meaning:"The Traducer",verses:9,type:"Meccan",revelation:"مكية",juz:30,fr:"al-hou-MA-za"},
-  {n:105,ar:"الفيل",en:"Al-Fil",meaning:"The Elephant",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-FEEL"},
+  {n:48,ar:"الفتح",en:"Al-Fath",meaning:"La Victoire",verses:29,type:"Medinan",revelation:"مدنية",juz:26,fr:"al-FATH"},
+  {n:49,ar:"الحجرات",en:"Al-Hujurat",meaning:"Les Appartements",verses:18,type:"Medinan",revelation:"مدنية",juz:26,fr:"al-hou-jou-RAAT"},
+  {n:50,ar:"ق",en:"Qaf",meaning:"La Lettre Qâf",verses:45,type:"Meccan",revelation:"مكية",juz:26,fr:"QAAF"},
+  {n:51,ar:"الذاريات",en:"Adh-Dhariyat",meaning:"Les Vents Dispersants",verses:60,type:"Meccan",revelation:"مكية",juz:26,fr:"adh-dhaa-ri-YAAT"},
+  {n:52,ar:"الطور",en:"At-Tur",meaning:"Le Mont",verses:49,type:"Meccan",revelation:"مكية",juz:27,fr:"at-TOUR"},
+  {n:53,ar:"النجم",en:"An-Najm",meaning:"L'Étoile",verses:62,type:"Meccan",revelation:"مكية",juz:27,fr:"an-NAJM"},
+  {n:54,ar:"القمر",en:"Al-Qamar",meaning:"La Lune",verses:55,type:"Meccan",revelation:"مكية",juz:27,fr:"al-QA-mar"},
+  {n:55,ar:"الرحمن",en:"Ar-Rahman",meaning:"Le Miséricordieux",verses:78,type:"Medinan",revelation:"مدنية",juz:27,fr:"ar-rah-MAAN"},
+  {n:56,ar:"الواقعة",en:"Al-Waqi'ah",meaning:"L'Événement",verses:96,type:"Meccan",revelation:"مكية",juz:27,fr:"al-waa-qi-'A"},
+  {n:57,ar:"الحديد",en:"Al-Hadid",meaning:"Le Fer",verses:29,type:"Medinan",revelation:"مدنية",juz:27,fr:"al-ha-DEED"},
+  {n:58,ar:"المجادلة",en:"Al-Mujadila",meaning:"La Femme qui plaide",verses:22,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-mou-jaa-di-LA"},
+  {n:59,ar:"الحشر",en:"Al-Hashr",meaning:"Le Rassemblement",verses:24,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-HACHR"},
+  {n:60,ar:"الممتحنة",en:"Al-Mumtahanah",meaning:"L'Éprouvée",verses:13,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-moum-ta-HA-na"},
+  {n:61,ar:"الصف",en:"As-Saf",meaning:"Les Rangs",verses:14,type:"Medinan",revelation:"مدنية",juz:28,fr:"as-SAFF"},
+  {n:62,ar:"الجمعة",en:"Al-Jumu'ah",meaning:"Le Vendredi",verses:11,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-jou-MOU-'a"},
+  {n:63,ar:"المنافقون",en:"Al-Munafiqun",meaning:"Les Hypocrites",verses:11,type:"Medinan",revelation:"مدنية",juz:28,fr:"al-mou-naa-fi-QOUN"},
+  {n:64,ar:"التغابن",en:"At-Taghabun",meaning:"La Déception réciproque",verses:18,type:"Medinan",revelation:"مدنية",juz:28,fr:"at-ta-GHAA-boun"},
+  {n:65,ar:"الطلاق",en:"At-Talaq",meaning:"Le Divorce",verses:12,type:"Medinan",revelation:"مدنية",juz:28,fr:"at-ta-LAAQ"},
+  {n:66,ar:"التحريم",en:"At-Tahrim",meaning:"L'Interdiction",verses:12,type:"Medinan",revelation:"مدنية",juz:28,fr:"at-tah-REEM"},
+  {n:67,ar:"الملك",en:"Al-Mulk",meaning:"La Royauté",verses:30,type:"Meccan",revelation:"مكية",juz:29,fr:"al-MOULK"},
+  {n:68,ar:"القلم",en:"Al-Qalam",meaning:"Le Calame",verses:52,type:"Meccan",revelation:"مكية",juz:29,fr:"al-QA-lam"},
+  {n:69,ar:"الحاقة",en:"Al-Haqqah",meaning:"La Vérité inéluctable",verses:52,type:"Meccan",revelation:"مكية",juz:29,fr:"al-haaq-QA"},
+  {n:70,ar:"المعارج",en:"Al-Ma'arij",meaning:"Les Voies d'ascension",verses:44,type:"Meccan",revelation:"مكية",juz:29,fr:"al-ma-'AA-rij"},
+  {n:71,ar:"نوح",en:"Nuh",meaning:"Noé",verses:28,type:"Meccan",revelation:"مكية",juz:29,fr:"NOUH"},
+  {n:72,ar:"الجن",en:"Al-Jinn",meaning:"Les Djinns",verses:28,type:"Meccan",revelation:"مكية",juz:29,fr:"al-JINN"},
+  {n:73,ar:"المزمل",en:"Al-Muzzammil",meaning:"L'Enveloppé",verses:20,type:"Meccan",revelation:"مكية",juz:29,fr:"al-mouz-ZAM-mil"},
+  {n:74,ar:"المدثر",en:"Al-Muddaththir",meaning:"Le Revêtu",verses:56,type:"Meccan",revelation:"مكية",juz:29,fr:"al-mou-DATH-thir"},
+  {n:75,ar:"القيامة",en:"Al-Qiyamah",meaning:"La Résurrection",verses:40,type:"Meccan",revelation:"مكية",juz:29,fr:"al-qi-YAA-ma"},
+  {n:76,ar:"الإنسان",en:"Al-Insan",meaning:"L'Homme",verses:31,type:"Medinan",revelation:"مدنية",juz:29,fr:"al-in-SAAN"},
+  {n:77,ar:"المرسلات",en:"Al-Mursalat",meaning:"Les Envoyés",verses:50,type:"Meccan",revelation:"مكية",juz:29,fr:"al-mour-sa-LAAT"},
+  {n:78,ar:"النبأ",en:"An-Naba",meaning:"La Nouvelle",verses:40,type:"Meccan",revelation:"مكية",juz:30,fr:"an-NA-ba"},
+  {n:79,ar:"النازعات",en:"An-Nazi'at",meaning:"Ceux qui arrachent",verses:46,type:"Meccan",revelation:"مكية",juz:30,fr:"an-naa-zi-'AAT"},
+  {n:80,ar:"عبس",en:"Abasa",meaning:"Il s'est renfrogné",verses:42,type:"Meccan",revelation:"مكية",juz:30,fr:"'a-BA-sa"},
+  {n:81,ar:"التكوير",en:"At-Takwir",meaning:"L'Enroulement",verses:29,type:"Meccan",revelation:"مكية",juz:30,fr:"at-tak-WEER"},
+  {n:82,ar:"الانفطار",en:"Al-Infitar",meaning:"La Déchirure",verses:19,type:"Meccan",revelation:"مكية",juz:30,fr:"al-in-fi-TAAR"},
+  {n:83,ar:"المطففين",en:"Al-Mutaffifin",meaning:"Les Fraudeurs",verses:36,type:"Meccan",revelation:"مكية",juz:30,fr:"al-mou-taf-fi-FEEN"},
+  {n:84,ar:"الانشقاق",en:"Al-Inshiqaq",meaning:"La Fissuration",verses:25,type:"Meccan",revelation:"مكية",juz:30,fr:"al-inch-qi-QAAQ"},
+  {n:85,ar:"البروج",en:"Al-Buruj",meaning:"Les Constellations",verses:22,type:"Meccan",revelation:"مكية",juz:30,fr:"al-bou-ROUJ"},
+  {n:86,ar:"الطارق",en:"At-Tariq",meaning:"L'Astre nocturne",verses:17,type:"Meccan",revelation:"مكية",juz:30,fr:"at-TAA-riq"},
+  {n:87,ar:"الأعلى",en:"Al-A'la",meaning:"Le Très-Haut",verses:19,type:"Meccan",revelation:"مكية",juz:30,fr:"al-a'-LAA"},
+  {n:88,ar:"الغاشية",en:"Al-Ghashiyah",meaning:"L'Enveloppante",verses:26,type:"Meccan",revelation:"مكية",juz:30,fr:"al-ghaa-chi-YA"},
+  {n:89,ar:"الفجر",en:"Al-Fajr",meaning:"L'Aube",verses:30,type:"Meccan",revelation:"مكية",juz:30,fr:"al-FAJR"},
+  {n:90,ar:"البلد",en:"Al-Balad",meaning:"La Cité",verses:20,type:"Meccan",revelation:"مكية",juz:30,fr:"al-BA-lad"},
+  {n:91,ar:"الشمس",en:"Ash-Shams",meaning:"Le Soleil",verses:15,type:"Meccan",revelation:"مكية",juz:30,fr:"ach-CHAMS"},
+  {n:92,ar:"الليل",en:"Al-Layl",meaning:"La Nuit",verses:21,type:"Meccan",revelation:"مكية",juz:30,fr:"al-LAYL"},
+  {n:93,ar:"الضحى",en:"Ad-Duha",meaning:"Le Matin",verses:11,type:"Meccan",revelation:"مكية",juz:30,fr:"ad-dou-HAA"},
+  {n:94,ar:"الشرح",en:"Ash-Sharh",meaning:"L'Expansion",verses:8,type:"Meccan",revelation:"مكية",juz:30,fr:"ach-CHARH"},
+  {n:95,ar:"التين",en:"At-Tin",meaning:"Le Figuier",verses:8,type:"Meccan",revelation:"مكية",juz:30,fr:"at-TEEN"},
+  {n:96,ar:"العلق",en:"Al-Alaq",meaning:"L'Adhérence",verses:19,type:"Meccan",revelation:"مكية",juz:30,fr:"al-'a-LAQ"},
+  {n:97,ar:"القدر",en:"Al-Qadr",meaning:"La Nuit du Destin",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-QA-dr"},
+  {n:98,ar:"البينة",en:"Al-Bayyinah",meaning:"La Preuve évidente",verses:8,type:"Medinan",revelation:"مدنية",juz:30,fr:"al-bay-yi-NA"},
+  {n:99,ar:"الزلزلة",en:"Az-Zalzalah",meaning:"Le Tremblement de terre",verses:8,type:"Medinan",revelation:"مدنية",juz:30,fr:"az-zal-ZA-la"},
+  {n:100,ar:"العاديات",en:"Al-Adiyat",meaning:"Les Coursiers",verses:11,type:"Meccan",revelation:"مكية",juz:30,fr:"al-'aa-di-YAAT"},
+  {n:101,ar:"القارعة",en:"Al-Qari'ah",meaning:"La Calamité",verses:11,type:"Meccan",revelation:"مكية",juz:30,fr:"al-qaa-ri-'A"},
+  {n:102,ar:"التكاثر",en:"At-Takathur",meaning:"La Course aux richesses",verses:8,type:"Meccan",revelation:"مكية",juz:30,fr:"at-ta-KA-thour"},
+  {n:103,ar:"العصر",en:"Al-Asr",meaning:"Le Temps",verses:3,type:"Meccan",revelation:"مكية",juz:30,fr:"al-'ASR"},
+  {n:104,ar:"الهمزة",en:"Al-Humazah",meaning:"Le Calomniateur",verses:9,type:"Meccan",revelation:"مكية",juz:30,fr:"al-hou-MA-za"},
+  {n:105,ar:"الفيل",en:"Al-Fil",meaning:"L'Éléphant",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-FEEL"},
   {n:106,ar:"قريش",en:"Quraysh",meaning:"Quraysh",verses:4,type:"Meccan",revelation:"مكية",juz:30,fr:"qou-RAYCHE"},
-  {n:107,ar:"الماعون",en:"Al-Ma'un",meaning:"The Small Kindnesses",verses:7,type:"Meccan",revelation:"مكية",juz:30,fr:"al-maa-'OUN"},
-  {n:108,ar:"الكوثر",en:"Al-Kawthar",meaning:"A River in Paradise",verses:3,type:"Meccan",revelation:"مكية",juz:30,fr:"al-KAW-thar"},
-  {n:109,ar:"الكافرون",en:"Al-Kafirun",meaning:"The Disbelievers",verses:6,type:"Meccan",revelation:"مكية",juz:30,fr:"al-kaa-fi-ROUN"},
-  {n:110,ar:"النصر",en:"An-Nasr",meaning:"The Divine Support",verses:3,type:"Medinan",revelation:"مدنية",juz:30,fr:"an-NASR"},
-  {n:111,ar:"المسد",en:"Al-Masad",meaning:"The Palm Fibre",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-MA-sad"},
-  {n:112,ar:"الإخلاص",en:"Al-Ikhlas",meaning:"The Sincerity",verses:4,type:"Meccan",revelation:"مكية",juz:30,fr:"al-ikh-LAAS"},
-  {n:113,ar:"الفلق",en:"Al-Falaq",meaning:"The Daybreak",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-FA-laq"},
-  {n:114,ar:"الناس",en:"An-Nas",meaning:"The Mankind",verses:6,type:"Meccan",revelation:"مكية",juz:30,fr:"an-NAAS"},
+  {n:107,ar:"الماعون",en:"Al-Ma'un",meaning:"Les Ustensiles",verses:7,type:"Meccan",revelation:"مكية",juz:30,fr:"al-maa-'OUN"},
+  {n:108,ar:"الكوثر",en:"Al-Kawthar",meaning:"L'Abondance",verses:3,type:"Meccan",revelation:"مكية",juz:30,fr:"al-KAW-thar"},
+  {n:109,ar:"الكافرون",en:"Al-Kafirun",meaning:"Les Infidèles",verses:6,type:"Meccan",revelation:"مكية",juz:30,fr:"al-kaa-fi-ROUN"},
+  {n:110,ar:"النصر",en:"An-Nasr",meaning:"Le Secours",verses:3,type:"Medinan",revelation:"مدنية",juz:30,fr:"an-NASR"},
+  {n:111,ar:"المسد",en:"Al-Masad",meaning:"Les Fibres",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-MA-sad"},
+  {n:112,ar:"الإخلاص",en:"Al-Ikhlas",meaning:"Le Monothéisme pur",verses:4,type:"Meccan",revelation:"مكية",juz:30,fr:"al-ikh-LAAS"},
+  {n:113,ar:"الفلق",en:"Al-Falaq",meaning:"L'Aube",verses:5,type:"Meccan",revelation:"مكية",juz:30,fr:"al-FA-laq"},
+  {n:114,ar:"الناس",en:"An-Nas",meaning:"Les Hommes",verses:6,type:"Meccan",revelation:"مكية",juz:30,fr:"an-NAAS"},
 ];
 
 const NO_BASMALA = new Set([1, 9]);
@@ -607,7 +607,7 @@ export default function QuranReader() {
                   onClick={() => setLocalTrans(v => !v)}
                   style={toggleBtnStyle(localTrans, P.teal, P.tealBg, P.tealBr)}
                 >
-                  {localTrans ? <Icon.Eye/> : <Icon.EyeOff/>} EXPL.
+                  {localTrans ? <Icon.Eye/> : <Icon.EyeOff/>} TRAD.
                 </button>
               )}
             </div>
@@ -638,7 +638,7 @@ export default function QuranReader() {
           }}>
             <button
               onClick={() => toggleBookmark(selectedSurah.n, verse.num)}
-              title={bk ? "Remove bookmark" : "Bookmark"}
+              title={bk ? "Retirer le signet" : "Ajouter un signet"}
               style={{
                 width:26, height:26, borderRadius:6, cursor:"pointer",
                 border:`1px solid ${bk ? P.gold : P.br2}`,
@@ -649,7 +649,7 @@ export default function QuranReader() {
             >{bk ? "★" : "☆"}</button>
             <button
               onClick={() => setHighlightedVerse(hl ? null : verse.num)}
-              title="Highlight"
+              title="Surligner"
               style={{
                 width:26, height:26, borderRadius:6, cursor:"pointer",
                 border:`1px solid ${hl ? P.gold : P.br2}`,
@@ -693,7 +693,7 @@ export default function QuranReader() {
             </div>
             <div>
               <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:700, color:P.ink1 }}>القرآن الكريم</div>
-              <div style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", letterSpacing:"0.12em" }}>THE HOLY QURAN · 114 SURAHS</div>
+              <div style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", letterSpacing:"0.12em" }}>LE SAINT CORAN · 114 SOURATES</div>
             </div>
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:8, background:P.bg2, border:`1px solid ${P.br2}`, borderRadius:8, padding:"7px 11px" }}>
@@ -764,7 +764,7 @@ export default function QuranReader() {
               </div>
               <div>
                 <div style={{ fontSize:13, color:P.ink1, fontFamily:"'Cormorant Garamond',serif", fontWeight:700 }}>{j.name}</div>
-                <div style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui", marginTop:1 }}>Starts: {ALL_SURAHS.find(s=>s.n===j.start.s)?.en} : {j.start.v}</div>
+                <div style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui", marginTop:1 }}>Début : {ALL_SURAHS.find(s=>s.n===j.start.s)?.ar} : {j.start.v}</div>
               </div>
             </button>
           ))}
@@ -782,10 +782,10 @@ export default function QuranReader() {
           {selectedSurah ? (
             <>
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:700, color:P.ink1 }}>{selectedSurah.en}</span>
+                <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:700, color:P.ink1 }}>{selectedSurah.ar}</span>
                 <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:P.gold }}>{selectedSurah.ar}</span>
                 <span style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", background:P.bg3, border:`1px solid ${P.br2}`, borderRadius:5, padding:"2px 7px" }}>
-                  {selectedSurah.verses} verses · Juz' {selectedSurah.juz}
+                  {selectedSurah.verses} versets · Juz' {selectedSurah.juz}
                 </span>
               </div>
               <div style={{ flex:1 }}/>
@@ -806,7 +806,7 @@ export default function QuranReader() {
                 fontFamily:"system-ui", fontWeight:700, fontSize:10, transition:"all .15s",
                 display:"flex", alignItems:"center", gap:4
               }}>
-                {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} EXPL.
+                {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} TRAD.
               </button>
 
               {/* PRON. global toggle — only when API returned data */}
@@ -830,7 +830,7 @@ export default function QuranReader() {
             </>
           ) : (
             <span style={{ fontSize:13, color:P.ink3, fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic" }}>
-              اختر سورة — Select a surah to begin reading
+              اختر سورة — Sélectionnez une sourate pour commencer
             </span>
           )}
         </div>
@@ -873,8 +873,8 @@ export default function QuranReader() {
                 <OrnamentDivider/>
                 <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:P.ink2, marginTop:12, fontStyle:"italic" }}>الرَّحْمَٰنِ الرَّحِيمِ</div>
                 <div style={{ marginTop:28, fontSize:12, color:P.ink3, fontFamily:"system-ui", lineHeight:1.7, maxWidth:360 }}>
-                  Select any surah from the list on the left to begin your reading session.
-                  Use the toolbar to toggle pronunciation guides and translations.
+                  Sélectionnez une sourate dans la liste à gauche pour commencer votre lecture.
+                  Utilisez la barre d'outils pour afficher la prononciation et la traduction.
                 </div>
                 <div style={{ marginTop:24, display:"flex", justifyContent:"center", gap:16, flexWrap:"wrap" }}>
                   {[{n:1,label:"Al-Fatiha"},{n:36,label:"Ya-Sin"},{n:67,label:"Al-Mulk"},{n:112,label:"Al-Ikhlas"}].map(q => (
@@ -882,7 +882,7 @@ export default function QuranReader() {
                       padding:"8px 18px", borderRadius:9,
                       border:`1px solid ${P.goldBr}`, background:P.goldBg,
                       color:P.gold, fontFamily:"system-ui", fontSize:12, fontWeight:700, cursor:"pointer"
-                    }}>{q.label}</button>
+                    }}>{ALL_SURAHS[q.n-1].ar}</button>
                   ))}
                 </div>
               </div>
@@ -920,7 +920,7 @@ export default function QuranReader() {
                   </svg>
                 ))}
                 <div style={{ fontFamily:"system-ui", fontSize:9, fontWeight:700, color:P.ink3, letterSpacing:"0.15em", marginBottom:10 }}>
-                  {selectedSurah.revelation} · SURAH {selectedSurah.n} OF 114
+                  {selectedSurah.revelation} · SOURATE {selectedSurah.n} SUR 114
                 </div>
                 <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:36, fontWeight:700, color:P.gold, marginBottom:4, lineHeight:1.2 }}>
                   {selectedSurah.ar}
@@ -935,7 +935,7 @@ export default function QuranReader() {
                   </div>
                 )}
                 <div style={{ fontFamily:"system-ui", fontSize:11, color:P.ink3, fontStyle:"italic" }}>
-                  {selectedSurah.meaning} · {selectedSurah.verses} verses
+                  {selectedSurah.meaning} · {selectedSurah.verses} versets
                 </div>
                 <OrnamentDivider/>
               </div>
@@ -946,7 +946,7 @@ export default function QuranReader() {
                   <div style={{ display:"inline-block", padding:"14px 36px", background:P.goldBg, border:`1px solid ${P.goldBr}`, borderRadius:12 }}>
                     <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:24, color:P.gold, lineHeight:1.9 }}>{basmala.ar}</div>
                     <div style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", letterSpacing:"0.08em", marginTop:4 }}>
-                      BASMALA — In the name of Allah, the Most Gracious, the Most Merciful
+                      BASMALA — Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
                     </div>
                     <div style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui", fontStyle:"italic", marginTop:2 }}>
                       Biss-mill-aa-hir-rah-maa-nir-ra-HEEM
@@ -982,7 +982,7 @@ export default function QuranReader() {
                       color:P.gold, fontFamily:"system-ui", fontWeight:700, fontSize:12, cursor:"pointer",
                       display:"inline-flex", alignItems:"center", gap:8
                     }}>
-                      Suivant : {ALL_SURAHS[selectedSurah.n].en} <Icon.ChevR/>
+                      Suivant : {ALL_SURAHS[selectedSurah.n].ar} <Icon.ChevR/>
                     </button>
                   </div>
                 )}
