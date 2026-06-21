@@ -483,14 +483,14 @@ export default function QuranReader() {
     setLoading(true);
     if (contentRef.current) contentRef.current.scrollTop = 0;
     try {
-      const [arRes, enRes] = await Promise.all([
+      const [arRes, frRes] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/surah/${surah.n}`),
-        fetch(`https://api.alquran.cloud/v1/surah/${surah.n}/en.asad`),
+        fetch(`https://api.alquran.cloud/v1/surah/${surah.n}/fr.hamidullah`),
       ]);
-      const [arData, enData] = await Promise.all([arRes.json(), enRes.json()]);
+      const [arData, frData] = await Promise.all([arRes.json(), frRes.json()]);
       if (arData.code === 200) {
         const raw = arData.data.ayahs;
-        const enRaw = enData.data?.ayahs || [];
+        const frRaw = frData.data?.ayahs || [];
         let bas = null, mainVerses = raw;
         if (!NO_BASMALA.has(surah.n) && raw.length > 0 && isBasmala(raw[0].text)) {
           bas = { ar: raw[0].text, num: raw[0].numberInSurah };
@@ -499,11 +499,11 @@ export default function QuranReader() {
         setBasmala(bas);
         setVerses(mainVerses.map((v, i) => ({
           ar: v.text, num: v.numberInSurah,
-          en: enRaw[bas ? i+1 : i]?.text || ""
+          fr: frRaw[bas ? i+1 : i]?.text || ""
         })));
       }
     } catch(e) {
-      setVerses([{ ar: "تعذّر تحميل الآيات", num:1, en:"Could not load." }]);
+      setVerses([{ ar: "تعذّر تحميل الآيات", num:1, fr:"Impossible de charger les versets." }]);
     }
     setLoading(false);
   }
@@ -602,7 +602,7 @@ export default function QuranReader() {
               )}
 
               {/* EXPL. toggle — teal, same pill pattern */}
-              {verse.en && (
+              {verse.fr && (
                 <button
                   onClick={() => setLocalTrans(v => !v)}
                   style={toggleBtnStyle(localTrans, P.teal, P.tealBg, P.tealBr)}
@@ -613,7 +613,7 @@ export default function QuranReader() {
             </div>
 
             {/* Translation panel — slides in under the button row */}
-            {localTrans && verse.en && (
+            {localTrans && verse.fr && (
               <div style={{
                 background:P.tealBg, border:`1px solid ${P.tealBr}`,
                 borderRadius:8, padding:"9px 13px", marginTop:4,
@@ -626,7 +626,7 @@ export default function QuranReader() {
                 <span style={{
                   fontFamily:"'Cormorant Garamond',serif", fontSize:14,
                   color:"rgba(30,200,150,0.85)", fontStyle:"italic", lineHeight:1.7
-                }}>{verse.en}</span>
+                }}>{verse.fr}</span>
               </div>
             )}
           </div>
