@@ -35,7 +35,7 @@ const ROADMAP = [
         id:1, title:"Alphabet Arabe & Phonétique", titleAr:"الحروف والصوتيات",
         category:"Arabe", level:"Débutant", duration:"10h", rating:4.9, students:"1.2k",
         instructor:"Pr. Yassine", accent:C.teal, icon:"أ",
-        image:"https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1696513553729-17129c427356?auto=format&fit=crop&w=1200&q=90",
         tags:["Écriture","Oral"],
         description:"Maîtrisez les 28 lettres arabes, leurs formes et leur phonétique.",
         recommended:true
@@ -44,7 +44,7 @@ const ROADMAP = [
         id:7, title:"L'Art du Tashkeel Arabe", titleAr:"فن التشكيل العربي",
         category:"Arabe", level:"Débutant", duration:"12h", rating:4.6, students:"450",
         instructor:"Ustadh Kamal", accent:"#9d7bea", icon:"خ",
-        image:"https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1761639935382-43452f278898?auto=format&fit=crop&w=1200&q=90",
         tags:["Art","Créativité"],
         description:"Transformez l'écriture en art avec les styles Naskh et Thuluth.",
         recommended:false
@@ -58,7 +58,7 @@ const ROADMAP = [
         id:4, title:"Grammaire : Tome 1 de Médine", titleAr:"النحو العربي",
         category:"Arabe", level:"Débutant", duration:"25h", rating:4.7, students:"2.1k",
         instructor:"Dr. Amira", accent:"#4fadd4", icon:"ن",
-        image:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1720701575003-51dafcf39cb4?auto=format&fit=crop&w=1200&q=90",
         tags:["Syntaxe","Vocabulaire"],
         description:"Bases solides en grammaire arabe avec la méthode de l'Université de Médine.",
         recommended:true
@@ -67,7 +67,7 @@ const ROADMAP = [
         id:8, title:"Devenir Musulman : Les Bases", titleAr:"أساسيات الإسلام",
         category:"Sciences", level:"Débutant", duration:"14h", rating:4.9, students:"1.2k",
         instructor:"Dr. Nadia", accent:"#2ab89a", icon:"☪",
-        image:"https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1513072064285-240f87fa81e8?auto=format&fit=crop&w=1200&q=90",
         tags:["Conversion","Fondements"],
         description:"La Chahada, les 5 piliers, la prière et comment vivre en Islam.",
         recommended:false
@@ -81,7 +81,7 @@ const ROADMAP = [
         id:2, title:"Tajwid : Récitation Sacrée", titleAr:"أحكام التجويد",
         category:"Coran", level:"Intermédiaire", duration:"15h", rating:4.8, students:"850",
         instructor:"Cheikh Omar", accent:"#9d7bea", icon:"ت",
-        image:"https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=1200&q=90",
         tags:["Règles","Mélodie"],
         description:"Récitez le Coran avec perfection grâce aux règles du Tajwid.",
         recommended:true
@@ -90,7 +90,7 @@ const ROADMAP = [
         id:3, title:"Mémorisation : Les Sourates", titleAr:"حفظ القرآن",
         category:"Coran", level:"Tous niveaux", duration:"20h", rating:5.0, students:"3.4k",
         instructor:"Pr. Fatma", accent:C.gold, icon:"س",
-        image:"https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1773738495671-79b90e39dc54?auto=format&fit=crop&w=1200&q=90",
         tags:["Hifz","Pratique"],
         description:"Mémorisez les sourates courtes avec des techniques éprouvées.",
         recommended:false
@@ -104,7 +104,7 @@ const ROADMAP = [
         id:9, title:"Arabe Moderne Standard", titleAr:"اللغة العربية الفصحى",
         category:"Arabe", level:"Intermédiaire", duration:"30h", rating:4.7, students:"1.8k",
         instructor:"Prof. Leila", accent:"#4fadd4", icon:"ع",
-        image:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1670852738521-701618bb5eb4?auto=format&fit=crop&w=1200&q=90",
         tags:["Conversation","Presse"],
         description:"Maîtrisez l'arabe moderne pour lire la presse et communiquer.",
         recommended:true
@@ -113,7 +113,7 @@ const ROADMAP = [
         id:5, title:"Introduction au Fiqh", titleAr:"أصول الفقه",
         category:"Sciences", level:"Intermédiaire", duration:"12h", rating:4.9, students:"600",
         instructor:"Dr. Hassan", accent:"#d4654a", icon:"ف",
-        image:"https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1744957280831-8d30f63914b8?auto=format&fit=crop&w=1200&q=90",
         tags:["Législation","Éthique"],
         description:"Les fondements de la jurisprudence islamique.",
         recommended:false
@@ -122,7 +122,7 @@ const ROADMAP = [
         id:6, title:"Sira : Vie du Prophète ﷺ", titleAr:"السيرة النبوية",
         category:"Sciences", level:"Tous niveaux", duration:"18h", rating:4.9, students:"1.5k",
         instructor:"Pr. Walid", accent:C.teal, icon:"م",
-        image:"https://images.unsplash.com/photo-1564349683136-77e08bef1ef1?auto=format&fit=crop&w=1200&q=90",
+        image:"https://images.unsplash.com/photo-1605976528013-638e49b6599f?auto=format&fit=crop&w=1200&q=90",
         tags:["Histoire","Éthique"],
         description:"Un voyage à travers la vie du Prophète Muhammad ﷺ.",
         recommended:false
