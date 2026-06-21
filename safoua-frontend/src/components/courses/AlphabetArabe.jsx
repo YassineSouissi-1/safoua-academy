@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Volume2, RotateCcw, CheckCircle, Zap, Mic, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { api, getUser } from "../../utils/auth";
 // arabicTTS utility used by other components (Dictionary, Grammaire, Tajwid)
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const COURSE_TITLE = "Alphabet Arabe & Phonétique";
+export const COURSE_TITLE = "Alphabet Arabe & Phonétique";
+export const MODULE_LETTRES = "Alphabet Arabe & Phonétique";
 
 // Saves a completed lesson key to MongoDB via /api/update-progress
 async function saveProgress(lessonKey) {
@@ -15,7 +17,7 @@ async function saveProgress(lessonKey) {
   }
 }
 
-const ARABIC_LETTERS = [
+export const ARABIC_LETTERS = [
   { letter: "ا", name: "Alif", transcription: "aa", ar: "ألف", tts: "أَلِف", fr: "Alif", en: "Alif", forms: ["ا","ـا","ـا","ا"], tip: "Comme un 'A' long. La lettre la plus simple: un simple trait vertical.", color: "#10b981", audioKey: "alif" },
   { letter: "ب", name: "Ba", transcription: "b", ar: "باء", tts: "بَاء", fr: "Ba", en: "Ba", forms: ["بـ","ـبـ","ـب","ب"], tip: "Comme le 'B' français. Un bol avec un point en dessous.", color: "#3b82f6", audioKey: "ba" },
   { letter: "ت", name: "Ta", transcription: "t", ar: "تاء", tts: "تَاء", fr: "Ta", en: "Ta", forms: ["تـ","ـتـ","ـت","ت"], tip: "Comme le 'T' français. Même forme que Ba mais DEUX points au-dessus.", color: "#8b5cf6", audioKey: "ta" },
@@ -757,6 +759,29 @@ function AlphabetArabe() {
   const selectedLetter = ARABIC_LETTERS[selectedLetterIdx];
   const currentQuiz = quizzes[quizStep];
 
+  // Load already-learned letters (and practiced ones) from the backend on mount —
+  // without this, progress always reset to 0 when leaving and reentering the course.
+  useEffect(() => {
+    if (!getUser()) return;
+    api.get("/api/me")
+      .then(r => {
+        const doneSet = new Set(r.data.completedLessons || []);
+        const learnedIdx = new Set();
+        const practicedIdx = new Set();
+        ARABIC_LETTERS.forEach((letter, i) => {
+          if (doneSet.has(`${COURSE_TITLE} — ${MODULE_LETTRES} — Lettre ${letter.name} (${letter.letter})`)) {
+            learnedIdx.add(i);
+          }
+          if (doneSet.has(`${COURSE_TITLE} — Atelier Écriture — Pratique ${letter.name} (${letter.letter})`)) {
+            practicedIdx.add(i);
+          }
+        });
+        setLearnedLetters(learnedIdx);
+        setPracticedLetters(practicedIdx);
+      })
+      .catch(() => {});
+  }, []);
+
   const addXp = (amount) => { setXp(x => x + amount); setShowXpPop(true); setTimeout(() => setShowXpPop(false), 1500); };
 
   const handleMicResult = (transcript, confidence, matched) => {
@@ -814,9 +839,9 @@ function AlphabetArabe() {
     if (!learnedLetters.has(idx)) {
       setLearnedLetters(prev => new Set([...prev, idx]));
       addXp(10);
-      // Persist to MongoDB — key format matches Dashboard + CourseDetail
+      // Persist to MongoDB — key format matches Dashboard's lookup
       const letter = ARABIC_LETTERS[idx];
-      saveProgress(`${COURSE_TITLE} — Alphabet Arabe & Phonétique — Lettre ${letter.name} (${letter.letter})`);
+      saveProgress(`${COURSE_TITLE} — ${MODULE_LETTRES} — Lettre ${letter.name} (${letter.letter})`);
     }
   };
 

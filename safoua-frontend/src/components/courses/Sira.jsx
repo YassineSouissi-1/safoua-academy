@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../../utils/auth";
 
-const COURSE_TITLE = "Sira : Vie du Prophète ﷺ";
+export const COURSE_TITLE = "Sira : Vie du Prophète ﷺ";
 
 async function saveProgress(lessonTitle) {
   try {
@@ -25,7 +25,7 @@ const C = {
   mutedLt:  "#7c72a0",
 };
 
-const EVENTS = [
+export const EVENTS = [
   {
     id: 0,
     year: "570 CE", yearAr: "عام الفيل",
@@ -329,6 +329,22 @@ export default function Sira() {
   const filtered = filterCat === "Tous" ? EVENTS : EVENTS.filter(e => e.category === filterCat);
   const event    = EVENTS[selectedIdx];
 
+  // Load already-read events from the backend on mount — without this,
+  // progress always reset to 0 when leaving and reentering the course.
+  useEffect(() => {
+    api.get("/api/me")
+      .then(r => {
+        const doneSet = new Set(r.data.completedLessons || []);
+        const done = new Set();
+        EVENTS.forEach(e => {
+          if (doneSet.has(`${COURSE_TITLE} — ${COURSE_TITLE} — ${e.title}`)) done.add(e.id);
+        });
+        setReadEvents(done);
+        if (doneSet.has(`${COURSE_TITLE} — ${COURSE_TITLE} — Quiz Sira`)) setQuizDone(true);
+      })
+      .catch(() => {});
+  }, []);
+
   const markRead = (id) => {
     if (readEvents.has(id)) return;
     const updated = new Set([...readEvents, id]);
@@ -405,7 +421,7 @@ export default function Sira() {
       <div style={{ overflowX:"auto", borderBottom:`1px solid ${C.border}`, background:C.surface }}>
         <div style={{ display:"flex", minWidth:"max-content", padding:"0 24px" }}>
           {filtered.map(e => (
-            <button key={e.id} onClick={() => { setSelectedIdx(e.id); markRead(e.id); }}
+            <button key={e.id} onClick={() => setSelectedIdx(e.id)}
               style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5, padding:"12px 16px", border:"none", background:"transparent", cursor:"pointer", position:"relative", transition:"all .2s" }}>
               <div style={{ width:34, height:34, borderRadius:"50%", background:selectedIdx===e.id?e.color:`${e.color}20`, border:`2px solid ${selectedIdx===e.id?e.color:`${e.color}40`}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, transition:"all .2s", position:"relative" }}>
                 {e.icon}
@@ -460,7 +476,7 @@ export default function Sira() {
               </div>
 
               <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-                <button onClick={() => { setShowAI(true); markRead(event.id); }}
+                <button onClick={() => setShowAI(true)}
                   style={{ flex:1, minWidth:180, background:`linear-gradient(135deg,${event.color}20,${event.color}10)`, border:`1px solid ${event.color}40`, borderRadius:14, padding:"12px", cursor:"pointer", color:event.color, fontWeight:700, fontSize:13, fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
                   ✨ Explorer avec l'IA
                 </button>
@@ -476,14 +492,14 @@ export default function Sira() {
 
           {/* Navigation */}
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            <button onClick={() => { const prev=EVENTS[Math.max(0,selectedIdx-1)]; setSelectedIdx(prev.id); markRead(prev.id); }} disabled={selectedIdx===0}
+            <button onClick={() => { const prev=EVENTS[Math.max(0,selectedIdx-1)]; setSelectedIdx(prev.id); }} disabled={selectedIdx===0}
               style={{ background:C.surface, border:`1px solid ${C.border}`, color:C.mutedLt, borderRadius:12, padding:"10px 20px", cursor:selectedIdx===0?"not-allowed":"pointer", fontFamily:"sans-serif", fontWeight:600, fontSize:13, opacity:selectedIdx===0?.4:1 }}>
               ← Précédent
             </button>
             <div style={{ fontSize:12, color:C.muted, fontFamily:"sans-serif" }}>
               {selectedIdx+1} / {EVENTS.length} événements
             </div>
-            <button onClick={() => { const next=EVENTS[Math.min(EVENTS.length-1,selectedIdx+1)]; setSelectedIdx(next.id); markRead(next.id); }} disabled={selectedIdx===EVENTS.length-1}
+            <button onClick={() => { const next=EVENTS[Math.min(EVENTS.length-1,selectedIdx+1)]; setSelectedIdx(next.id); }} disabled={selectedIdx===EVENTS.length-1}
               style={{ background:C.surface, border:`1px solid ${C.border}`, color:C.mutedLt, borderRadius:12, padding:"10px 20px", cursor:selectedIdx===EVENTS.length-1?"not-allowed":"pointer", fontFamily:"sans-serif", fontWeight:600, fontSize:13, opacity:selectedIdx===EVENTS.length-1?.4:1 }}>
               Suivant →
             </button>

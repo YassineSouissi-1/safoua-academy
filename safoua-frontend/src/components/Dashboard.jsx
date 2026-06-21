@@ -10,6 +10,22 @@ import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { api, getUser, logout } from "../utils/auth";
 
+// ── Real course content, imported as the single source of truth ──────────
+// Previously this file hand-typed its own copy of every course's lesson
+// list, which drifted out of sync with the actual courses (wrong counts,
+// wrong titles, progress that could never match). Importing the same
+// arrays the courses themselves use means the Dashboard can never drift
+// again — if a course's content changes, the Dashboard updates with it.
+import { ARABIC_LETTERS, COURSE_TITLE as AA_TITLE, MODULE_LETTRES as AA_MODULE } from "./courses/AlphabetArabe";
+import { RULES as TAJWID_RULES, COURSE_TITLE as TAJWID_TITLE } from "./courses/Tajwid";
+import { PILLARS as FIQH_PILLARS, COURSE_TITLE as FIQH_TITLE, MODULE_TITLE as FIQH_MODULE } from "./courses/Fiqh";
+import { EVENTS as SIRA_EVENTS, COURSE_TITLE as SIRA_TITLE } from "./courses/Sira";
+import { CHAPTERS as MUSLIM_CHAPTERS, COURSE_TITLE as MUSLIM_TITLE, MODULE_TITLE as MUSLIM_MODULE } from "./courses/BecomeMuslim";
+import { CHAPTERS as CALLIGRAPHY_CHAPTERS, COURSE_TITLE as CALLIGRAPHY_TITLE } from "./courses/Calligraphy";
+import { MODULES as ASM_MODULES, COURSE_TITLE as ASM_TITLE } from "./courses/ArabeModerneStandard";
+import { MODULES as GRAM_MODULES, COURSE_META as GRAM_META } from "./courses/data/courseData";
+import { COURSE_TITLE as GRAM_TITLE, MODULE_PREFIX as GRAM_MODULE_PREFIX } from "./courses/Grammaire";
+
 /* ── FONTS ─────────────────────────────────────────────────────── */
 const FONT_LINK = ``;
 
@@ -32,52 +48,37 @@ const C = {
 };
 
 /* ── CONSTANTS ──────────────────────────────────────────────────── */
+// Each course below derives its modules/lessons from the actual course
+// component's data — see the imports above. The shape `{ title, modules: [{ title, lessons: [...] }] }`
+// is what CourseProgressCard / OverallProgress / totalLessons() expect;
+// lesson titles must be plain strings here because lessonKey() builds the
+// exact `${courseTitle} — ${moduleTitle} — ${lessonTitle}` string that's
+// compared against what each course actually saves to the backend.
 const ALL_COURSES = [
   {
     id: 1,
-    title: "Alphabet Arabe & Phonétique",
+    title: AA_TITLE,
     accent: C.teal,
     icon: "أ",
     modules: [
       {
-        title: "Alphabet Arabe & Phonétique",
-        lessons: [
-          "Lettre Alif (ا)","Lettre Ba (ب)","Lettre Ta (ت)","Lettre Tha (ث)",
-          "Lettre Jim (ج)","Lettre Ha (ح)","Lettre Kha (خ)","Lettre Dal (د)",
-          "Lettre Dhal (ذ)","Lettre Ra (ر)","Lettre Zay (ز)","Lettre Sin (س)",
-          "Lettre Shin (ش)","Lettre Sad (ص)","Lettre Dad (ض)","Lettre Taa (ط)",
-          "Lettre Dha (ظ)","Lettre Ayn (ع)","Lettre Ghayn (غ)","Lettre Fa (ف)",
-          "Lettre Qaf (ق)","Lettre Kaf (ك)","Lettre Lam (ل)","Lettre Meem (م)",
-          "Lettre Nun (ن)","Lettre Ha2 (ه)","Lettre Waw (و)","Lettre Ya (ي)",
-        ],
+        title: AA_MODULE,
+        // Dashboard tracks only the 28 letters themselves (matching "28
+        // letters" in the course) — writing-practice reps and the quiz
+        // are separate XP-only activities, not counted lessons here.
+        lessons: ARABIC_LETTERS.map(l => `Lettre ${l.name} (${l.letter})`),
       },
-      {
-        title: "Atelier Écriture",
-        lessons: [
-          "Pratique Alif (ا)","Pratique Ba (ب)","Pratique Ta (ت)","Pratique Tha (ث)",
-          "Pratique Jim (ج)","Pratique Ha (ح)","Pratique Kha (خ)","Pratique Dal (د)",
-          "Pratique Dhal (ذ)","Pratique Ra (ر)","Pratique Zay (ز)","Pratique Sin (س)",
-          "Pratique Shin (ش)","Pratique Sad (ص)","Pratique Dad (ض)","Pratique Taa (ط)",
-          "Pratique Dha (ظ)","Pratique Ayn (ع)","Pratique Ghayn (غ)","Pratique Fa (ف)",
-          "Pratique Qaf (ق)","Pratique Kaf (ك)","Pratique Lam (ل)","Pratique Meem (م)",
-          "Pratique Nun (ن)","Pratique Ha2 (ه)","Pratique Waw (و)","Pratique Ya (ي)",
-        ],
-      },
-      { title: "Quiz", lessons: ["Quiz Alphabet (10/10)"] },
     ],
   },
   {
     id: 2,
-    title: "Tajwid : Récitation Sacrée",
+    title: TAJWID_TITLE,
     accent: C.purple,
     icon: "ت",
     modules: [
       {
-        title: "Tajwid : Récitation Sacrée",
-        lessons: [
-          "La Prolongation","Le Son Nasal","L'Assimilation","Le Voilement",
-          "L'Écho / Vibration","La Prononciation Claire","La Transformation","L'Arrêt",
-        ],
+        title: TAJWID_TITLE,
+        lessons: TAJWID_RULES.map(r => r.fr),
       },
     ],
   },
@@ -101,105 +102,74 @@ const ALL_COURSES = [
   },
   {
     id: 4,
-    title: "Grammaire : Tome 1 de Médine",
+    title: GRAM_TITLE,
     accent: C.blue,
     icon: "ن",
-    modules: [
-      {
-        title: "Grammaire : Tome 1 de Médine",
-        lessons: [
-          "Leçon 1 : Les noms (Ism)","Leçon 2 : Les pronoms","Leçon 3 : Le genre grammatical",
-          "Leçon 4 : L'article défini","Leçon 5 : Les adjectifs","Leçon 6 : L'accord",
-          "Leçon 7 : Les prépositions","Leçon 8 : Les nombres","Leçon 9 : Le verbe au passé",
-          "Leçon 10 : Le verbe au présent","Leçon 11 : La phrase nominale","Leçon 12 : La phrase verbale",
-          "Leçon 13 : Le duel","Leçon 14 : Le pluriel sain","Leçon 15 : Le pluriel brisé",
-          "Leçon 16 : Les cas grammaticaux","Leçon 17 : Le tanwin","Leçon 18 : Les interrogatifs",
-          "Leçon 19 : Les relatifs","Leçon 20 : Les démonstratifs","Quiz Grammaire Tome 1",
-        ],
-      },
-    ],
+    // Grammaire saves one flat key per module: "<course> — Module <num> — <subtitle>".
+    // Module title is just "Module <num>" and the lesson is the subtitle, so
+    // lessonKey() below reproduces that exact same 3-segment string.
+    modules: GRAM_MODULES.map(m => ({
+      title: `${GRAM_MODULE_PREFIX} ${m.num}`,
+      lessons: [m.subtitle],
+    })),
   },
   {
     id: 5,
-    title: "Introduction au Fiqh",
+    title: FIQH_TITLE,
     accent: C.red,
     icon: "ف",
     modules: [
       {
-        title: "Introduction au Fiqh",
-        lessons: ["La Purification","La Prière","La Zakat","Le Jeûne","Le Pèlerinage","Quiz Fiqh"],
+        title: FIQH_MODULE,
+        lessons: FIQH_PILLARS.map(p => p.fr),
       },
     ],
   },
   {
     id: 6,
-    title: "Sira : Vie du Prophète ﷺ",
+    title: SIRA_TITLE,
     accent: C.teal,
     icon: "م",
     modules: [
       {
-        title: "Sira : Vie du Prophète ﷺ",
-        lessons: [
-          "Naissance du Prophète ﷺ","Mariage avec Khadīja","Première Révélation",
-          "Début de la Prédication Publique","Hégire en Abyssinie","L'Année du Chagrin",
-          "Le Voyage Nocturne","L'Hégire vers Médine","Bataille de Badr",
-          "Bataille d'Uhud","Bataille du Fossé","Conquête de La Mecque",
-          "Le Pèlerinage d'Adieu","Quiz Sira",
-        ],
+        title: SIRA_TITLE,
+        lessons: SIRA_EVENTS.map(e => e.title),
       },
     ],
   },
   {
     id: 7,
-    title: "Calligraphie Arabe",
+    title: CALLIGRAPHY_TITLE,
     accent: "#9d7bea",
     icon: "خ",
-    modules: [
-      {
-        title: "Calligraphie Arabe",
-        lessons: [
-          "Introduction à la calligraphie","Les outils du calligraphe","Le style Naskh : bases",
-          "Naskh : les lettres isolées","Naskh : les connexions","Naskh : mots et phrases",
-          "Le style Thuluth : introduction","Thuluth : proportions et tracés","Thuluth : composition",
-          "La mise en page islamique","Calligraphie du Basmala","Calligraphie de la Shahada",
-          "Créer une œuvre complète","Quiz Calligraphie",
-        ],
-      },
-    ],
+    // This course's underlying content teaches Tashkeel (diacritics):
+    // chapters and lessons below mirror its real CHAPTERS structure.
+    modules: CALLIGRAPHY_CHAPTERS.map(ch => ({
+      title: ch.title,
+      lessons: ch.lessons.map(l => l.name),
+    })),
   },
   {
     id: 8,
-    title: "Devenir Musulman : Les Bases",
+    title: MUSLIM_TITLE,
     accent: "#2ab89a",
     icon: "☪",
     modules: [
       {
-        title: "Devenir Musulman : Les Bases",
-        lessons: [
-          "Qu'est-ce que l'Islam ?","Les 5 piliers de l'Islam","La Shahada : témoignage de foi",
-          "Comment prononcer la Shahada","La Salat : la prière","Apprendre Al-Fatiha",
-          "Les 5 prières quotidiennes","La purification avant la prière","Le Ramadan et le jeûne",
-          "La Zakat : purification des biens","Le Hajj : le pèlerinage","La foi en Allah",
-          "La foi aux anges et aux prophètes","Les livres révélés","Le Jour du Jugement",
-          "Vivre en musulman au quotidien","Quiz Bases de l'Islam",
-        ],
+        title: MUSLIM_MODULE,
+        lessons: MUSLIM_CHAPTERS.map(c => c.fr),
       },
     ],
   },
   {
     id: 9,
-    title: "Arabe Moderne Standard",
+    title: ASM_TITLE,
     accent: "#f97316",
     icon: "ع",
-    modules: [
-      {
-        title: "Arabe Moderne Standard",
-        lessons: [
-          "Module 1 : Fondamentaux","Module 2 : Vocabulaire","Module 3 : Grammaire avancée",
-          "Module 4 : Expression","Module 5 : Compréhension","Quiz Arabe Moderne",
-        ],
-      },
-    ],
+    modules: ASM_MODULES.map(m => ({
+      title: m.title,
+      lessons: m.lessons.map(l => l.title),
+    })),
   },
 ];
 

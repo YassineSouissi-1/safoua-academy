@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, createContext, useContext } from "react";
 import { speakArabic } from "../../utils/arabicTTS";
+import { api, getUser } from "../../utils/auth";
 import { MODULES, COURSE_META } from "./data/courseData";
+
+export const COURSE_TITLE = "Grammaire : Tome 1 de Médine";
+export const MODULE_PREFIX = "Module";
+
+async function saveProgress(lessonTitle) {
+  try {
+    await api.post("/api/update-progress", { lessonTitle });
+  } catch (err) {
+    console.error("Erreur progression:", err);
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // DESIGN CONCEPT
@@ -1501,7 +1513,7 @@ function LessonView({ lesson, color, lessonNumber, onWritingScore }) {
 }
 
 // ─── Quiz panel ──────────────────────────────────────────────────────────
-function QuizPanel({ quiz, color }) {
+function QuizPanel({ quiz, color, onComplete }) {
   const [step, setStep] = useState(0);
   const [sel, setSel] = useState(null);
   const [score, setScore] = useState(0);
@@ -1509,7 +1521,14 @@ function QuizPanel({ quiz, color }) {
   const q = quiz[step];
 
   const pick = (i) => { if (sel !== null) return; setSel(i); if (i === q.ans) setScore(s => s + 1); };
-  const next = () => { if (step + 1 >= quiz.length) { setDone(true); return; } setStep(s => s + 1); setSel(null); };
+  const next = () => {
+    if (step + 1 >= quiz.length) {
+      setDone(true);
+      if (onComplete) onComplete(score);
+      return;
+    }
+    setStep(s => s + 1); setSel(null);
+  };
   const reset = () => { setStep(0); setSel(null); setScore(0); setDone(false); };
 
   if (done) {
@@ -1590,8 +1609,38 @@ export default function Grammaire() {
   const wordsTraced = Object.keys(writingScores).length;
   const avgWritingScore = wordsTraced ? Math.round(Object.values(writingScores).reduce((a, b) => a + b, 0) / wordsTraced) : 0;
 
+  const markModuleComplete = (moduleId) => {
+    if (completed.includes(moduleId)) return;
+    setCompleted(c => [...c, moduleId]);
+    const m = MODULES.find(mm => mm.id === moduleId);
+    saveProgress(`${COURSE_TITLE} — ${MODULE_PREFIX} ${m.num} — ${m.subtitle}`);
+  };
+
+  // NOTE on key format: this saves "<course> — Module <num> — <subtitle>"
+  // as one flat string (3 segments). The Dashboard mirrors this exactly by
+  // using "Module <num>" as the module title and <subtitle> as the lesson
+  // title, so lessonKey() reproduces the same 3-segment string — see
+  // Dashboard.jsx's ALL_COURSES entry for this course (id 4).
+
+  // Load already-completed modules from the backend on mount — without this,
+  // progress always reset to 0 when leaving and reentering the course
+  // (this course previously didn't save to the backend at all).
+  useEffect(() => {
+    if (!getUser()) return;
+    api.get("/api/me")
+      .then(r => {
+        const doneSet = new Set(r.data.completedLessons || []);
+        const done = [];
+        MODULES.forEach(m => {
+          if (doneSet.has(`${COURSE_TITLE} — ${MODULE_PREFIX} ${m.num} — ${m.subtitle}`)) done.push(m.id);
+        });
+        setCompleted(done);
+      })
+      .catch(() => {});
+  }, []);
+
   const goNextModule = () => {
-    setCompleted(c => c.includes(modId) ? c : [...c, modId]);
+    markModuleComplete(modId);
     if (modId < MODULES.length - 1) { setModId(modId + 1); setMainTab("cours"); }
   };
 
@@ -1711,7 +1760,7 @@ export default function Grammaire() {
                 <div style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>{mod.quiz.length} questions</div>
               </div>
             </div>
-            <QuizPanel quiz={mod.quiz} color="var(--mihrab)" />
+            <QuizPanel quiz={mod.quiz} color="var(--mihrab)" onComplete={() => markModuleComplete(modId)} />
             {modId < MODULES.length - 1 && (
               <div style={{ textAlign: "center", marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
                 <button onClick={goNextModule} className="focus-ring" style={{ padding: "9px 22px", borderRadius: 9, border: "1.5px solid rgba(28,61,58,.3)", background: "transparent", color: "var(--mihrab)", cursor: "pointer", fontSize: 12.5 }}>

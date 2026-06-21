@@ -76,7 +76,6 @@ function AppInner() {
             {/* Public */}
             <Route path="/"         element={<Home />} />
             <Route path="/courses"  element={<Courses />} />
-            <Route path="/quran" element={<QuranReader />} />
 
 
             {/* Auth — redirect if already logged in */}
@@ -86,6 +85,7 @@ function AppInner() {
             {/* Protected */}
             <Route path="/dashboard"      element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/dictionary"     element={<ProtectedRoute><Dictionary /></ProtectedRoute>} />
+            <Route path="/quran"          element={<ProtectedRoute><QuranReader /></ProtectedRoute>} />
 
             {/* Course views — specific routes MUST come before the generic :id catch-all */}
             <Route path="/course-view/1" element={<ProtectedRoute><AlphabetArabe /></ProtectedRoute>} />

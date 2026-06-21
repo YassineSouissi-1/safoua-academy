@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
+import { api, getUser } from "../../utils/auth";
 
 /* ══════════════════════════════════════════════════════════════════
    PALETTE & CONSTANTS
@@ -22,15 +22,12 @@ const C = {
   dim:     "rgba(226,240,255,0.18)",
 };
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const COURSE_TITLE = "Calligraphie Arabe";
 
 async function saveProgress(lessonKey) {
-  const email = localStorage.getItem("userEmail");
-  if (!email) return;
   try {
-    await axios.post(`${API}/api/update-progress`, {
-      email,
-      lessonTitle: `Tashkeel — ${lessonKey}`,
+    await api.post("/api/update-progress", {
+      lessonTitle: `${COURSE_TITLE} — ${lessonKey}`,
     });
   } catch {}
 }
@@ -38,7 +35,7 @@ async function saveProgress(lessonKey) {
 /* ══════════════════════════════════════════════════════════════════
    TASHKEEL DATA
 ══════════════════════════════════════════════════════════════════ */
-const CHAPTERS = [
+export const CHAPTERS = [
   {
     id: "short",
     title: "Voyelles Courtes",
@@ -610,14 +607,17 @@ export default function TashkeelCourse() {
   const [doneLessons,   setDoneLessons]   = useState(new Set());
 
   useEffect(()=>{
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-    axios.get(`${API}/api/user/${email}`)
+    if (!getUser()) return;
+    api.get("/api/me")
       .then(r=>{
+        const doneSet = new Set(r.data.completedLessons || []);
         const done = new Set();
-        (r.data.completedLessons||[]).forEach(key=>{
-          const m = key.match(/^Tashkeel — (.+)$/);
-          if (m) done.add(m[1]);
+        CHAPTERS.forEach(ch => {
+          ch.lessons.forEach(lesson => {
+            if (doneSet.has(`${COURSE_TITLE} — ${ch.title} — ${lesson.name}`)) {
+              done.add(lesson.id);
+            }
+          });
         });
         setDoneLessons(done);
       }).catch(()=>{});
@@ -630,7 +630,7 @@ export default function TashkeelCourse() {
   const handleMarkDone = async () => {
     if (doneLessons.has(activeLesson.id)) return;
     setDoneLessons(prev=>new Set([...prev,activeLesson.id]));
-    await saveProgress(activeLesson.id);
+    await saveProgress(`${activeChapter.title} — ${activeLesson.name}`);
   };
 
   // FIX: when selecting a chapter, open it and show its first lesson

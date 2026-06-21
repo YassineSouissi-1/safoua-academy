@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "../../utils/auth";
 
-const COURSE_TITLE = "Introduction au Fiqh";
-const MODULE_TITLE = "Introduction au Fiqh";
+export const COURSE_TITLE = "Introduction au Fiqh";
+export const MODULE_TITLE = "Introduction au Fiqh";
 
 async function saveProgress(lessonTitle) {
   try {
@@ -33,7 +33,7 @@ const LEVEL_COLORS = {
   "سنة":  { bg:"rgba(236,72,153,.12)",  border:"#ec4899", text:"#f9a8d4" },
 };
 
-const PILLARS = [
+export const PILLARS = [
   {
     id: 0, ar: "الطَّهَارَة", fr: "La Purification", icon: "💧", color: "#0ea5e9",
     subtitle: "Conditions de l'adoration",
@@ -306,6 +306,23 @@ export default function Fiqh() {
   const pillar = PILLARS[activePillar];
 
   const pct = Math.round((completedPillars.size / PILLARS.length) * 100);
+
+  // Load already-completed pillars from the backend on mount — without this,
+  // progress always reset to 0/5 when leaving and reentering the course
+  // even though saves were working correctly.
+  useEffect(() => {
+    api.get("/api/me")
+      .then(r => {
+        const doneSet = new Set(r.data.completedLessons || []);
+        const done = new Set();
+        PILLARS.forEach(p => {
+          if (doneSet.has(`${COURSE_TITLE} — ${MODULE_TITLE} — ${p.fr}`)) done.add(p.id);
+        });
+        setCompletedPillars(done);
+        if (doneSet.has(`${COURSE_TITLE} — ${MODULE_TITLE} — Quiz Fiqh`)) setFinalQuizDone(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const markPillarComplete = (id) => {
     if (completedPillars.has(id)) return;

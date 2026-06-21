@@ -41,8 +41,15 @@ const registerValidation = [
   body('teacherCode').optional().trim().escape(),
 ];
 
+// NOTE: .escape() was removed — it HTML-entity-encodes characters like
+// apostrophes (' → &#x27;), which broke exact-string matching between
+// what the frontend saves and what it later compares against when
+// reloading progress (e.g. "L'Assimilation" became "L&#x27;Assimilation"
+// in the DB, so the next page load could never find it again).
+// This field is only ever stored in MongoDB and rendered by React
+// (which auto-escapes text), so .escape() added no real protection here.
 const progressValidation = [
-  body('lessonTitle').trim().notEmpty().withMessage('Titre de leçon requis.').isLength({ max: 200 }).escape(),
+  body('lessonTitle').trim().notEmpty().withMessage('Titre de leçon requis.').isLength({ max: 200 }),
 ];
 
 // ── JWT HELPER ─────────────────────────────────────────────────────
@@ -118,6 +125,21 @@ router.post('/register', authRateLimit, registerValidation, async (req, res) => 
   }
 });
 
+// Old rows saved before the .escape() fix may contain HTML-entity-encoded
+// characters (e.g. "L&#x27;Assimilation" instead of "L'Assimilation").
+// Decoding here means existing users don't lose progress that was already
+// saved under the broken encoding — it heals itself on next read/write.
+function unescapeEntities(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
 // ── GET /api/me ────────────────────────────────────────────────────
 router.get('/me', authMiddleware, async (req, res) => {
   try {
@@ -129,7 +151,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       username:         user.username,
       email:            user.email,
       role:             user.role || 'student',
-      completedLessons: user.completedLessons,
+      completedLessons: (user.completedLessons || []).map(unescapeEntities),
       points:           user.points,
     });
   } catch (err) {
@@ -145,14 +167,36 @@ router.post('/update-progress', authMiddleware, progressValidation, async (req, 
     return res.status(400).json({ error: errors.array()[0].msg });
 
   try {
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { $addToSet: { completedLessons: req.body.lessonTitle }, $inc: { points: 10 } },
-      { new: true }
-    );
+    const lessonTitle = req.body.lessonTitle;
+    // Also clean up the old escaped variant if it exists, so a user who
+    // already has the broken entry doesn't end up with two near-duplicate
+    // rows (the old escaped one + the new clean one) padding their count.
+    const escapedVariant = lessonTitle
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const user = await User.findById(req.user.id);
     if (!user)
       return res.status(404).json({ error: 'Utilisateur non trouvé.' });
-    res.json({ message: 'Succès', points: user.points });
+
+    // MongoDB won't allow $addToSet and $pull on the same field in one
+    // update, so the old-escaped-duplicate cleanup runs as its own step.
+    if (escapedVariant !== lessonTitle) {
+      await User.updateOne(
+        { _id: req.user.id },
+        { $pull: { completedLessons: escapedVariant } }
+      );
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      req.user.id,
+      { $addToSet: { completedLessons: lessonTitle }, $inc: { points: 10 } },
+      { new: true }
+    );
+    res.json({ message: 'Succès', points: updated.points });
   } catch (err) {
     console.error('Update progress error:', err);
     res.status(500).json({ error: 'Erreur lors de la mise à jour.' });

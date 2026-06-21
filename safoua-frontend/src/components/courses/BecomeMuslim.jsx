@@ -1,4 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { api, getUser } from "../../utils/auth";
+
+export const COURSE_TITLE = "Devenir Musulman : Les Bases";
+export const MODULE_TITLE = "Devenir Musulman : Les Bases";
+
+async function saveProgress(lessonTitle) {
+  try {
+    await api.post("/api/update-progress", { lessonTitle });
+  } catch (err) {
+    console.error("Erreur progression:", err);
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════
    "ZELLIGE" DESIGN SYSTEM
@@ -223,7 +235,7 @@ const COURSE_AYAT = {
 /* ═══════════════════════════════════════════════
    COURSE DATA
 ═══════════════════════════════════════════════ */
-const CHAPTERS = [
+export const CHAPTERS = [
   {
     id: 0, ar: "مَن هو المسلم؟", fr: "Qui est le Musulman ?", icon: "crescent", color: T.teal,
     intro: "L'Islam (الإسلام) signifie « soumission à Allah ». Devenir musulman est un acte conscient et sincère du cœur. Il n'y a pas de race, de nationalité ou d'origine requise — l'Islam est universel.",
@@ -1006,7 +1018,29 @@ export default function BecomeMuslim() {
   const [visible, setVisible] = useState(false);
   const ch = CHAPTERS[activeChapter];
 
-  const markDone = (id) => { if (!completed.includes(id)) setCompleted(c=>[...c,id]); };
+  const markDone = (id) => {
+    if (completed.includes(id)) return;
+    setCompleted(c => [...c, id]);
+    const chapter = CHAPTERS.find(c => c.id === id);
+    saveProgress(`${COURSE_TITLE} — ${MODULE_TITLE} — ${chapter.fr}`);
+  };
+
+  // Load already-completed chapters from the backend on mount — without this,
+  // progress always reset to 0 when leaving and reentering the course
+  // (this course previously didn't save to the backend at all).
+  useEffect(() => {
+    if (!getUser()) return;
+    api.get("/api/me")
+      .then(r => {
+        const doneSet = new Set(r.data.completedLessons || []);
+        const done = [];
+        CHAPTERS.forEach(c => {
+          if (doneSet.has(`${COURSE_TITLE} — ${MODULE_TITLE} — ${c.fr}`)) done.push(c.id);
+        });
+        setCompleted(done);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setVisible(false);
@@ -1123,15 +1157,27 @@ export default function BecomeMuslim() {
           {ch.video && <VideoEmbed video={ch.video} />}
           <Quiz questions={ch.quiz} color={ch.color} />
 
-          <div style={{ display:"flex", justifyContent:"space-between", marginTop:30, paddingTop:22, borderTop:`1px dashed ${T.line}` }}>
-            <button className="nav-btn" onClick={() => { markDone(activeChapter); if (activeChapter>0) setActiveChapter(a=>a-1); }} disabled={activeChapter===0}
-              style={{ padding:"11px 20px", borderRadius:99, border:`1px solid ${T.line}`, background:T.card, color:T.inkSoft, cursor: activeChapter===0?"not-allowed":"pointer", opacity: activeChapter===0?0.4:1, fontSize:13, fontFamily:"inherit" }}>
-              ← Précédent
-            </button>
-            <button className="nav-btn" onClick={() => { markDone(activeChapter); if (activeChapter<CHAPTERS.length-1) setActiveChapter(a=>a+1); }}
-              style={{ padding:"11px 24px", borderRadius:99, background:ch.color, border:"none", color:"#fff", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", boxShadow:`0 4px 14px ${ch.color}40` }}>
-              {activeChapter===CHAPTERS.length-1 ? "Terminer le cours ✓" : "Chapitre suivant →"}
-            </button>
+          <div style={{ marginTop:30, paddingTop:22, borderTop:`1px dashed ${T.line}` }}>
+            {completed.includes(ch.id) ? (
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:9, padding:"13px 18px", borderRadius:13, background:`${T.teal}12`, border:`1px solid ${T.teal}40`, color:T.tealDeep, fontWeight:700, fontSize:13, marginBottom:18 }}>
+                ✓ Chapitre lu et compris
+              </div>
+            ) : (
+              <button onClick={() => markDone(ch.id)}
+                style={{ width:"100%", padding:"13px 18px", borderRadius:13, background:ch.color, border:"none", color:"#fff", fontWeight:700, fontSize:13.5, cursor:"pointer", fontFamily:"inherit", marginBottom:18, boxShadow:`0 4px 14px ${ch.color}40` }}>
+                ✓ J'ai lu et compris ce chapitre
+              </button>
+            )}
+            <div style={{ display:"flex", justifyContent:"space-between" }}>
+              <button className="nav-btn" onClick={() => { if (activeChapter>0) setActiveChapter(a=>a-1); }} disabled={activeChapter===0}
+                style={{ padding:"11px 20px", borderRadius:99, border:`1px solid ${T.line}`, background:T.card, color:T.inkSoft, cursor: activeChapter===0?"not-allowed":"pointer", opacity: activeChapter===0?0.4:1, fontSize:13, fontFamily:"inherit" }}>
+                ← Précédent
+              </button>
+              <button className="nav-btn" onClick={() => { if (activeChapter<CHAPTERS.length-1) setActiveChapter(a=>a+1); }} disabled={activeChapter===CHAPTERS.length-1}
+                style={{ padding:"11px 24px", borderRadius:99, background:ch.color, border:"none", color:"#fff", cursor: activeChapter===CHAPTERS.length-1?"not-allowed":"pointer", opacity: activeChapter===CHAPTERS.length-1?0.4:1, fontWeight:700, fontSize:13, fontFamily:"inherit", boxShadow:`0 4px 14px ${ch.color}40` }}>
+                Chapitre suivant →
+              </button>
+            </div>
           </div>
         </main>
       </div>

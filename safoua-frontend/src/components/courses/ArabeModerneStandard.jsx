@@ -7,7 +7,7 @@ import {
   Globe, Layers, Award, Flame, Brain,
   RotateCcw, PenLine, Eye, EyeOff, Sparkles
 } from "lucide-react";
-import axios from "axios";
+import { api, getUser } from "../../utils/auth";
 
 const FONT_LINK = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap');`;
 
@@ -30,12 +30,12 @@ const C = {
 };
 
 const ACCENT = C.blue;
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const COURSE_TITLE = "Arabe Moderne Standard";
 
 /* ══════════════════════════════════════════════════════════
    COURSE DATA
 ══════════════════════════════════════════════════════════ */
-const MODULES = [
+export const MODULES = [
   {
     id:"m1", num:"01", title:"Fondations de l'Arabe Moderne", titleAr:"أسس اللغة العربية المعاصرة", color:C.blue, icon:"ف",
     lessons:[
@@ -1064,21 +1064,19 @@ export default function ArabeModerneStandard() {
   const isDone        = completedLessons.has(lessonKey);
 
   useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-    axios.get(`${API}/api/user/${email}`)
-      .then(r => setCompletedLessons(new Set(r.data.completedLessons?.map(k => k.replace(/^Arabe Moderne Standard — /, "")) || [])))
+    if (!getUser()) return;
+    api.get("/api/me")
+      .then(r => setCompletedLessons(new Set(r.data.completedLessons?.map(k => k.replace(`${COURSE_TITLE} — `, "")) || [])))
       .catch(() => {});
     if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = () => {};
   }, []);
 
   const handleMarkComplete = async () => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) { alert("Connectez-vous pour enregistrer votre progression."); return; }
+    if (!getUser()) { alert("Connectez-vous pour enregistrer votre progression."); return; }
     if (isDone) return;
     setMarking(true);
     try {
-      const res = await axios.post(`${API}/api/update-progress`, { email, lessonTitle:`Arabe Moderne Standard — ${lessonKey}` });
+      const res = await api.post("/api/update-progress", { lessonTitle:`${COURSE_TITLE} — ${lessonKey}` });
       setCompletedLessons(prev => new Set([...prev, lessonKey]));
       setXpNotif({ lessonTitle: activeLesson.title, points: res.data.points });
       setTimeout(() => setXpNotif(null), 4200);

@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import axios from "axios";
 import { speakArabic } from "../../utils/arabicTTS";
+import { api, getUser } from "../../utils/auth";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const COURSE_TITLE = "Tajwid : Récitation Sacrée";
+export const COURSE_TITLE = "Tajwid : Récitation Sacrée";
 
 async function saveProgress(lessonKey) {
   try {
@@ -31,7 +30,7 @@ const C = {
   white:    "#fdf6e3",
 };
 
-const RULES = [
+export const RULES = [
   {
     id: "madd",
     ar: "المَدّ",
@@ -75,8 +74,8 @@ const RULES = [
     ],
     testWord: "اللَّهُ",
     testTranslit: "Al-lā-hu",
-    testInstruction: "Prononcez « Al-lā-hu » en allongeant clairement le son 'aa' — 2 temps",
-    testHint: "Le 'aa' doit durer environ une seconde. Écoutez la référence d'abord.",
+    testInstruction: "Dites uniquement « Al-lā-hu » en tenant la voyelle 'aa' le plus longtemps possible — au moins 2 secondes.",
+    testHint: "Ne lisez pas toute l'ayah — juste ce mot. Tenez le son comme une note de musique.",
     testType: "duration",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
   },
@@ -122,8 +121,8 @@ const RULES = [
     ],
     testWord: "إِنَّا",
     testTranslit: "In-nā",
-    testInstruction: "Prononcez « In-nā » — maintenez 2 temps de résonance nasale sur le نّ",
-    testHint: "Le son 'nn' doit vibrer dans le nez, comme un 'hmmm' bref. Bouche légèrement ouverte.",
+    testInstruction: "Dites uniquement « In-nā » — maintenez le son nasal 'nn' 2 temps dans le nez avant d'ouvrir sur 'aa'.",
+    testHint: "Ne lisez pas toute l'ayah. Sentez votre nez vibrer quand vous dites 'nnn'. Pincez le nez : le son doit changer.",
     testType: "nasal",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/108001.mp3",
   },
@@ -172,8 +171,8 @@ const RULES = [
     ],
     testWord: "مَن يَعْمَلْ",
     testTranslit: "man ya'-mal",
-    testInstruction: "Prononcez « man ya'-mal » sans pause — le نْ se fond dans يَ avec Ghunnah",
-    testHint: "Aucune pause entre 'man' et 'ya' — transition lisse avec légère résonance nasale.",
+    testInstruction: "Dites uniquement « man ya'-mal » d'une seule traite — le نْ se fond dans يَ sans pause ni coupure.",
+    testHint: "Ne lisez pas toute l'ayah. Les deux mots doivent sonner comme un seul, avec une légère résonance nasale à la jonction.",
     testType: "blend",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/099007.mp3",
   },
@@ -220,8 +219,8 @@ const RULES = [
     ],
     testWord: "الْإِنسَانَ",
     testTranslit: "al-in-sā-na",
-    testInstruction: "Prononcez « al-in-sā-na » — le نْ doit être voilé devant سَ, ni clair ni fusionné",
-    testHint: "Son doux à mi-chemin : langue s'approche sans toucher, avec légère résonance nasale.",
+    testInstruction: "Dites uniquement « al-in-sā-na » — le نْ est voilé devant سَ : ni clair ni fusionné, légèrement nasal.",
+    testHint: "Ne lisez pas toute l'ayah. La langue s'approche de سَ sans toucher — son intermédiaire avec légère Ghunnah.",
     testType: "blend",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/103002.mp3",
   },
@@ -268,8 +267,8 @@ const RULES = [
     ],
     testWord: "قُلْ",
     testTranslit: "Qul",
-    testInstruction: "Prononcez « Qul » — le قْ doit avoir un rebond vibratoire audible",
-    testHint: "Après le 'q', un léger 'uh' sort naturellement — c'est la Qalqala. Ne l'étouffez pas.",
+    testInstruction: "Dites uniquement « Qul » — court, fort et net, avec un rebond sonore sur le قْ.",
+    testHint: "Ne lisez pas toute l'ayah. Un seul mot, bref et percutant. Après قْ, un petit son 'uh' sort naturellement — ne l'étouffez pas.",
     testType: "echo",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
   },
@@ -320,8 +319,8 @@ const RULES = [
     ],
     testWord: "مِن كُلِّ",
     testTranslit: "min kul-li",
-    testInstruction: "Prononcez « min kul-li » — le نْ doit sonner clair, sans résonance nasale",
-    testHint: "Son net, articulé — pas de 'mm' ou 'ng'. La langue touche le palais puis détache.",
+    testInstruction: "Dites uniquement « min kul-li » — le نْ doit sonner net et clair, sans aucun son nasal.",
+    testHint: "Ne lisez pas toute l'ayah. Pas de 'mng' ou 'mm' — juste un 'n' clair, langue qui décolle proprement.",
     testType: "clear",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/097004.mp3",
   },
@@ -339,16 +338,16 @@ const RULES = [
     ],
     examples: [
       {
-        ar: "كَلَّا لَيُنبَذَنَّ فِي الْحُطَمَةِ",
-        note: "Iqlab : نْ + بَ dans لَيُنبَذَنَّ → son مْ nasal 2 temps",
-        url: "https://everyayah.com/data/Alafasy_128kbps/104004.mp3",
-        clipDuration: 0,
+        ar: "مِن بَعْدِ مَا جَاءَكَ",
+        note: "Iqlab : نْ + بَ dans مِن بَعْدِ → les lèvres se ferment, son مْ nasal 2 temps",
+        url: "https://everyayah.com/data/Alafasy_128kbps/002145.mp3",
+        clipDuration: 3500,
         startTime: 0,
         words: [
-          { w: "كَلَّا", translit: "kal-lā", en: "No!", rule: "madd", label: "Madd" },
-          { w: "لَيُنبَذَنَّ", translit: "la-yum-ba-dha-nan", en: "he will surely be thrown", rule: "iqlab", label: "Iqlab" },
-          { w: "فِي", translit: "fī", en: "into", rule: "madd", label: "Madd" },
-          { w: "الْحُطَمَةِ", translit: "al-ḥu-ṭa-ma", en: "the Crusher", rule: "waqf", label: "Waqf" },
+          { w: "مِن", translit: "mim", en: "from after", rule: "iqlab", label: "Iqlab" },
+          { w: "بَعْدِ", translit: "ba'-di", en: "after", rule: null },
+          { w: "مَا", translit: "mā", en: "what", rule: "madd", label: "Madd" },
+          { w: "جَاءَكَ", translit: "jā-'a-ka", en: "has come to you", rule: "madd", label: "Madd" },
         ]
       },
       {
@@ -366,12 +365,12 @@ const RULES = [
         ]
       },
     ],
-    testWord: "لَيُنبَذَنَّ",
-    testTranslit: "la-yum-ba-dha-nan",
-    testInstruction: "Prononcez « la-yum-ba-dha-nan » — lèvres fermées, son مْ nasal avant le بَ",
-    testHint: "Les lèvres se ferment brièvement comme pour 'mmm' avant d'ouvrir sur 'ba'. 2 temps.",
+    testWord: "مِن بَعْدِ مَا",
+    testTranslit: "mim ba'-di mā",
+    testInstruction: "Dites « mim ba'-di mā » — fermez les lèvres sur 'mm' avant le بَ, avec vibration nasale 2 temps.",
+    testHint: "Ne lisez pas toute l'ayah. Fermez les lèvres comme 'mmm' avant 'ba' — sentez le nez vibrer.",
     testType: "nasal",
-    testUrl: "https://everyayah.com/data/Alafasy_128kbps/104004.mp3",
+    testUrl: "https://everyayah.com/data/Alafasy_128kbps/002145.mp3",
   },
   {
     id: "waqf",
@@ -415,9 +414,9 @@ const RULES = [
       },
     ],
     testWord: "أَحَدٌ",
-    testTranslit: "a-ḥad",
-    testInstruction: "Prononcez puis arrêtez net sur « a-ḥad » — la voyelle finale -un disparaît",
-    testHint: "Finissez sur 'd' (aḥad), pas sur 'dun' (aḥadun). Coupure nette, pas de traîne.",
+    testTranslit: "a-ḥad  [puis silence]",
+    testInstruction: "Dites « a-ḥad » puis arrêtez immédiatement — bouche fermée, silence total. Pas de '-un' final.",
+    testHint: "Ne lisez pas toute l'ayah. Dites le mot, puis silence net. L'enregistrement doit finir en silence.",
     testType: "stop",
     testUrl: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
   },
@@ -574,313 +573,291 @@ function useAudio() {
   return { ...state, play, stop };
 }
 
-// ─── MIC HOOK — MediaRecorder + WebAudio analysis ────────────────────────────
+// ─── MIC HOOK — Speech Recognition + Energy Analysis ─────────────────────────
+// Layer 1: Web Speech API (ar-SA) verifies the correct word was spoken → rejects random speech
+// Layer 2: WebAudio energy analysis checks tajwid technique (sustain, sharpness, smoothness, stop)
 function useMic() {
   const [micState, setMicState] = useState("idle");
-  const [result, setResult] = useState(null);
-  const streamRef = useRef(null);
-  const recorderRef = useRef(null);
-  const chunksRef = useRef([]);
-  const analyserRef = useRef(null);
-  const ctxRef = useRef(null);
-  const framesRef = useRef([]);
-  const rafRef = useRef(null);
+  const [result,   setResult]   = useState(null);
+  const recognitionRef = useRef(null);
+  const ctxRef         = useRef(null);
+  const streamRef      = useRef(null);
+  const rafRef         = useRef(null);
+  const timerRef       = useRef(null);
+  const framesRef      = useRef([]);
 
-  const stop = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    if (recorderRef.current && recorderRef.current.state !== "inactive") {
-      try { recorderRef.current.stop(); } catch {}
-    }
-    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
-    if (ctxRef.current && ctxRef.current.state !== "closed") ctxRef.current.close().catch(() => {});
-    streamRef.current = null; recorderRef.current = null; ctxRef.current = null; analyserRef.current = null;
+  const stopAll = useCallback(() => {
+    if (rafRef.current)  { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    if (timerRef.current){ clearTimeout(timerRef.current);       timerRef.current = null; }
+    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} recognitionRef.current = null; }
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+    if (ctxRef.current && ctxRef.current.state !== "closed") { ctxRef.current.close().catch(() => {}); ctxRef.current = null; }
   }, []);
 
-  const analyzeFrames = useCallback((frames, testType) => {
-    if (!frames || frames.length === 0) {
-      return { score: 0, feedback: "Aucun son détecté. Parlez plus fort.", tip: "Approchez-vous du micro et parlez clairement.", good: false };
+  // Strip Arabic diacritics and normalize letters for fuzzy matching
+  const normalizeAr = useCallback((str = "") => str
+    .replace(/[\u064B-\u065F\u0670]/g, "")  // remove all harakat
+    .replace(/[أإآا]/g, "ا")                 // normalize alef forms
+    .replace(/ة/g, "ه")                      // ta marbuta → ha
+    .replace(/ى/g, "ي")                      // alef maqsura → ya
+    .replace(/\s+/g, " ").trim()
+  , []);
+
+  // Stem: strip suffixes the recognizer adds due to kasra/damma (ي، و، ا، ن)
+  const stemWord = (w) => w.replace(/[يوان]+$/, "");
+
+  // Returns 0–1: fraction of expected tokens found in heard text (with fuzzy matching)
+  const matchRatio = useCallback((heard, expected) => {
+    const h = normalizeAr(heard);
+    const e = normalizeAr(expected);
+    if (!e) return 1;
+    const expectedTokens = e.split(" ").filter(Boolean);
+    const heardWords     = h.split(" ").filter(Boolean);
+
+    const hits = expectedTokens.filter(eTok => {
+      const eStem = stemWord(eTok);
+      return heardWords.some(hWord => {
+        const hStem = stemWord(hWord);
+        return (
+          hWord === eTok        ||   // exact
+          hWord.includes(eTok)  ||   // heard contains expected
+          eTok.includes(hWord)  ||   // expected contains heard
+          hStem === eStem       ||   // stems match (handles suffix additions)
+          hStem.startsWith(eStem) || // heard stem starts with expected stem
+          eStem.startsWith(hStem)    // expected stem starts with heard stem
+        );
+      });
+    }).length;
+
+    const ratio = hits / expectedTokens.length;
+    console.log("[SR]", { heard: h, expected: e, hits, total: expectedTokens.length, ratio });
+    return ratio;
+  }, [normalizeAr]);
+
+  // Energy analysis — only for technique, word already verified by SR
+  const analyzeEnergy = useCallback((frames, testType) => {
+    if (!frames || frames.length < 5) return { techScore: 50, techFeedback: "", techTip: "" };
+
+    const rms        = frames.map(f => f.rms);
+    const maxRms     = Math.max(...rms);
+    const sortedRms  = [...rms].sort((a, b) => a - b);
+    const noiseFloor = sortedRms[Math.floor(sortedRms.length * 0.25)] ?? 0;
+    const threshold  = Math.max(0.5, noiseFloor * 1.8);
+
+    const speechFrames = frames.filter(f => f.rms > threshold);
+    const speechRatio  = speechFrames.length / frames.length;
+
+    if (!speechFrames.length) return { techScore: 40, techFeedback: "Son trop faible.", techTip: "Parlez plus fort." };
+
+    const avgRms    = speechFrames.reduce((s, f) => s + f.rms, 0) / speechFrames.length;
+    const variance  = speechFrames.reduce((s, f) => s + (f.rms - avgRms) ** 2, 0) / speechFrames.length;
+    const coV       = Math.sqrt(variance) / (avgRms + 0.01);
+    const peakToMean = maxRms / (avgRms + 0.01);
+
+    const third         = Math.max(1, Math.floor(frames.length / 3));
+    const firstAvg      = frames.slice(0, third).reduce((s, f) => s + f.rms, 0) / third;
+    const lastAvg       = frames.slice(-third).reduce((s, f) => s + f.rms, 0) / third;
+    const dropRatio     = firstAvg > 0.3 ? Math.max(0, 1 - lastAvg / (firstAvg + 0.01)) : 0;
+
+    let techScore = 60, techFeedback = "", techTip = "";
+
+    switch (testType) {
+      case "duration": {
+        const sustainPts = Math.min(30, (speechRatio / 0.45) * 30);
+        const steadyPts  = Math.min(10, Math.max(0, (1 - coV / 1.0) * 10));
+        techScore = Math.round(60 + sustainPts + steadyPts);
+        if      (speechRatio < 0.30) { techFeedback = "Voyelle trop courte.";          techTip = "Tenez « Al-lāaaa-hu » — maintenez le son 'aa' au moins 2 secondes."; }
+        else if (coV > 0.8)          { techFeedback = "Son haché — flux non continu."; techTip = "Poussez l'air régulièrement sans interruption."; }
+        else { techFeedback = techScore >= 90 ? "Madd excellent — voyelle parfaitement soutenue !" : "Bien — allongez encore la voyelle."; }
+        break;
+      }
+      case "nasal": {
+        const durationPts = Math.min(25, (speechRatio / 0.25) * 25);
+        techScore = Math.round(60 + durationPts);
+        techFeedback = "Mot reconnu — confirmez la résonance nasale ci-dessous.";
+        techTip = "Le 'nnn' doit faire vibrer votre nez.";
+        break;
+      }
+      case "echo": {
+        const attackPts = Math.min(25, (peakToMean / 3.0) * 25);
+        const brevPts   = speechRatio <= 0.25 ? 15 : speechRatio <= 0.45 ? 8 : 0;
+        techScore = Math.round(60 + attackPts + brevPts);
+        if      (peakToMean < 1.8)   { techFeedback = "Rebond trop doux.";      techTip = "Frappez plus fort sur قْ — coup net et bref."; }
+        else if (speechRatio > 0.50) { techFeedback = "Son trop long.";          techTip = "Juste « Qul » — court et percutant."; }
+        else { techFeedback = techScore >= 88 ? "Qalqala nette — rebond bien marqué !" : "Correct — accentuez le rebond sur قْ."; }
+        break;
+      }
+      case "blend": {
+        const smoothPts   = Math.min(25, Math.max(0, (1 - coV / 1.2) * 25));
+        const durationPts = Math.min(15, (speechRatio / 0.25) * 15);
+        techScore = Math.round(60 + smoothPts + durationPts);
+        if (coV > 1.0) { techFeedback = "Coupure détectée."; techTip = "Enchaînez d'un seul souffle sans pause."; }
+        else { techFeedback = techScore >= 88 ? "Fusion parfaite — transition lisse !" : "Bien — liez encore mieux les deux sons."; }
+        break;
+      }
+      case "stop": {
+        const dropPts    = Math.min(30, dropRatio * 35);
+        const contentPts = speechRatio > 0.05 ? 10 : 0;
+        techScore = Math.round(60 + dropPts + contentPts);
+        if (dropRatio < 0.40) { techFeedback = "Arrêt non net — le son traîne."; techTip = "Dites « a-ḥad » puis fermez la bouche — silence total."; }
+        else { techFeedback = techScore >= 88 ? "Waqf parfait — arrêt net !" : "Bon arrêt — coupez encore plus franchement."; }
+        break;
+      }
+      case "clear": {
+        techScore = 75;
+        techFeedback = "Mot reconnu — confirmez l'absence de nasalité ci-dessous.";
+        techTip = "Le نْ doit être totalement clair, sans 'mm' ni 'ng'.";
+        break;
+      }
+      default:
+        techScore = Math.min(100, Math.round(60 + speechRatio * 40));
+        techFeedback = "Récitation détectée.";
     }
 
-    const rmsValues = frames.map(f => f.rms);
-    const maxRms = Math.max(...rmsValues);
-
-    // Adaptive noise floor: median of bottom 25% is ambient noise
-    const sorted = [...rmsValues].sort((a, b) => a - b);
-    const noiseFloor = sorted[Math.floor(sorted.length * 0.25)] || 0;
-    // Speech threshold: clearly above noise (at least 3x noise, min 4)
-    const speechThreshold = Math.max(noiseFloor * 3, 4);
-
-    const speechFrames = frames.filter(f => f.rms > speechThreshold);
-    const speechRatio = speechFrames.length / frames.length;
-
-    // Strict: must have meaningful signal
-    if (maxRms < 4 || speechFrames.length < 6) {
-      return { score: 0, feedback: "Micro non détecté ou son trop faible.", tip: "Vérifiez les permissions micro et parlez clairement.", good: false, speechRatio: 0 };
-    }
-    if (speechRatio < 0.15) {
-      return { score: 15, feedback: "Prononciation trop courte ou silencieuse.", tip: "Parlez dès que l'enregistrement commence, maintenez le son.", good: false, speechRatio };
-    }
-
-    const avgRms = speechFrames.reduce((s, f) => s + f.rms, 0) / speechFrames.length;
-    const rmsStd = Math.sqrt(speechFrames.reduce((s, f) => s + (f.rms - avgRms) ** 2, 0) / speechFrames.length);
-    const steadiness = Math.max(0, Math.min(1, 1 - rmsStd / (avgRms + 0.5)));
-    const avgNasalRatio = speechFrames.reduce((s, f) => s + f.nasalRatio, 0) / speechFrames.length;
-    const durationScore = Math.min(1, speechRatio / 0.5);
-    const avgHighFreq = speechFrames.reduce((s, f) => s + f.highFreq, 0) / speechFrames.length;
-
-    // STRICT BASE: no longer give free points for just speaking.
-    // The base only rewards moderate volume; feature checks must pass to score high.
-    const volumeScore = Math.min(25, (avgRms / 15) * 25);  // up to 25 pts for good volume
-
-    let score = 0, feedback = "", tip = "";
-
-    if (testType === "duration") {
-      // Madd: MUST sustain sound ≥ 0.55 of recording. Steadiness rewarded. 
-      // Random short sounds will fail the sustain check.
-      const sustain = Math.min(1, speechRatio / 0.55);
-      const sustainBonus = speechRatio >= 0.55 ? 40 : speechRatio >= 0.35 ? 20 : 0;
-      const steadyBonus = steadiness >= 0.6 ? 20 : steadiness >= 0.4 ? 10 : 0;
-      score = Math.round(volumeScore + sustainBonus + steadyBonus);
-      score = Math.min(100, Math.max(10, score));
-
-      if (speechRatio < 0.35) {
-        feedback = "Son trop court — le Madd exige une voyelle tenue longtemps.";
-        tip = "Inspirez bien, puis tenez 'Al-laaaa-hu' au moins 1,5 seconde sans couper.";
-      } else if (speechRatio < 0.55) {
-        feedback = "Allongement insuffisant — continuez à tenir la voyelle plus longtemps.";
-        tip = "La voyelle 'aa' doit durer comme une note tenue, sans interruption.";
-      } else if (steadiness < 0.4) {
-        feedback = "Son présent mais instable — volume irrégulier.";
-        tip = "Maintenez une pression d'air constante pendant toute la voyelle.";
-      } else {
-        feedback = score >= 80 ? "Excellent ! Madd clair et bien soutenu." : "Bien — allongez encore légèrement pour un Madd complet.";
-        tip = score < 80 ? "La voyelle 'aa' doit durer régulièrement, comme une note de musique." : "";
-      }
-
-    } else if (testType === "nasal") {
-      // Ghunnah / Iqlab: MUST have nasal resonance > 0.30 AND good duration
-      // Random speech will fail the nasal check unless the person actually hums nasally
-      const nasalOk = avgNasalRatio >= 0.30;
-      const nasalGood = avgNasalRatio >= 0.45;
-      const durationOk = speechRatio >= 0.25;
-
-      if (!durationOk) {
-        score = 15;
-        feedback = "Prononciation trop brève — maintenez le son nasal.";
-        tip = "Tenez le 'nnn' dans les narines pendant au moins 1 seconde.";
-      } else if (!nasalOk) {
-        score = 25;
-        feedback = "Aucune résonance nasale détectée — le son doit vibrer dans le nez.";
-        tip = "Bloquez légèrement le flux d'air par le nez en prononçant 'Inn'. Le son doit changer si vous pincez le nez.";
-      } else {
-        const nasalBonus = nasalGood ? 45 : 30;
-        const durationBonus = Math.min(30, speechRatio * 60);
-        score = Math.round(volumeScore * 0.5 + nasalBonus + durationBonus);
-        score = Math.min(100, Math.max(30, score));
-        feedback = score >= 80 ? "Bonne Ghunnah ! Résonance nasale bien présente." : score >= 60 ? "Son nasal détecté — accentuez encore la résonance." : "Nasalité insuffisante — faites vibrer le nez.";
-        tip = score < 80 ? "La résonance nasale doit être clairement audible pendant 2 temps." : "";
-      }
-
-    } else if (testType === "echo") {
-      // Qalqala: needs a sharp, short, bouncy sound — not sustained.
-      // Penalise if too long (dragged), reward sharpness and clear attack.
-      const isShort = speechRatio <= 0.35;
-      const hasAttack = maxRms > 10; // needs a clear sharp onset
-      const tooLong = speechRatio > 0.6;
-
-      if (!hasAttack) {
-        score = 20;
-        feedback = "Son trop doux — la Qalqala nécessite une attaque franche.";
-        tip = "Prononcez 'Qul' avec un coup sec sur le قْ, comme un rebond brusque.";
-      } else if (tooLong) {
-        score = 30;
-        feedback = "Son trop prolongé — la Qalqala est un rebond court et net.";
-        tip = "Dites 'Qul' brièvement, avec un petit rebond sur le قْ. Pas de voyelle traînante.";
-      } else {
-        const sharpBonus = isShort ? 40 : 25;
-        const attackBonus = Math.min(30, (maxRms / 20) * 30);
-        score = Math.round(volumeScore * 0.5 + sharpBonus + attackBonus);
-        score = Math.min(100, Math.max(20, score));
-        feedback = score >= 80 ? "Bonne Qalqala ! Rebond net et précis." : score >= 55 ? "Son correct — ajoutez un rebond plus marqué sur قْ." : "Prononcez plus fort avec un rebond plus net.";
-        tip = score < 80 ? "Comme claquer la langue : blocage bref de l'air puis explosion nette sur قْ." : "";
-      }
-
-    } else if (testType === "blend") {
-      // Idgham / Ikhfa: smooth transition — no pause, steady, moderate duration
-      const hasPause = !steadiness || steadiness < 0.25; // very unsteady = paused
-      const durationOk = speechRatio >= 0.30;
-
-      if (!durationOk) {
-        score = 20;
-        feedback = "Trop court — prononcez les deux syllabes d'une traite.";
-        tip = "Enchaînez les deux sons sans reprendre votre souffle ni marquer de pause.";
-      } else if (hasPause) {
-        score = 25;
-        feedback = "Pause détectée — les deux sons doivent se fondre sans interruption.";
-        tip = "Prononcez d'une seule traite, sans aucune coupure entre les deux sons.";
-      } else {
-        const steadyBonus = Math.min(40, steadiness * 50);
-        const durationBonus = Math.min(25, speechRatio * 50);
-        score = Math.round(volumeScore * 0.5 + steadyBonus + durationBonus);
-        score = Math.min(100, Math.max(20, score));
-        feedback = score >= 80 ? "Fusion lisse ! Transition parfaitement réussie." : score >= 55 ? "Correct — évitez toute pause entre les sons." : "Liez les sons sans aucune coupure ni silence.";
-        tip = score < 80 ? "Prononcez d'une seule traite, sans reprendre votre souffle entre les deux sons." : "";
-      }
-
-    } else if (testType === "stop") {
-      // Waqf: clear dropoff at end — must speak then stop cleanly
-      const midpoint = Math.floor(speechFrames.length * 0.6);
-      const firstHalf = speechFrames.slice(0, midpoint);
-      const lastQuarter = frames.slice(-Math.ceil(frames.length * 0.25));
-      const firstAvg = firstHalf.length ? firstHalf.reduce((s, f) => s + f.rms, 0) / firstHalf.length : 0;
-      const lastAvg = lastQuarter.reduce((s, f) => s + f.rms, 0) / lastQuarter.length;
-      const dropoff = firstAvg > 4 ? Math.min(1, Math.max(0, 1 - lastAvg / (firstAvg + 0.5))) : 0;
-
-      const hasContent = firstAvg > 4 && speechRatio > 0.2;
-      const cleanStop = dropoff >= 0.65;
-
-      if (!hasContent) {
-        score = 15;
-        feedback = "Prononciation trop faible ou absente.";
-        tip = "Prononcez 'a-ḥad' clairement puis arrêtez net.";
-      } else if (!cleanStop) {
-        score = 30;
-        feedback = "Arrêt non net — la fin traîne encore.";
-        tip = "Prononcez 'a-ḥad' puis fermez la bouche immédiatement. Coupure franche, pas de '-un' qui traîne.";
-      } else {
-        const dropBonus = Math.min(45, dropoff * 55);
-        const durationBonus = Math.min(20, speechRatio * 40);
-        score = Math.round(volumeScore * 0.5 + dropBonus + durationBonus);
-        score = Math.min(100, Math.max(20, score));
-        feedback = score >= 80 ? "Arrêt net ! Waqf parfaitement exécuté." : "Bon arrêt — coupez encore plus franchement à la fin.";
-        tip = score < 80 ? "Prononcez 'a-ḥad' puis fermez la bouche net — pas de '-un' final." : "";
-      }
-
-    } else if (testType === "clear") {
-      // Izhar: clear consonants, absence of nasal resonance
-      const crispness = Math.min(1, avgHighFreq / 40);
-      const notNasal = avgNasalRatio < 0.25 ? 1 : avgNasalRatio < 0.40 ? (0.40 - avgNasalRatio) / 0.15 : 0;
-      const durationOk = speechRatio >= 0.20;
-
-      if (!durationOk) {
-        score = 15;
-        feedback = "Prononciation trop brève.";
-        tip = "Prononcez les deux syllabes complètes : 'min kul-li'.";
-      } else if (avgNasalRatio >= 0.40) {
-        score = 20;
-        feedback = "Résonance nasale détectée — l'Izhar doit être totalement clair, sans nasalité.";
-        tip = "Articulation nette : langue active, bouche ouverte, aucun 'mm' ou 'ng'.";
-      } else {
-        const crispBonus = Math.min(35, crispness * 40);
-        const nasalPenaltyBonus = Math.round(notNasal * 30);
-        score = Math.round(volumeScore * 0.5 + crispBonus + nasalPenaltyBonus);
-        score = Math.min(100, Math.max(15, score));
-        feedback = score >= 80 ? "Prononciation claire et nette !" : score >= 55 ? "Correct — articulez encore plus distinctement chaque consonne." : "Prononcez le نْ net, sans résonance nasale.";
-        tip = score < 80 ? "Articulez clairement chaque consonne — langue active, pas de traîne nasale." : "";
-      }
-
-    } else {
-      const steadyBonus = Math.min(35, steadiness * 40);
-      const durationBonus = Math.min(25, speechRatio * 45);
-      score = Math.round(volumeScore * 0.5 + steadyBonus + durationBonus);
-      score = Math.min(100, Math.max(10, score));
-      feedback = score >= 70 ? "Bonne récitation !" : "Continuez à pratiquer — écoutez d'abord la référence.";
-      tip = score < 70 ? "Écoutez attentivement la référence avant de répéter." : "";
-    }
-
-    return { score, feedback, tip, good: score >= 75, speechRatio, speechFrames: speechFrames.length };
+    return { techScore: Math.min(100, techScore), techFeedback, techTip };
   }, []);
 
-  const record = useCallback(async (durationMs = 4000, testType = "duration") => {
-    stop();
+  const record = useCallback(async (durationMs = 6000, testType = "duration", expectedWord = "") => {
+    stopAll();
     setResult(null);
-    setMicState("requesting");
     framesRef.current = [];
 
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const hasSR = !!SpeechRecognition;
+
+    setMicState("requesting");
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } });
+      // Start WebAudio energy collection (raw signal, no DSP)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, sampleRate: 44100 }
+      });
       streamRef.current = stream;
 
       const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
       ctxRef.current = ctx;
-      const src = ctx.createMediaStreamSource(stream);
-
-      // Analyser for feature extraction
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0.3;
-      src.connect(analyser);
-      analyserRef.current = analyser;
+      analyser.smoothingTimeConstant = 0.1;
+      ctx.createMediaStreamSource(stream).connect(analyser);
 
-      const freqBinCount = analyser.frequencyBinCount;
-      const freqData = new Uint8Array(freqBinCount);
       const timeData = new Uint8Array(analyser.fftSize);
-
-      // Hz per bin
-      const binHz = (ctx.sampleRate / 2) / freqBinCount;
-      // Nasal resonance: ~100–500 Hz (bins ~2–11)
-      const nasalLow = Math.round(100 / binHz);
-      const nasalHigh = Math.round(500 / binHz);
-      // High freq for clarity: ~2000–4000 Hz
-      const hiLow = Math.round(2000 / binHz);
-      const hiHigh = Math.round(4000 / binHz);
-
       setMicState("recording");
 
       const collectFrame = () => {
-        analyser.getByteFrequencyData(freqData);
         analyser.getByteTimeDomainData(timeData);
-
-        // RMS from time domain
-        let sumSq = 0;
-        for (let i = 0; i < timeData.length; i++) sumSq += (timeData[i] - 128) ** 2;
-        const rms = Math.sqrt(sumSq / timeData.length);
-
-        // Nasal energy
-        let nasalSum = 0;
-        for (let i = nasalLow; i <= nasalHigh; i++) nasalSum += freqData[i];
-        const nasalEnergy = nasalSum / (nasalHigh - nasalLow + 1);
-
-        // High freq energy (consonant clarity)
-        let hiSum = 0;
-        for (let i = hiLow; i <= Math.min(hiHigh, freqBinCount - 1); i++) hiSum += freqData[i];
-        const highFreq = hiSum / (Math.min(hiHigh, freqBinCount - 1) - hiLow + 1);
-
-        // Total energy (all voiced freq 80–3000 Hz)
-        let totalSum = 0;
-        const totalLow = Math.round(80 / binHz);
-        const totalHigh = Math.round(3000 / binHz);
-        for (let i = totalLow; i <= Math.min(totalHigh, freqBinCount - 1); i++) totalSum += freqData[i];
-        const totalEnergy = totalSum / (Math.min(totalHigh, freqBinCount - 1) - totalLow + 1);
-
-        const nasalRatio = totalEnergy > 5 ? nasalEnergy / (totalEnergy + 1) : 0;
-
-        framesRef.current.push({ rms, nasalRatio, highFreq, time: ctx.currentTime });
+        let sq = 0;
+        for (let i = 0; i < timeData.length; i++) sq += (timeData[i] - 128) ** 2;
+        framesRef.current.push({ rms: Math.sqrt(sq / timeData.length) });
         rafRef.current = requestAnimationFrame(collectFrame);
       };
       collectFrame();
 
-      setTimeout(() => {
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
-        if (ctxRef.current && ctxRef.current.state !== "closed") ctxRef.current.close().catch(() => {});
+      // Start Speech Recognition in Arabic
+      let heardText = "";
+      if (hasSR) {
+        const sr = new SpeechRecognition();
+        sr.lang            = "ar-SA";
+        sr.continuous      = false;  // stop after first utterance — prevents duplicate captures
+        sr.interimResults  = false;  // final results only — cleaner transcript
+        sr.maxAlternatives = 5;      // more alternatives = better chance of matching
+        recognitionRef.current = sr;
+
+        sr.onresult = (e) => {
+          // Collect best alternative from each final result
+          const parts = new Set();
+          for (let i = 0; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+              // Take the best (highest confidence) alternative
+              parts.add(e.results[i][0].transcript.trim());
+            }
+          }
+          heardText = [...parts].join(" ").trim();
+        };
+        sr.onerror = (e) => { console.log("[SR error]", e.error); };
+        sr.onend   = () => {};
+        try { sr.start(); } catch (err) { console.log("[SR start error]", err); }
+      }
+
+      // Stop after durationMs
+      timerRef.current = setTimeout(() => {
+        cancelAnimationFrame(rafRef.current); rafRef.current = null;
+        if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+        if (ctxRef.current && ctxRef.current.state !== "closed") { ctxRef.current.close().catch(() => {}); ctxRef.current = null; }
+        if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} }
 
         setMicState("analyzing");
-        // Short delay so UI updates before heavy analysis
+
+        // 1200ms grace period for SR to finalize its last result
         setTimeout(() => {
-          const res = analyzeFrames(framesRef.current, testType);
-          setResult(res);
+          const frames = framesRef.current;
+
+          // ── Layer 1: word verification ──────────────────────────────────
+          let wordOk = false, wordPts = 0, wordFeedback = "";
+
+          if (!hasSR) {
+            // SR not available — skip word check, go straight to energy
+            wordOk = true; wordPts = 30;
+            wordFeedback = "Vérification du mot non disponible sur ce navigateur.";
+          } else if (!heardText.trim()) {
+            wordOk = false; wordPts = 0;
+            wordFeedback = "Aucun mot reconnu. Parlez plus clairement vers le micro.";
+          } else {
+            const ratio = matchRatio(heardText, expectedWord);
+            if (ratio >= 0.4) {
+              wordOk = true;
+              wordPts = Math.round(ratio * 40);   // 16–40 pts
+              wordFeedback = `Reconnu : « ${heardText} »`;
+            } else {
+              wordOk = false; wordPts = 0;
+              wordFeedback = `Mot incorrect détecté : « ${heardText} » — prononcez exactement : ${expectedWord}`;
+            }
+          }
+
+          // If word wrong and SR is working → hard fail, don't check technique
+          if (!wordOk && hasSR) {
+            setResult({ score: 0, feedback: wordFeedback, tip: `Prononcez uniquement : ${expectedWord}`, good: false, selfCheck: null, heard: heardText });
+            setMicState("done");
+            return;
+          }
+
+          // ── Layer 2: technique analysis ─────────────────────────────────
+          const { techScore, techFeedback, techTip } = analyzeEnergy(frames, testType);
+          const needsSelfCheck = testType === "nasal" || testType === "clear";
+
+          const selfCheck = needsSelfCheck ? ({
+            nasal: { question: "Avez-vous senti votre nez vibrer pendant le son nasal ?", yesBonus: 25, yesMsg: "✓ Ghunnah confirmée — résonance nasale bien présente !", noMsg: "Reprenez — tenez le 'nnn' dans les narines jusqu'à sentir la vibration." },
+            clear: { question: "Avez-vous prononcé le نْ sans aucun son nasal (pas de 'mm' ni 'ng') ?", yesBonus: 25, yesMsg: "✓ Izhar confirmé — prononciation nette et claire !", noMsg: "Reprenez — articulez le نْ distinctement, langue active, sans laisser le nez vibrer." },
+          }[testType]) : null;
+
+          const baseScore = wordPts + techScore * 0.6;
+          const finalScore = Math.min(100, Math.round(needsSelfCheck ? baseScore * 0.75 : baseScore));
+
+          setResult({
+            score:    finalScore,
+            feedback: techFeedback || wordFeedback,
+            tip:      techTip,
+            good:     needsSelfCheck ? false : finalScore >= 72,
+            selfCheck,
+            heard:    heardText,
+          });
           setMicState("done");
-        }, 80);
+        }, 700);
       }, durationMs);
 
     } catch {
       setMicState("error");
-      setResult({ score: 0, feedback: "Microphone non accessible.", tip: "Autorisez l'accès au microphone dans les paramètres du navigateur.", good: false });
+      setResult({ score: 0, feedback: "Microphone non accessible.", tip: "Autorisez l'accès micro dans les paramètres du navigateur.", good: false });
     }
-  }, [stop, analyzeFrames]);
+  }, [stopAll, matchRatio, analyzeEnergy]);
 
-  const reset = useCallback(() => { stop(); setMicState("idle"); setResult(null); framesRef.current = []; }, [stop]);
+  const reset = useCallback(() => {
+    stopAll();
+    setMicState("idle");
+    setResult(null);
+    framesRef.current = [];
+  }, [stopAll]);
+
   return { micState, result, record, reset };
 }
 
@@ -959,8 +936,10 @@ function VoiceTest({ rule, audio }) {
   const mic = useMic();
   const [countdown, setCountdown] = useState(null);
   const countRef = useRef(null);
+  const [selfAnswer, setSelfAnswer] = useState(null); // "yes" | "no" | null
 
   const handleRecord = () => {
+    setSelfAnswer(null);
     setCountdown(3);
     let c = 3;
     countRef.current = setInterval(() => {
@@ -968,7 +947,8 @@ function VoiceTest({ rule, audio }) {
       if (c <= 0) {
         clearInterval(countRef.current);
         setCountdown(null);
-        mic.record(4000, rule.testType);
+        const dur = rule.testType === "duration" ? 4000 : 3000;
+        mic.record(dur, rule.testType, rule.testWord);
       } else {
         setCountdown(c);
       }
@@ -979,60 +959,72 @@ function VoiceTest({ rule, audio }) {
 
   const isIdle = mic.micState === "idle" || mic.micState === "error";
   const isDone = mic.micState === "done";
+  const res    = mic.result;
+
+  // Final score after selfCheck
+  const finalScore = (() => {
+    if (!res) return null;
+    if (!res.selfCheck || selfAnswer === null) return res.score;
+    return selfAnswer === "yes" ? Math.min(100, res.score + res.selfCheck.yesBonus) : res.score;
+  })();
+  const finalGood  = finalScore !== null && finalScore >= 72;
+  const finalMsg   = (() => {
+    if (!res?.selfCheck || selfAnswer === null) return res?.feedback ?? "";
+    return selfAnswer === "yes" ? res.selfCheck.yesMsg : res.selfCheck.noMsg;
+  })();
 
   return (
     <div style={{ background: C.panel, border: `1.5px solid ${C.border}`, borderRadius: 16, padding: 20, marginTop: 16 }}>
+
+      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
         <div style={{ width: 34, height: 34, borderRadius: "50%", background: `${rule.color}22`, border: `1.5px solid ${rule.color}55`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🎤</div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 13, color: C.cream }}>Test de Voix</div>
-          <div style={{ fontSize: 11, color: C.muted }}>4 secondes d'enregistrement</div>
+          <div style={{ fontWeight: 800, fontSize: 13, color: C.cream }}>Test de Prononciation</div>
+          <div style={{ fontSize: 11, color: C.muted }}>{rule.testType === "duration" ? "4" : "3"} secondes · prononcez uniquement le mot ci-dessous</div>
         </div>
       </div>
 
-      {/* WHAT TO PRONOUNCE — main focus */}
-      <div style={{ background: C.surface, borderRadius: 14, padding: "16px 20px", marginBottom: 14, border: `1.5px solid ${rule.color}44` }}>
-        <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: rule.color, textTransform: "uppercase", marginBottom: 10 }}>
-          📢 À PRONONCER
+      {/* WHAT TO SAY — prominent box */}
+      <div style={{ background: C.surface, borderRadius: 14, padding: "18px 20px", marginBottom: 16, border: `2px solid ${rule.color}66`, textAlign: "center" }}>
+        <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 2, color: rule.color, textTransform: "uppercase", marginBottom: 12 }}>
+          📢 PRONONCEZ UNIQUEMENT CE MOT / CETTE PHRASE
         </div>
-
-        {/* The Arabic word(s) to say — large and clear */}
-        <div style={{ fontFamily: "'Amiri',serif", fontSize: "2.4rem", color: rule.color, lineHeight: 1.5, textAlign: "center", marginBottom: 6, direction: "rtl" }}>
+        <div style={{ fontFamily: "'Amiri',serif", fontSize: "3rem", color: rule.color, lineHeight: 1.4, direction: "rtl", marginBottom: 6 }}>
           {rule.testWord}
         </div>
-        <div style={{ textAlign: "center", fontSize: 14, color: C.cream, fontWeight: 700, letterSpacing: 1, marginBottom: 4 }}>
+        <div style={{ fontSize: 15, color: C.cream, fontWeight: 700, letterSpacing: 1.5, marginBottom: 14 }}>
           {rule.testTranslit}
         </div>
-
-        {/* Divider */}
-        <div style={{ width: 40, height: 1, background: C.border, margin: "10px auto" }} />
-
-        {/* Instruction */}
-        <div style={{ fontSize: 13, color: C.text, textAlign: "center", lineHeight: 1.7, marginBottom: 8 }}>
+        <div style={{ width: "100%", height: 1, background: C.border, marginBottom: 14 }} />
+        <div style={{ fontSize: 13, color: C.text, lineHeight: 1.8, marginBottom: 10 }}>
           {rule.testInstruction}
         </div>
-        <div style={{ fontSize: 11, color: C.muted, textAlign: "center", fontStyle: "italic" }}>
+        <div style={{ fontSize: 11, color: C.muted, fontStyle: "italic", background: C.panel, borderRadius: 8, padding: "8px 12px", display: "inline-block" }}>
           💡 {rule.testHint}
         </div>
       </div>
 
-      {/* Step 1: listen */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14, background: C.surface, borderRadius: 10, padding: "10px 14px", flexWrap: "wrap" }}>
-        <span style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>① Écouter d'abord :</span>
-        <PlayBtn url={rule.testUrl} label="Référence" audio={audio} small maxDuration={5500} />
-        <span style={{ fontSize: 11, color: C.muted }}>② puis enregistrez</span>
+      {/* Listen first */}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16, background: C.surface, borderRadius: 10, padding: "10px 14px", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 11, color: C.muted, fontWeight: 700, whiteSpace: "nowrap" }}>① Écouter d'abord :</span>
+        <PlayBtn url={rule.testUrl} label="Référence audio" audio={audio} small maxDuration={6000} />
+        <span style={{ fontSize: 11, color: C.muted }}>② Répétez le mot ci-dessus</span>
       </div>
 
       {/* Countdown */}
       {countdown !== null && (
-        <div style={{ textAlign: "center", padding: "18px 0", fontSize: "2.8rem", fontWeight: 900, color: rule.color, animation: "pulse 0.5s ease" }}>
+        <div style={{ textAlign: "center", padding: "20px 0", fontSize: "3rem", fontWeight: 900, color: rule.color }}>
           {countdown}
         </div>
       )}
 
-      {/* Waveform during recording */}
+      {/* Waveform */}
       {mic.micState === "recording" && (
         <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: rule.color, fontWeight: 700, textAlign: "center", marginBottom: 6 }}>
+            🔴 Parlez maintenant — dites : {rule.testTranslit}
+          </div>
           <WaveformDisplay color={rule.color} />
         </div>
       )}
@@ -1046,27 +1038,54 @@ function VoiceTest({ rule, audio }) {
       )}
 
       {/* Error */}
-      {mic.micState === "error" && (
+      {mic.micState === "error" && res && (
         <div style={{ padding: 12, background: "#e0706018", borderRadius: 10, fontSize: 12, color: "#e07060", marginBottom: 14 }}>
-          {mic.result?.feedback} {mic.result?.tip && `— ${mic.result.tip}`}
+          {res.feedback} {res.tip && `— ${res.tip}`}
         </div>
       )}
 
       {/* Result */}
-      {isDone && mic.result && (
-        <div style={{ display: "flex", gap: 16, alignItems: "center", background: C.surface, borderRadius: 12, padding: 16, marginBottom: 14, animation: "fadeIn 0.3s ease" }}>
-          <ScoreMeter score={mic.result.score} color={mic.result.good ? "#5dcaa5" : mic.result.score >= 50 ? C.gold : "#e07060"} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 13, color: mic.result.good ? "#5dcaa5" : mic.result.score >= 50 ? C.gold : "#e07060", marginBottom: 6 }}>
-              {mic.result.good ? "✓ " : mic.result.score >= 50 ? "◎ " : "✗ "}{mic.result.feedback}
-            </div>
-            {mic.result.tip && <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>👉 {mic.result.tip}</div>}
-            {mic.result.speechFrames != null && (
-              <div style={{ fontSize: 10, color: C.muted, marginTop: 6 }}>
-                Signal détecté : {Math.round((mic.result.speechRatio || 0) * 100)}% de l'enregistrement
+      {isDone && res && (
+        <div style={{ animation: "fadeIn 0.3s ease" }}>
+          {/* Score row */}
+          <div style={{ display: "flex", gap: 16, alignItems: "center", background: C.surface, borderRadius: 12, padding: 16, marginBottom: 14 }}>
+            <ScoreMeter
+              score={finalScore ?? res.score}
+              color={finalGood ? "#5dcaa5" : (finalScore ?? res.score) >= 50 ? C.gold : "#e07060"}
+            />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 6,
+                color: finalGood ? "#5dcaa5" : (finalScore ?? res.score) >= 50 ? C.gold : "#e07060" }}>
+                {finalGood ? "✓ " : (finalScore ?? res.score) >= 50 ? "◎ " : "✗ "}{finalMsg}
               </div>
-            )}
+              {res.tip && !res.selfCheck && (
+                <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>👉 {res.tip}</div>
+              )}
+              {res.heard !== undefined && (
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 8, background: C.panel, borderRadius: 6, padding: "4px 10px", fontStyle: "italic" }}>
+                  🎙 Entendu : « {res.heard || "—"} »
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Self-check question (for nasal / clear types) */}
+          {res.selfCheck && selfAnswer === null && (
+            <div style={{ background: C.surface, borderRadius: 12, padding: 16, marginBottom: 14, border: `1.5px solid ${rule.color}44` }}>
+              <div style={{ fontSize: 13, color: C.cream, fontWeight: 700, marginBottom: 12 }}>
+                🤔 {res.selfCheck.question}
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <Btn onClick={() => setSelfAnswer("yes")} color="#5dcaa5" small>✓ {res.selfCheck.yesLabel}</Btn>
+                <Btn onClick={() => setSelfAnswer("no")}  color="#e07060" outline small>✗ {res.selfCheck.noLabel}</Btn>
+              </div>
+            </div>
+          )}
+          {res.selfCheck && selfAnswer !== null && (
+            <div style={{ fontSize: 12, color: selfAnswer === "yes" ? "#5dcaa5" : "#e07060", padding: "8px 12px", background: C.surface, borderRadius: 10, marginBottom: 14 }}>
+              {selfAnswer === "yes" ? "✓ " : "✗ "}{selfAnswer === "yes" ? res.selfCheck.yesMsg : res.selfCheck.noMsg}
+            </div>
+          )}
         </div>
       )}
 
@@ -1074,14 +1093,14 @@ function VoiceTest({ rule, audio }) {
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         {(isIdle || isDone) && countdown === null && (
           <Btn onClick={handleRecord} color={rule.color}>
-            🎤 {isDone ? "Réessayer" : "Commencer (4s)"}
+            🎤 {isDone ? "Réessayer" : `Commencer (${rule.testType === "duration" ? "4" : "3"}s)`}
           </Btn>
         )}
         {mic.micState === "recording" && (
           <Btn onClick={mic.reset} color="#e07060">⏹ Arrêter</Btn>
         )}
         {isDone && (
-          <Btn onClick={mic.reset} outline color={C.muted} small>Réinitialiser</Btn>
+          <Btn onClick={() => { mic.reset(); setSelfAnswer(null); }} outline color={C.muted} small>Réinitialiser</Btn>
         )}
       </div>
     </div>
@@ -1416,9 +1435,8 @@ export default function App() {
 
   // Load already-completed rules from backend on mount
   useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-    axios.get(`${API}/api/user/${email}`)
+    if (!getUser()) return;
+    api.get("/api/me")
       .then(r => {
         const done = new Set();
         (r.data.completedLessons || []).forEach(key => {

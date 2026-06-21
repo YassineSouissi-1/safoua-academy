@@ -1,12 +1,11 @@
 /**
  * components/Navbar.jsx — Safoua Academy
- * Extracted from App.jsx (was inlined there before).
  */
 
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion }    from 'framer-motion';
-import { LogOut, Menu, X }            from 'lucide-react';
+import { LogOut, Menu, X, BookMarked } from 'lucide-react';
 import { isLoggedIn, getUser, logout } from '../utils/auth';
 
 const C = {
@@ -16,7 +15,6 @@ const C = {
   border: 'rgba(255,255,255,0.07)',
 };
 
-// Fonts loaded once in index.html
 const FONTS = ``;
 
 export default function Navbar() {
@@ -52,12 +50,26 @@ export default function Navbar() {
 
   const navLinkStyle = ({ isActive }) => ({
     fontSize: 13, fontWeight: 600, textDecoration: 'none',
-    color:  isActive ? C.gold : textColor,
+    color: isActive ? C.gold : textColor,
     borderBottom: isActive ? `2px solid ${C.gold}` : '2px solid transparent',
     paddingBottom: 2,
     transition: 'color 0.15s',
     fontFamily: "'DM Sans',sans-serif",
     letterSpacing: '0.02em',
+  });
+
+  // Special style for the Quran link — gold tint to make it stand out
+  const quranLinkStyle = ({ isActive }) => ({
+    fontSize: 13, fontWeight: 700, textDecoration: 'none',
+    color: isActive ? C.gold : `${C.gold}cc`,
+    borderBottom: isActive ? `2px solid ${C.gold}` : '2px solid transparent',
+    paddingBottom: 2,
+    transition: 'color 0.15s',
+    fontFamily: "'Cormorant Garamond',serif",
+    letterSpacing: '0.04em',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
   });
 
   const roleBadge = userRole === 'teacher'
@@ -67,9 +79,10 @@ export default function Navbar() {
       : null;
 
   const mobileLinks = [
-    { label: 'Accueil', to: '/' },
-    { label: 'Cours', to: '/courses' },
-    { label: 'Dictionnaire', to: '/dictionary' },
+    { label: 'Accueil',     to: '/' },
+    { label: 'Cours',       to: '/courses' },
+    { label: 'Dictionnaire',to: '/dictionary' },
+    { label: 'القرآن الكريم', to: '/quran', isQuran: true },
     ...(loggedIn
       ? [{ label: 'Mon Espace', to: '/dashboard' }]
       : [{ label: 'Connexion', to: '/login' }, { label: "S'inscrire", to: '/register' }]
@@ -111,9 +124,11 @@ export default function Navbar() {
             <NavLink to="/" end style={navLinkStyle}>Accueil</NavLink>
             <NavLink to="/courses" style={navLinkStyle}>Cours</NavLink>
             <NavLink to="/dictionary" style={navLinkStyle}>Dictionnaire</NavLink>
-            
-            
+            <NavLink to="/quran" style={navLinkStyle}>Quran</NavLink>
+
+
             <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.1)' }} />
+
             {loggedIn ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -169,8 +184,15 @@ export default function Navbar() {
               <Link
                 key={i} to={l.to}
                 onClick={() => setMenuOpen(false)}
-                style={{ display: 'block', padding: '13px 0', fontSize: 15, fontWeight: 600, color: 'rgba(242,237,230,0.75)', textDecoration: 'none', borderBottom: `1px solid ${C.border}`, fontFamily: "'DM Sans',sans-serif" }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '13px 0', fontSize: 15, fontWeight: l.isQuran ? 700 : 600,
+                  color: l.isQuran ? C.gold : 'rgba(242,237,230,0.75)',
+                  textDecoration: 'none', borderBottom: `1px solid ${C.border}`,
+                  fontFamily: l.isQuran ? "'Cormorant Garamond',serif" : "'DM Sans',sans-serif",
+                }}
               >
+                {l.isQuran && <BookMarked size={14} color={C.gold}/>}
                 {l.label}
               </Link>
             ))}
