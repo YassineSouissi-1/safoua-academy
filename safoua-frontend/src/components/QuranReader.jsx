@@ -21,19 +21,29 @@ const Icon = {
   SkipB:  () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>,
   SkipF:  () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="4" x2="19" y2="20"/></svg>,
   Stop:   () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>,
+  Star8:  () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.2 6.8L21 10l-6.8 2.2L12 19l-2.2-6.8L3 10l6.8-2.2z" transform="rotate(22.5 12 12)"/><path d="M12 1l2.2 6.8L21 10l-6.8 2.2L12 19l-2.2-6.8L3 10l6.8-2.2z"/></svg>,
 };
 
-/* ── PALETTE ─────────────────────────────────────────────────── */
+/* ── PALETTE — "Illuminated Manuscript": deep ink-emerald ground,
+   hand-burnished gold leaf, jade for translation, muted amethyst
+   for pronunciation. Modeled on lacquered Quran bindings & old
+   Maghrebi/Ottoman manuscript pages. ─────────────────────────── */
 const P = {
-  bg0:"#0c0a08", bg1:"#110f0c", bg2:"#1a1612", bg3:"#221e19",
-  ink1:"#f0e8d8", ink2:"rgba(240,232,216,0.62)", ink3:"rgba(240,232,216,0.32)", ink4:"rgba(240,232,216,0.14)",
-  gold:"#c8a45a", goldL:"#e8c97a", goldD:"#9a7a3a",
-  goldBg:"rgba(200,164,90,0.08)", goldBr:"rgba(200,164,90,0.22)",
-  teal:"#1e9e72", tealL:"#27c490",
-  tealBg:"rgba(30,158,114,0.1)", tealBr:"rgba(30,158,114,0.24)",
-  br1:"rgba(200,164,90,0.14)", br2:"rgba(240,232,216,0.07)",
-  pur:"#a78bda", purBg:"rgba(167,139,218,0.1)", purBr:"rgba(167,139,218,0.24)",
+  bg0:"#070f0c", bg1:"#0b1712", bg2:"#122019", bg3:"#182a21",
+  ink1:"#f3ead2", ink2:"rgba(243,234,210,0.64)", ink3:"rgba(243,234,210,0.34)", ink4:"rgba(243,234,210,0.13)",
+  gold:"#cda053", goldL:"#f0cf85", goldD:"#8a6a2e",
+  goldBg:"rgba(205,160,83,0.09)", goldBr:"rgba(205,160,83,0.26)",
+  teal:"#3fa085", tealL:"#5fc4a6",
+  tealBg:"rgba(63,160,133,0.1)", tealBr:"rgba(63,160,133,0.26)",
+  br1:"rgba(205,160,83,0.16)", br2:"rgba(243,234,210,0.07)",
+  pur:"#b08fd6", purBg:"rgba(176,143,214,0.1)", purBr:"rgba(176,143,214,0.26)",
+  vine:"rgba(205,160,83,0.5)",
 };
+
+/* Shared manuscript-style font stacks (Cormorant for Latin/numerals,
+   system serif fallback keeps weight if the webfont hasn't loaded) */
+const F_DISPLAY = "'Cormorant Garamond', Georgia, serif";
+const F_UI = "'Inter', system-ui, sans-serif";
 
 /* ── RECITERS ────────────────────────────────────────────────── */
 const RECITERS = [
@@ -289,32 +299,46 @@ function AudioPlayer({ src, reciterName }) {
 
   const ctrlStyle = (accent) => ({
     display:"flex", alignItems:"center", justifyContent:"center",
-    width:32, height:32, borderRadius:8, cursor:"pointer", border:"none",
-    background:"rgba(200,164,90,0.06)", color: accent || P.ink3,
+    width:31, height:31, borderRadius:5, cursor:"pointer", border:"none",
+    background:"rgba(205,160,83,0.06)", color: accent || P.ink3,
     transition:"all .15s", flexShrink:0,
   });
 
   const skipLabelStyle = {
-    fontSize:9, fontWeight:800, fontFamily:"system-ui", lineHeight:1, letterSpacing:"0.04em"
+    fontSize:9, fontWeight:700, fontFamily:F_UI, lineHeight:1, letterSpacing:"0.03em"
   };
 
   return (
     <div style={{
-      background:`linear-gradient(135deg,rgba(200,164,90,0.06),rgba(200,164,90,0.02))`,
-      border:`1px solid ${P.br1}`, borderRadius:14,
-      padding:"14px 16px",
+      background:`linear-gradient(135deg, rgba(205,160,83,0.07), rgba(63,160,133,0.03))`,
+      border:`1px solid ${P.br1}`, borderRadius:4,
+      padding:"15px 17px", position:"relative",
     }}>
+      {/* corner brackets — manuscript frame detail */}
+      {["0px,0px","auto,0px","0px,auto","auto,auto"].map((pos,i) => {
+        const [l,t] = pos.split(",");
+        return (
+          <svg key={i} width="9" height="9" viewBox="0 0 9 9" style={{
+            position:"absolute",
+            top: t==="0px" ? 4 : "auto", bottom: t==="auto" ? 4 : "auto",
+            left: l==="0px" ? 4 : "auto", right: l==="auto" ? 4 : "auto",
+            transform: i===1?"scaleX(-1)":i===2?"scaleY(-1)":i===3?"scale(-1,-1)":"none",
+          }}>
+            <path d="M0.5 0.5 L0.5 8.5 M0.5 0.5 L8.5 0.5" fill="none" stroke={P.goldBr} strokeWidth="1"/>
+          </svg>
+        );
+      })}
       {/* Reciter name + live indicator */}
-      <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:11 }}>
         <div style={{
-          width:7, height:7, borderRadius:"50%",
+          width:6, height:6, borderRadius:"50%",
           background: playing ? P.gold : P.ink4,
           boxShadow: playing ? `0 0 8px ${P.gold}` : "none",
           transition:"all .3s", flexShrink:0
         }}/>
         <Icon.Volume/>
-        <span style={{ fontSize:10, color: playing ? P.gold : P.ink3, fontFamily:"system-ui", fontWeight:700, letterSpacing:"0.1em" }}>
-          {reciterName || "RÉCITATION"}
+        <span style={{ fontSize:10, color: playing ? P.gold : P.ink3, fontFamily:F_UI, fontWeight:600, letterSpacing:"0.12em" }}>
+          {(reciterName || "RÉCITATION").toUpperCase()}
         </span>
         {playing && (
           <div style={{ marginLeft:"auto", display:"flex", gap:2, alignItems:"flex-end", height:14 }}>
@@ -332,18 +356,18 @@ function AudioPlayer({ src, reciterName }) {
       {/* Progress bar */}
       <div
         onClick={handleBar}
-        style={{ position:"relative", height:5, borderRadius:99, background:P.ink4, cursor:"pointer", marginBottom:12 }}
+        style={{ position:"relative", height:4, borderRadius:99, background:P.ink4, cursor:"pointer", marginBottom:13 }}
       >
         <div style={{
           position:"absolute", left:0, top:0, height:"100%",
           width:`${pct}%`,
-          background:`linear-gradient(90deg,${P.goldD},${P.gold})`,
+          background:`linear-gradient(90deg,${P.goldD},${P.gold},${P.goldL})`,
           borderRadius:99, transition:"width .1s",
           boxShadow:`0 0 8px ${P.gold}50`
         }}/>
         <div style={{
           position:"absolute", top:"50%", left:`${pct}%`,
-          width:13, height:13, borderRadius:"50%",
+          width:12, height:12, borderRadius:"50%",
           background:P.gold, border:`2px solid ${P.bg0}`,
           transform:"translate(-50%,-50%)",
           boxShadow:`0 0 8px ${P.gold}80`,
@@ -366,22 +390,22 @@ function AudioPlayer({ src, reciterName }) {
         {/* −5s */}
         <button onClick={() => skip(-5)} style={{
           ...ctrlStyle(P.gold),
-          background:"rgba(200,164,90,0.1)",
-          border:`1px solid rgba(200,164,90,0.2)`,
-          width:36, height:36, borderRadius:9,
+          background:"rgba(205,160,83,0.1)",
+          border:`1px solid rgba(205,160,83,0.22)`,
+          width:35, height:35, borderRadius:6,
         }} title="-5s">
           <span style={{...skipLabelStyle, color:P.gold}}>−5</span>
         </button>
 
         {/* Play/Pause — primary button */}
         <button onClick={toggle} style={{
-          width:44, height:44, borderRadius:"50%",
-          background: playing ? P.goldBg : P.gold,
+          width:43, height:43, borderRadius:"50%",
+          background: playing ? P.goldBg : `linear-gradient(155deg, ${P.goldL}, ${P.gold} 60%, ${P.goldD})`,
           border:`2px solid ${P.gold}`,
           color: playing ? P.gold : P.bg0,
           cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
           flexShrink:0, transition:"all .2s",
-          boxShadow: playing ? `0 0 20px ${P.gold}50` : `0 4px 16px ${P.gold}40`,
+          boxShadow: playing ? `0 0 20px ${P.gold}50` : `0 3px 14px ${P.gold}45`,
           margin:"0 4px",
         }}>
           {loading
@@ -392,9 +416,9 @@ function AudioPlayer({ src, reciterName }) {
         {/* +5s */}
         <button onClick={() => skip(5)} style={{
           ...ctrlStyle(P.gold),
-          background:"rgba(200,164,90,0.1)",
-          border:`1px solid rgba(200,164,90,0.2)`,
-          width:36, height:36, borderRadius:9,
+          background:"rgba(205,160,83,0.1)",
+          border:`1px solid rgba(205,160,83,0.22)`,
+          width:35, height:35, borderRadius:6,
         }} title="+5s">
           <span style={{...skipLabelStyle, color:P.gold}}>+5</span>
         </button>
@@ -430,13 +454,16 @@ function AudioPlayer({ src, reciterName }) {
   );
 }
 
-/* ── ORNAMENTAL DIVIDER ──────────────────────────────────────── */
+/* ── ORNAMENTAL DIVIDER — eight-point manuscript star (rub el hizb),
+   the signature motif repeated throughout the reader ────────── */
 function OrnamentDivider({ color = P.goldBr }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:10, margin:"6px 0" }}>
       <div style={{ flex:1, height:1, background:`linear-gradient(90deg,transparent,${color})` }}/>
-      <svg width="14" height="14" viewBox="0 0 14 14" fill={color}>
-        <polygon points="7,1 8.5,5.5 13,7 8.5,8.5 7,13 5.5,8.5 1,7 5.5,5.5"/>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1">
+        <path d="M12 2l2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6z" strokeLinejoin="round"/>
+        <path d="M12 2l2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6z" transform="rotate(45 12 12)" strokeLinejoin="round"/>
+        <circle cx="12" cy="12" r="1.4" fill={color}/>
       </svg>
       <div style={{ flex:1, height:1, background:`linear-gradient(90deg,${color},transparent)` }}/>
     </div>
@@ -521,15 +548,17 @@ export default function QuranReader() {
     return bookmarks.includes(`${surahN}:${verseNum}`);
   }
 
-  /* ── VERSE NUMBER ROUNDEL ───────────────────────────────── */
+  /* ── VERSE NUMBER — traditional ayah-end star marker ─────── */
   const VerseNumber = ({ n }) => (
-    <div style={{
-      width:32, height:32, borderRadius:"50%", flexShrink:0,
-      border:`1px solid ${P.gold}`, background:P.goldBg,
-      display:"flex", alignItems:"center", justifyContent:"center",
-      fontFamily:"'Cormorant Garamond',serif", fontSize:12,
-      color:P.gold, fontWeight:700, lineHeight:1,
-    }}>{n}</div>
+    <div style={{ width:32, height:32, flexShrink:0, position:"relative" }}>
+      <svg width="32" height="32" viewBox="0 0 32 32" style={{ position:"absolute", inset:0 }}>
+        <path d="M16 2l3 11 11 3-11 3-3 11-3-11-11-3 11-3z" fill={P.goldBg} stroke={P.gold} strokeWidth="1" strokeLinejoin="round"/>
+      </svg>
+      <div style={{
+        position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center",
+        fontFamily:F_UI, fontSize:11, color:P.gold, fontWeight:700, lineHeight:1,
+      }}>{n}</div>
+    </div>
   );
 
   /* ── VERSE CARD — per-verse PRON. + EXPL. toggles ────────── */
@@ -547,27 +576,27 @@ export default function QuranReader() {
 
     const toggleBtnStyle = (on, color, bgColor, borderColor) => ({
       display:"inline-flex", alignItems:"center", gap:4,
-      padding:"2px 9px", borderRadius:20, cursor:"pointer",
-      border:`1px solid ${on ? borderColor : "rgba(240,232,216,0.12)"}`,
+      padding:"2px 9px", borderRadius:4, cursor:"pointer",
+      border:`1px solid ${on ? borderColor : "rgba(243,234,210,0.12)"}`,
       background: on ? bgColor : "transparent",
       color: on ? color : P.ink3,
-      fontFamily:"system-ui", fontSize:10, fontWeight:700,
+      fontFamily:F_UI, fontSize:10, fontWeight:600,
       transition:"all .2s",
     });
 
     const pillStyle = (color, bgColor, borderColor) => ({
-      fontSize:12, color, fontFamily:"system-ui",
-      fontStyle:"italic", fontWeight:600,
+      fontSize:12, color, fontFamily:F_UI,
+      fontStyle:"italic", fontWeight:500,
       background:bgColor, border:`1px solid ${borderColor}`,
-      borderRadius:20, padding:"2px 10px",
+      borderRadius:4, padding:"2px 10px",
       animation:"fadeUp .15s ease both",
     });
 
     return (
       <div className="verse-row" style={{
-        padding:"16px 0", borderBottom:`1px solid ${P.br2}`,
+        padding:"17px 0", borderBottom:`1px solid ${P.br2}`,
         background: hl ? P.goldBg : "transparent",
-        borderRadius: hl ? 8 : 0, transition:"background .2s",
+        borderRadius: hl ? 4 : 0, transition:"background .2s",
         animation:`fadeUp .3s ease ${index*0.018}s both`
       }}>
         <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
@@ -576,8 +605,8 @@ export default function QuranReader() {
           <div style={{ flex:1 }}>
             {/* Arabic text */}
             <p style={{
-              direction:"rtl", fontFamily:"'Cormorant Garamond',serif",
-              fontSize:fontSize, color:P.ink1, lineHeight:2.1,
+              direction:"rtl", fontFamily:"'Amiri', 'Cormorant Garamond', serif",
+              fontSize:fontSize, color:P.ink1, lineHeight:2.15,
               margin:"0 0 10px", letterSpacing:"0.01em"
             }}>{verse.ar}</p>
 
@@ -616,16 +645,16 @@ export default function QuranReader() {
             {localTrans && verse.fr && (
               <div style={{
                 background:P.tealBg, border:`1px solid ${P.tealBr}`,
-                borderRadius:8, padding:"9px 13px", marginTop:4,
+                borderRadius:4, padding:"9px 13px", marginTop:4,
                 animation:"fadeUp .18s ease both"
               }}>
                 <div style={{
-                  fontSize:9, fontFamily:"system-ui", fontWeight:700,
-                  color:P.teal, letterSpacing:"0.12em", marginBottom:4
+                  fontSize:9, fontFamily:F_UI, fontWeight:700,
+                  color:P.tealL, letterSpacing:"0.13em", marginBottom:4
                 }}>TRADUCTION</div>
                 <span style={{
-                  fontFamily:"'Cormorant Garamond',serif", fontSize:14,
-                  color:"rgba(30,200,150,0.85)", fontStyle:"italic", lineHeight:1.7
+                  fontFamily:F_DISPLAY, fontSize:14,
+                  color:"rgba(95,196,166,0.9)", fontStyle:"italic", lineHeight:1.7
                 }}>{verse.fr}</span>
               </div>
             )}
@@ -640,7 +669,7 @@ export default function QuranReader() {
               onClick={() => toggleBookmark(selectedSurah.n, verse.num)}
               title={bk ? "Retirer le signet" : "Ajouter un signet"}
               style={{
-                width:26, height:26, borderRadius:6, cursor:"pointer",
+                width:26, height:26, borderRadius:4, cursor:"pointer",
                 border:`1px solid ${bk ? P.gold : P.br2}`,
                 background: bk ? P.goldBg : "transparent",
                 color: bk ? P.gold : P.ink3,
@@ -651,7 +680,7 @@ export default function QuranReader() {
               onClick={() => setHighlightedVerse(hl ? null : verse.num)}
               title="Surligner"
               style={{
-                width:26, height:26, borderRadius:6, cursor:"pointer",
+                width:26, height:26, borderRadius:4, cursor:"pointer",
                 border:`1px solid ${hl ? P.gold : P.br2}`,
                 background: hl ? P.goldBg : "transparent",
                 color: hl ? P.gold : P.ink3,
@@ -666,8 +695,12 @@ export default function QuranReader() {
 
   /* ── RENDER ─────────────────────────────────────────────── */
   return (
-    <div style={{ display:"flex", height:"calc(100vh - 70px)", marginTop:70, background:P.bg1, color:P.ink1, overflow:"hidden" }}>
+    <div style={{
+      display:"flex", height:"calc(100vh - 70px)", marginTop:70,
+      background:P.bg1, color:P.ink1, overflow:"hidden", position:"relative"
+    }}>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
@@ -679,38 +712,53 @@ export default function QuranReader() {
         .verse-row:hover .verse-actions{opacity:1!important}
         .sidebar-btn:hover{background:${P.bg3}!important}
         .reciter-btn:hover{background:${P.bg3}!important}
+        .qr-lattice{
+          position:absolute; inset:0; pointer-events:none; z-index:0; opacity:0.5;
+          background-image:
+            radial-gradient(circle at 1px 1px, rgba(205,160,83,0.10) 1px, transparent 1.6px);
+          background-size:26px 26px;
+          mask-image: radial-gradient(ellipse 80% 60% at 18% 0%, black 0%, transparent 70%);
+        }
       `}</style>
+      <div className="qr-lattice"/>
 
       {/* ══ SIDEBAR ═══════════════════════════════════════════ */}
       <aside style={{
         width:280, background:P.bg0, borderRight:`1px solid ${P.br1}`,
-        display:"flex", flexDirection:"column", flexShrink:0, overflow:"hidden"
+        display:"flex", flexDirection:"column", flexShrink:0, overflow:"hidden",
+        position:"relative", zIndex:1,
       }}>
-        <div style={{ padding:"18px 18px 14px", borderBottom:`1px solid ${P.br2}` }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
-            <div style={{ width:36, height:36, borderRadius:10, background:P.goldBg, border:`1px solid ${P.goldBr}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <Icon.Book/>
+        <div style={{ padding:"20px 18px 15px", borderBottom:`1px solid ${P.br2}` }}>
+          <div style={{ display:"flex", alignItems:"center", gap:11, marginBottom:16 }}>
+            <div style={{
+              width:38, height:38, borderRadius:"50%", flexShrink:0,
+              background:`radial-gradient(circle at 35% 30%, ${P.goldL}22, ${P.goldBg})`,
+              border:`1px solid ${P.goldBr}`, position:"relative",
+              display:"flex", alignItems:"center", justifyContent:"center"
+            }}>
+              <div style={{ position:"absolute", inset:3, borderRadius:"50%", border:`1px solid ${P.br1}` }}/>
+              <span style={{ color:P.gold }}><Icon.Book/></span>
             </div>
             <div>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:700, color:P.ink1 }}>القرآن الكريم</div>
-              <div style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", letterSpacing:"0.12em" }}>LE SAINT CORAN · 114 SOURATES</div>
+              <div style={{ fontFamily:"'Amiri', 'Cormorant Garamond', serif", fontSize:18, fontWeight:700, color:P.ink1, lineHeight:1.2 }}>القرآن الكريم</div>
+              <div style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:600, letterSpacing:"0.14em", marginTop:2 }}>LE SAINT CORAN · 114 SOURATES</div>
             </div>
           </div>
-          <div style={{ display:"flex", alignItems:"center", gap:8, background:P.bg2, border:`1px solid ${P.br2}`, borderRadius:8, padding:"7px 11px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, background:P.bg2, border:`1px solid ${P.br2}`, borderRadius:6, padding:"7px 11px" }}>
             <Icon.Search/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search surah..."
-              style={{ border:"none", background:"transparent", fontSize:12, outline:"none", width:"100%", color:P.ink1, fontFamily:"system-ui" }}/>
+              style={{ border:"none", background:"transparent", fontSize:12, outline:"none", width:"100%", color:P.ink1, fontFamily:F_UI }}/>
           </div>
         </div>
 
         <div style={{ display:"flex", borderBottom:`1px solid ${P.br2}`, flexShrink:0 }}>
           {[["surahs","Surahs"],["juzaa","Juz'"]].map(([k,l]) => (
             <button key={k} onClick={() => setSidebarTab(k)} style={{
-              flex:1, padding:"9px 0", border:"none", background:"transparent",
+              flex:1, padding:"10px 0", border:"none", background:"transparent",
               color: sidebarTab===k ? P.gold : P.ink3,
-              fontFamily:"system-ui", fontWeight:700, fontSize:10, cursor:"pointer",
+              fontFamily:F_UI, fontWeight:600, fontSize:10, cursor:"pointer",
               borderBottom: sidebarTab===k ? `2px solid ${P.gold}` : "2px solid transparent",
-              letterSpacing:"0.1em", transition:"all .15s"
+              letterSpacing:"0.12em", transition:"all .15s"
             }}>{l.toUpperCase()}</button>
           ))}
         </div>
@@ -721,29 +769,34 @@ export default function QuranReader() {
               display:"flex", alignItems:"center", width:"100%", padding:"10px 16px",
               border:"none", borderBottom:`1px solid ${P.br2}`,
               background: selectedSurah?.n===s.n ? P.goldBg : "transparent",
-              borderLeft: selectedSurah?.n===s.n ? `3px solid ${P.gold}` : "3px solid transparent",
+              borderLeft: selectedSurah?.n===s.n ? `2px solid ${P.gold}` : "2px solid transparent",
               cursor:"pointer", textAlign:"left", transition:"background .12s"
             }}>
               <div style={{
-                width:28, height:28, borderRadius:8, flexShrink:0, marginRight:10,
+                width:27, height:27, borderRadius:"30%", flexShrink:0, marginRight:11,
+                transform:"rotate(45deg)",
                 background: selectedSurah?.n===s.n ? P.goldBg : P.bg2,
                 border:`1px solid ${selectedSurah?.n===s.n ? P.gold : P.br2}`,
                 display:"flex", alignItems:"center", justifyContent:"center",
-                fontFamily:"system-ui", fontSize:10, fontWeight:700,
-                color: selectedSurah?.n===s.n ? P.gold : P.ink3,
-              }}>{s.n}</div>
+              }}>
+                <span style={{
+                  transform:"rotate(-45deg)",
+                  fontFamily:F_UI, fontSize:10, fontWeight:700,
+                  color: selectedSurah?.n===s.n ? P.gold : P.ink3,
+                }}>{s.n}</span>
+              </div>
               <div style={{flex:1, minWidth:0}}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <span style={{ fontSize:12, fontWeight:700, color: selectedSurah?.n===s.n ? P.gold : P.ink1, fontFamily:"system-ui" }}>{s.en}</span>
-                  <span style={{ fontSize:14, color: selectedSurah?.n===s.n ? P.gold : P.ink2, fontFamily:"'Cormorant Garamond',serif" }}>{s.ar}</span>
+                  <span style={{ fontSize:12, fontWeight:600, color: selectedSurah?.n===s.n ? P.gold : P.ink1, fontFamily:F_UI }}>{s.en}</span>
+                  <span style={{ fontSize:15, color: selectedSurah?.n===s.n ? P.gold : P.ink2, fontFamily:"'Amiri',serif" }}>{s.ar}</span>
                 </div>
-                <div style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui", marginTop:1 }}>
+                <div style={{ fontSize:10, color:P.ink3, fontFamily:F_UI, marginTop:1 }}>
                   <span style={{ color: s.type==="Meccan" ? P.teal : "#c09060" }}>{s.revelation}</span>
                   &ensp;·&ensp;{s.verses}v
                   {selectedSurah?.n===s.n && <span style={{ color:P.gold, marginLeft:5 }}>Juz' {s.juz}</span>}
                 </div>
                 {s.fr && selectedSurah?.n===s.n && (
-                  <div style={{ fontSize:9, color:P.pur, fontFamily:"system-ui", fontStyle:"italic", marginTop:2 }}>{s.fr}</div>
+                  <div style={{ fontSize:9, color:P.pur, fontFamily:F_UI, fontStyle:"italic", marginTop:2 }}>{s.fr}</div>
                 )}
               </div>
             </button>
@@ -758,13 +811,13 @@ export default function QuranReader() {
               border:"none", borderBottom:`1px solid ${P.br2}`,
               background:"transparent", cursor:"pointer", textAlign:"left", transition:"background .12s"
             }}>
-              <div style={{ width:34, height:34, borderRadius:8, flexShrink:0, marginRight:12, background:P.bg2, border:`1px solid ${P.br2}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:8, color:P.ink3, fontFamily:"system-ui", fontWeight:700, letterSpacing:"0.06em", lineHeight:1 }}>JUZ'</span>
-                <span style={{ fontSize:13, color:P.gold, fontFamily:"'Cormorant Garamond',serif", fontWeight:700, lineHeight:1.1 }}>{j.n}</span>
+              <div style={{ width:33, height:33, borderRadius:"50%", flexShrink:0, marginRight:12, background:P.bg2, border:`1px solid ${P.br1}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+                <span style={{ fontSize:7, color:P.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.08em", lineHeight:1 }}>JUZ'</span>
+                <span style={{ fontSize:13, color:P.gold, fontFamily:F_DISPLAY, fontWeight:700, lineHeight:1.1 }}>{j.n}</span>
               </div>
               <div>
-                <div style={{ fontSize:13, color:P.ink1, fontFamily:"'Cormorant Garamond',serif", fontWeight:700 }}>{j.name}</div>
-                <div style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui", marginTop:1 }}>Début : {ALL_SURAHS.find(s=>s.n===j.start.s)?.ar} : {j.start.v}</div>
+                <div style={{ fontSize:14, color:P.ink1, fontFamily:"'Amiri',serif", fontWeight:700 }}>{j.name}</div>
+                <div style={{ fontSize:10, color:P.ink3, fontFamily:F_UI, marginTop:1 }}>Début : {ALL_SURAHS.find(s=>s.n===j.start.s)?.ar} : {j.start.v}</div>
               </div>
             </button>
           ))}
@@ -772,7 +825,7 @@ export default function QuranReader() {
       </aside>
 
       {/* ══ MAIN READER ═══════════════════════════════════════ */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zIndex:1 }}>
 
         {/* Toolbar */}
         <div style={{
@@ -781,10 +834,10 @@ export default function QuranReader() {
         }}>
           {selectedSurah ? (
             <>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:700, color:P.ink1 }}>{selectedSurah.ar}</span>
-                <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:P.gold }}>{selectedSurah.ar}</span>
-                <span style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", background:P.bg3, border:`1px solid ${P.br2}`, borderRadius:5, padding:"2px 7px" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:9 }}>
+                <span style={{ fontFamily:"'Amiri',serif", fontSize:17, fontWeight:700, color:P.ink1 }}>{selectedSurah.ar}</span>
+                <span style={{ fontFamily:F_DISPLAY, fontSize:13, color:P.gold, fontStyle:"italic" }}>{selectedSurah.en}</span>
+                <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:600, background:P.bg3, border:`1px solid ${P.br2}`, borderRadius:4, padding:"3px 8px" }}>
                   {selectedSurah.verses} versets · Juz' {selectedSurah.juz}
                 </span>
               </div>
@@ -792,18 +845,18 @@ export default function QuranReader() {
 
               {/* Font size */}
               <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:24,height:24,borderRadius:5,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:"system-ui",fontSize:12,fontWeight:700 }}>−</button>
-                <span style={{ fontSize:10,color:P.ink3,fontFamily:"system-ui",width:26,textAlign:"center" }}>{fontSize}</span>
-                <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:24,height:24,borderRadius:5,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:"system-ui",fontSize:12,fontWeight:700 }}>+</button>
+                <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>−</button>
+                <span style={{ fontSize:10,color:P.ink3,fontFamily:F_UI,width:26,textAlign:"center" }}>{fontSize}</span>
+                <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>+</button>
               </div>
 
               {/* EXPL. global toggle */}
               <button onClick={() => setShowAllTrans(v => !v)} style={{
-                padding:"4px 11px", borderRadius:6, cursor:"pointer",
+                padding:"4px 11px", borderRadius:5, cursor:"pointer",
                 border:`1px solid ${showAllTrans ? P.tealBr : P.br2}`,
                 background: showAllTrans ? P.tealBg : "transparent",
                 color: showAllTrans ? P.teal : P.ink3,
-                fontFamily:"system-ui", fontWeight:700, fontSize:10, transition:"all .15s",
+                fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
                 display:"flex", alignItems:"center", gap:4
               }}>
                 {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} TRAD.
@@ -811,17 +864,17 @@ export default function QuranReader() {
 
               {/* PRON. global toggle — only when API returned data */}
               {loadingPron ? (
-                <div style={{ padding:"4px 11px", borderRadius:6, border:`1px solid ${P.br2}`, background:"transparent", display:"flex", alignItems:"center", gap:5 }}>
+                <div style={{ padding:"4px 11px", borderRadius:5, border:`1px solid ${P.br2}`, background:"transparent", display:"flex", alignItems:"center", gap:5 }}>
                   <div style={{ width:8,height:8,border:`1.5px solid ${P.purBg}`,borderTopColor:P.pur,borderRadius:"50%",animation:"spin .7s linear infinite" }}/>
-                  <span style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui" }}>Pron…</span>
+                  <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI }}>Pron…</span>
                 </div>
               ) : hasPron && (
                 <button onClick={() => setShowAllPron(v => !v)} style={{
-                  padding:"4px 11px", borderRadius:6, cursor:"pointer",
+                  padding:"4px 11px", borderRadius:5, cursor:"pointer",
                   border:`1px solid ${showAllPron ? P.purBr : P.br2}`,
                   background: showAllPron ? P.purBg : "transparent",
                   color: showAllPron ? P.pur : P.ink3,
-                  fontFamily:"system-ui", fontWeight:700, fontSize:10, transition:"all .15s",
+                  fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
                   display:"flex", alignItems:"center", gap:4
                 }}>
                   {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} Prononciation FR
@@ -829,7 +882,7 @@ export default function QuranReader() {
               )}
             </>
           ) : (
-            <span style={{ fontSize:13, color:P.ink3, fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic" }}>
+            <span style={{ fontSize:13, color:P.ink3, fontFamily:F_DISPLAY, fontStyle:"italic" }}>
               اختر سورة — Sélectionnez une sourate pour commencer
             </span>
           )}
@@ -839,20 +892,20 @@ export default function QuranReader() {
         {selectedSurah && (
           <div style={{
             background:P.bg0, borderBottom:`1px solid ${P.br2}`,
-            padding:"12px 20px", flexShrink:0
+            padding:"13px 20px", flexShrink:0
           }}>
             {/* Reciter selector */}
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10, flexWrap:"wrap" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:11, flexWrap:"wrap" }}>
               <Icon.Volume/>
-              <span style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", fontWeight:700, letterSpacing:"0.12em", marginRight:4 }}>RÉCITATEUR</span>
+              <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:4 }}>RÉCITATEUR</span>
               {RECITERS.map(r => (
                 <button key={r.id} onClick={() => setReciter(r.id)} className="reciter-btn" style={{
-                  padding:"4px 12px", borderRadius:20,
+                  padding:"4px 12px", borderRadius:4,
                   border:`1px solid ${reciter===r.id ? P.gold : P.br2}`,
                   background: reciter===r.id ? P.goldBg : "transparent",
                   color: reciter===r.id ? P.gold : P.ink3,
-                  fontFamily:"system-ui", fontSize:10,
-                  fontWeight: reciter===r.id ? 700 : 400,
+                  fontFamily:F_UI, fontSize:10,
+                  fontWeight: reciter===r.id ? 600 : 400,
                   cursor:"pointer", transition:"all .12s"
                 }}>{r.name}</button>
               ))}
@@ -868,20 +921,34 @@ export default function QuranReader() {
           {/* Welcome */}
           {!selectedSurah && (
             <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:20, padding:40 }}>
-              <div style={{ textAlign:"center" }}>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:64, color:P.goldBr, lineHeight:1, marginBottom:8 }}>بِسْمِ اللَّهِ</div>
+              <div style={{
+                textAlign:"center", position:"relative", padding:"44px 56px",
+                border:`1px solid ${P.br1}`, borderRadius:4,
+              }}>
+                {[0,1,2,3].map(i => (
+                  <svg key={i} width="34" height="34" viewBox="0 0 34 34" style={{
+                    position:"absolute",
+                    top: i<2 ? -1 : "auto", bottom: i>=2 ? -1 : "auto",
+                    left: i%2===0 ? -1 : "auto", right: i%2===1 ? -1 : "auto",
+                    transform: i===1?"scaleX(-1)":i===2?"scaleY(-1)":i===3?"scale(-1,-1)":"none"
+                  }}>
+                    <path d="M1 1 Q1 17 17 17" fill="none" stroke={P.goldBr} strokeWidth="1"/>
+                    <path d="M1 1 L1 13 M1 1 L13 1" fill="none" stroke={P.gold} strokeWidth="1.4"/>
+                  </svg>
+                ))}
+                <div style={{ fontFamily:"'Amiri',serif", fontSize:58, color:P.goldL, lineHeight:1, marginBottom:10, textShadow:`0 0 28px ${P.gold}30` }}>بِسْمِ اللَّهِ</div>
                 <OrnamentDivider/>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:P.ink2, marginTop:12, fontStyle:"italic" }}>الرَّحْمَٰنِ الرَّحِيمِ</div>
-                <div style={{ marginTop:28, fontSize:12, color:P.ink3, fontFamily:"system-ui", lineHeight:1.7, maxWidth:360 }}>
+                <div style={{ fontFamily:"'Amiri',serif", fontSize:23, color:P.ink2, marginTop:13 }}>الرَّحْمَٰنِ الرَّحِيمِ</div>
+                <div style={{ marginTop:26, fontSize:12, color:P.ink3, fontFamily:F_UI, lineHeight:1.75, maxWidth:340 }}>
                   Sélectionnez une sourate dans la liste à gauche pour commencer votre lecture.
                   Utilisez la barre d'outils pour afficher la prononciation et la traduction.
                 </div>
-                <div style={{ marginTop:24, display:"flex", justifyContent:"center", gap:16, flexWrap:"wrap" }}>
+                <div style={{ marginTop:26, display:"flex", justifyContent:"center", gap:12, flexWrap:"wrap" }}>
                   {[{n:1,label:"Al-Fatiha"},{n:36,label:"Ya-Sin"},{n:67,label:"Al-Mulk"},{n:112,label:"Al-Ikhlas"}].map(q => (
                     <button key={q.n} onClick={() => loadSurah(ALL_SURAHS[q.n-1])} style={{
-                      padding:"8px 18px", borderRadius:9,
+                      padding:"8px 18px", borderRadius:4,
                       border:`1px solid ${P.goldBr}`, background:P.goldBg,
-                      color:P.gold, fontFamily:"system-ui", fontSize:12, fontWeight:700, cursor:"pointer"
+                      color:P.gold, fontFamily:"'Amiri',serif", fontSize:14, fontWeight:700, cursor:"pointer"
                     }}>{ALL_SURAHS[q.n-1].ar}</button>
                   ))}
                 </div>
@@ -893,7 +960,7 @@ export default function QuranReader() {
           {loading && (
             <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100%", flexDirection:"column", gap:14 }}>
               <div style={{ width:36,height:36,border:`2px solid ${P.goldBg}`,borderTopColor:P.gold,borderRadius:"50%",animation:"spin .8s linear infinite" }}/>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:P.ink3, fontStyle:"italic" }}>جارٍ التحميل...</div>
+              <div style={{ fontFamily:"'Amiri',serif", fontSize:14, color:P.ink3 }}>جارٍ التحميل...</div>
             </div>
           )}
 
@@ -901,40 +968,43 @@ export default function QuranReader() {
           {selectedSurah && verses && !loading && (
             <div style={{ maxWidth:760, margin:"0 auto", padding:"32px 28px 80px" }}>
 
-              {/* Surah header */}
+              {/* Surah header — illuminated medallion */}
               <div style={{
                 textAlign:"center", marginBottom:36,
-                background:P.bg2, border:`1px solid ${P.br1}`, borderRadius:16,
-                padding:"28px 32px", position:"relative", overflow:"hidden"
+                background:`linear-gradient(180deg, ${P.bg2}, ${P.bg1})`,
+                border:`1px solid ${P.br1}`, borderRadius:6,
+                padding:"30px 32px", position:"relative", overflow:"hidden"
               }}>
+                <div style={{ position:"absolute", inset:8, border:`1px solid ${P.br2}`, borderRadius:3, pointerEvents:"none" }}/>
                 {[0,1,2,3].map(i => (
-                  <svg key={i} width="28" height="28" viewBox="0 0 28 28" style={{
+                  <svg key={i} width="30" height="30" viewBox="0 0 30 30" style={{
                     position:"absolute",
-                    top: i<2 ? 12 : "auto", bottom: i>=2 ? 12 : "auto",
-                    left: i%2===0 ? 12 : "auto", right: i%2===1 ? 12 : "auto",
+                    top: i<2 ? 6 : "auto", bottom: i>=2 ? 6 : "auto",
+                    left: i%2===0 ? 6 : "auto", right: i%2===1 ? 6 : "auto",
                     transform: i===1?"scaleX(-1)":i===2?"scaleY(-1)":i===3?"scale(-1,-1)":"none"
                   }}>
-                    <path d="M2 2 Q10 2 10 10" fill="none" stroke={P.goldBr} strokeWidth="1.2"/>
-                    <path d="M2 2 Q2 10 10 10" fill="none" stroke={P.goldBr} strokeWidth="1.2"/>
-                    <circle cx="2" cy="2" r="1.5" fill={P.goldBr}/>
+                    <path d="M2 2 Q12 2 12 12" fill="none" stroke={P.goldBr} strokeWidth="1"/>
+                    <path d="M2 2 Q2 12 12 12" fill="none" stroke={P.goldBr} strokeWidth="1"/>
+                    <path d="M2 2 L2 9 M2 2 L9 2" fill="none" stroke={P.gold} strokeWidth="1.3"/>
+                    <circle cx="2" cy="2" r="1.6" fill={P.gold}/>
                   </svg>
                 ))}
-                <div style={{ fontFamily:"system-ui", fontSize:9, fontWeight:700, color:P.ink3, letterSpacing:"0.15em", marginBottom:10 }}>
+                <div style={{ fontFamily:F_UI, fontSize:9, fontWeight:700, color:P.ink3, letterSpacing:"0.18em", marginBottom:12 }}>
                   {selectedSurah.revelation} · SOURATE {selectedSurah.n} SUR 114
                 </div>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:36, fontWeight:700, color:P.gold, marginBottom:4, lineHeight:1.2 }}>
+                <div style={{ fontFamily:"'Amiri',serif", fontSize:38, fontWeight:700, color:P.goldL, marginBottom:5, lineHeight:1.2, textShadow:`0 0 22px ${P.gold}25` }}>
                   {selectedSurah.ar}
                 </div>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:P.ink2, marginBottom:6 }}>
+                <div style={{ fontFamily:F_DISPLAY, fontSize:19, color:P.ink2, marginBottom:7, fontStyle:"italic" }}>
                   {selectedSurah.en}
                 </div>
                 {selectedSurah.fr && (
-                  <div style={{ display:"inline-flex", alignItems:"center", gap:6, marginBottom:8, background:P.purBg, border:`1px solid ${P.purBr}`, borderRadius:20, padding:"3px 13px" }}>
-                    <span style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui" }}>🗣</span>
-                    <span style={{ fontSize:12, color:P.pur, fontFamily:"system-ui", fontStyle:"italic", fontWeight:700 }}>{selectedSurah.fr}</span>
+                  <div style={{ display:"inline-flex", alignItems:"center", gap:6, marginBottom:9, background:P.purBg, border:`1px solid ${P.purBr}`, borderRadius:4, padding:"3px 13px" }}>
+                    <span style={{ fontSize:10, color:P.ink3, fontFamily:F_UI }}>🗣</span>
+                    <span style={{ fontSize:12, color:P.pur, fontFamily:F_UI, fontStyle:"italic", fontWeight:600 }}>{selectedSurah.fr}</span>
                   </div>
                 )}
-                <div style={{ fontFamily:"system-ui", fontSize:11, color:P.ink3, fontStyle:"italic" }}>
+                <div style={{ fontFamily:F_UI, fontSize:11, color:P.ink3, fontStyle:"italic" }}>
                   {selectedSurah.meaning} · {selectedSurah.verses} versets
                 </div>
                 <OrnamentDivider/>
@@ -943,12 +1013,12 @@ export default function QuranReader() {
               {/* Basmala */}
               {basmala && (
                 <div style={{ textAlign:"center", marginBottom:28 }}>
-                  <div style={{ display:"inline-block", padding:"14px 36px", background:P.goldBg, border:`1px solid ${P.goldBr}`, borderRadius:12 }}>
-                    <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:24, color:P.gold, lineHeight:1.9 }}>{basmala.ar}</div>
-                    <div style={{ fontSize:9, color:P.ink3, fontFamily:"system-ui", letterSpacing:"0.08em", marginTop:4 }}>
+                  <div style={{ display:"inline-block", padding:"15px 38px", background:P.goldBg, border:`1px solid ${P.goldBr}`, borderRadius:4 }}>
+                    <div style={{ fontFamily:"'Amiri',serif", fontSize:25, color:P.goldL, lineHeight:1.9 }}>{basmala.ar}</div>
+                    <div style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, letterSpacing:"0.1em", marginTop:4 }}>
                       BASMALA — Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
                     </div>
-                    <div style={{ fontSize:10, color:P.ink3, fontFamily:"system-ui", fontStyle:"italic", marginTop:2 }}>
+                    <div style={{ fontSize:10, color:P.ink3, fontFamily:F_UI, fontStyle:"italic", marginTop:2 }}>
                       Biss-mill-aa-hir-rah-maa-nir-ra-HEEM
                     </div>
                   </div>
@@ -971,15 +1041,15 @@ export default function QuranReader() {
               {/* Footer */}
               <div style={{ textAlign:"center", marginTop:40 }}>
                 <OrnamentDivider/>
-                <div style={{ marginTop:12, fontFamily:"'Cormorant Garamond',serif", fontSize:18, color:P.goldBr }}>
+                <div style={{ marginTop:13, fontFamily:"'Amiri',serif", fontSize:19, color:P.goldBr }}>
                   ﴾ {selectedSurah.ar} ﴿
                 </div>
                 {selectedSurah.n < 114 && (
                   <div style={{ marginTop:20 }}>
                     <button onClick={() => loadSurah(ALL_SURAHS[selectedSurah.n])} style={{
-                      padding:"9px 22px", borderRadius:9,
+                      padding:"9px 22px", borderRadius:4,
                       border:`1px solid ${P.goldBr}`, background:P.goldBg,
-                      color:P.gold, fontFamily:"system-ui", fontWeight:700, fontSize:12, cursor:"pointer",
+                      color:P.gold, fontFamily:F_UI, fontWeight:600, fontSize:12, cursor:"pointer",
                       display:"inline-flex", alignItems:"center", gap:8
                     }}>
                       Suivant : {ALL_SURAHS[selectedSurah.n].ar} <Icon.ChevR/>
