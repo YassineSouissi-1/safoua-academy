@@ -179,8 +179,8 @@ const COURSE_AYAT = {
     highlight: "إِنَّ الدِّينَ عِندَ اللَّهِ الْإِسْلَامُ",
     tr: "Inna d-dīna ʿinda-llāhi l-islām",
     fr: "Certes, la religion agréée d'Allah, c'est l'Islam",
-    ref: "Sourate Âl Imrân 3:19",
-    audioUrl: ayahUrl(3,19)
+    ref: "Sourate Âl Imrân 3:18–19",
+    audioUrl: ayahUrl(3, 18)
   },
   zakat: {
     ar: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
