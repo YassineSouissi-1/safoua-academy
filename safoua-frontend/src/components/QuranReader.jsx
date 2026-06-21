@@ -22,6 +22,9 @@ const Icon = {
   SkipF:  () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="4" x2="19" y2="20"/></svg>,
   Stop:   () => <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>,
   Star8:  () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.2 6.8L21 10l-6.8 2.2L12 19l-2.2-6.8L3 10l6.8-2.2z" transform="rotate(22.5 12 12)"/><path d="M12 1l2.2 6.8L21 10l-6.8 2.2L12 19l-2.2-6.8L3 10l6.8-2.2z"/></svg>,
+  Expand: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>,
+  Shrink: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>,
+  X:      () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
 };
 
 /* ── PALETTE — "Illuminated Manuscript": deep ink-emerald ground,
@@ -481,6 +484,7 @@ export default function QuranReader() {
   const [sidebarTab,    setSidebarTab]    = useState("surahs");
   const [showAllPron,   setShowAllPron]   = useState(false);
   const [showAllTrans,  setShowAllTrans]  = useState(false);
+  const [fullscreen,    setFullscreen]    = useState(false);
   const [bookmarks,     setBookmarks]     = useState(() => {
     try { return JSON.parse(localStorage.getItem("qr_bookmarks") || "[]"); } catch { return []; }
   });
@@ -490,6 +494,13 @@ export default function QuranReader() {
 
   const { pronunciations, loadingPron } = usePronunciations(selectedSurah?.n);
   const hasPron = pronunciations.length > 0;
+
+  // Exit fullscreen with Escape key
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === "Escape" && fullscreen) setFullscreen(false); };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [fullscreen]);
 
   const rec = RECITERS.find(r => r.id === reciter) || RECITERS[0];
   const audioSrc = selectedSurah ? `${rec.server}/${String(selectedSurah.n).padStart(3,"0")}.mp3` : null;
@@ -880,6 +891,22 @@ export default function QuranReader() {
                   {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} Prononciation FR
                 </button>
               )}
+
+              {/* Fullscreen toggle */}
+              <button
+                onClick={() => setFullscreen(v => !v)}
+                title={fullscreen ? "Quitter le plein écran (Échap)" : "Plein écran immersif"}
+                style={{
+                  width:30, height:30, borderRadius:5, cursor:"pointer",
+                  border:`1px solid ${fullscreen ? P.goldBr : P.br2}`,
+                  background: fullscreen ? P.goldBg : "transparent",
+                  color: fullscreen ? P.gold : P.ink3,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  transition:"all .15s", marginLeft:4,
+                }}
+              >
+                {fullscreen ? <Icon.Shrink/> : <Icon.Expand/>}
+              </button>
             </>
           ) : (
             <span style={{ fontSize:13, color:P.ink3, fontFamily:F_DISPLAY, fontStyle:"italic" }}>
@@ -1061,6 +1088,194 @@ export default function QuranReader() {
           )}
         </div>
       </div>
+
+      {/* ══ FULLSCREEN OVERLAY ════════════════════════════════ */}
+      {fullscreen && selectedSurah && (
+        <div style={{
+          position:"fixed", inset:0, zIndex:9999,
+          background:P.bg1, display:"flex", flexDirection:"column",
+          animation:"fadeUp .22s ease both",
+        }}>
+          {/* Fullscreen top bar */}
+          <div style={{
+            height:52, background:P.bg0, borderBottom:`1px solid ${P.br1}`,
+            display:"flex", alignItems:"center", padding:"0 24px", gap:14, flexShrink:0,
+          }}>
+            {/* Surah name */}
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <span style={{ fontFamily:"'Amiri',serif", fontSize:19, fontWeight:700, color:P.goldL }}>{selectedSurah.ar}</span>
+              <span style={{ fontFamily:F_DISPLAY, fontSize:13, color:P.gold, fontStyle:"italic" }}>{selectedSurah.en}</span>
+              <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:600, background:P.bg3, border:`1px solid ${P.br2}`, borderRadius:4, padding:"3px 8px" }}>
+                {selectedSurah.verses} versets · Juz' {selectedSurah.juz}
+              </span>
+            </div>
+
+            <div style={{ flex:1 }}/>
+
+            {/* Font size */}
+            <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+              <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>−</button>
+              <span style={{ fontSize:10,color:P.ink3,fontFamily:F_UI,width:26,textAlign:"center" }}>{fontSize}</span>
+              <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>+</button>
+            </div>
+
+            {/* TRAD toggle */}
+            <button onClick={() => setShowAllTrans(v => !v)} style={{
+              padding:"4px 11px", borderRadius:5, cursor:"pointer",
+              border:`1px solid ${showAllTrans ? P.tealBr : P.br2}`,
+              background: showAllTrans ? P.tealBg : "transparent",
+              color: showAllTrans ? P.teal : P.ink3,
+              fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
+              display:"flex", alignItems:"center", gap:4
+            }}>
+              {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} TRAD.
+            </button>
+
+            {/* PRON toggle */}
+            {hasPron && (
+              <button onClick={() => setShowAllPron(v => !v)} style={{
+                padding:"4px 11px", borderRadius:5, cursor:"pointer",
+                border:`1px solid ${showAllPron ? P.purBr : P.br2}`,
+                background: showAllPron ? P.purBg : "transparent",
+                color: showAllPron ? P.pur : P.ink3,
+                fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
+                display:"flex", alignItems:"center", gap:4
+              }}>
+                {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} Pron. FR
+              </button>
+            )}
+
+            {/* Close fullscreen */}
+            <button
+              onClick={() => setFullscreen(false)}
+              title="Quitter le plein écran (Échap)"
+              style={{
+                width:32, height:32, borderRadius:6, cursor:"pointer",
+                border:`1px solid ${P.br2}`, background:"transparent",
+                color:P.ink3, display:"flex", alignItems:"center", justifyContent:"center",
+                transition:"all .15s", marginLeft:4,
+              }}
+            ><Icon.X/></button>
+          </div>
+
+          {/* Scrollable verse area */}
+          <div style={{ flex:1, overflowY:"auto", background:P.bg1, paddingBottom:110 }}>
+            <div style={{ maxWidth:720, margin:"0 auto", padding:"36px 32px 20px" }}>
+
+              {/* Surah medallion header */}
+              <div style={{
+                textAlign:"center", marginBottom:32,
+                background:`linear-gradient(180deg, ${P.bg2}, ${P.bg1})`,
+                border:`1px solid ${P.br1}`, borderRadius:6,
+                padding:"28px 32px", position:"relative", overflow:"hidden"
+              }}>
+                <div style={{ position:"absolute", inset:8, border:`1px solid ${P.br2}`, borderRadius:3, pointerEvents:"none" }}/>
+                {[0,1,2,3].map(i => (
+                  <svg key={i} width="26" height="26" viewBox="0 0 30 30" style={{
+                    position:"absolute",
+                    top: i<2 ? 5 : "auto", bottom: i>=2 ? 5 : "auto",
+                    left: i%2===0 ? 5 : "auto", right: i%2===1 ? 5 : "auto",
+                    transform: i===1?"scaleX(-1)":i===2?"scaleY(-1)":i===3?"scale(-1,-1)":"none"
+                  }}>
+                    <path d="M2 2 Q12 2 12 12" fill="none" stroke={P.goldBr} strokeWidth="1"/>
+                    <path d="M2 2 Q2 12 12 12" fill="none" stroke={P.goldBr} strokeWidth="1"/>
+                    <path d="M2 2 L2 9 M2 2 L9 2" fill="none" stroke={P.gold} strokeWidth="1.3"/>
+                    <circle cx="2" cy="2" r="1.6" fill={P.gold}/>
+                  </svg>
+                ))}
+                <div style={{ fontFamily:F_UI, fontSize:9, fontWeight:700, color:P.ink3, letterSpacing:"0.18em", marginBottom:10 }}>
+                  {selectedSurah.revelation} · SOURATE {selectedSurah.n} SUR 114
+                </div>
+                <div style={{ fontFamily:"'Amiri',serif", fontSize:42, fontWeight:700, color:P.goldL, marginBottom:4, lineHeight:1.2, textShadow:`0 0 22px ${P.gold}25` }}>
+                  {selectedSurah.ar}
+                </div>
+                <div style={{ fontFamily:F_DISPLAY, fontSize:18, color:P.ink2, marginBottom:6, fontStyle:"italic" }}>
+                  {selectedSurah.en}
+                </div>
+                <div style={{ fontFamily:F_UI, fontSize:11, color:P.ink3, fontStyle:"italic" }}>
+                  {selectedSurah.meaning} · {selectedSurah.verses} versets
+                </div>
+                <OrnamentDivider/>
+              </div>
+
+              {/* Basmala */}
+              {basmala && (
+                <div style={{ textAlign:"center", marginBottom:28 }}>
+                  <div style={{ display:"inline-block", padding:"14px 36px", background:P.goldBg, border:`1px solid ${P.goldBr}`, borderRadius:4 }}>
+                    <div style={{ fontFamily:"'Amiri',serif", fontSize:26, color:P.goldL, lineHeight:1.9 }}>{basmala.ar}</div>
+                    <div style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, letterSpacing:"0.1em", marginTop:3 }}>
+                      BASMALA — Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Verses */}
+              {verses && (
+                <div style={{ animation:"fadeUp .4s ease both" }}>
+                  {verses.map((v, i) => (
+                    <VerseCard
+                      key={v.num}
+                      verse={v}
+                      index={i}
+                      globalPron={showAllPron}
+                      globalTrans={showAllTrans}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Footer nav */}
+              <div style={{ textAlign:"center", marginTop:40 }}>
+                <OrnamentDivider/>
+                <div style={{ marginTop:13, fontFamily:"'Amiri',serif", fontSize:19, color:P.goldBr }}>
+                  ﴾ {selectedSurah.ar} ﴿
+                </div>
+                {selectedSurah.n < 114 && (
+                  <div style={{ marginTop:20 }}>
+                    <button onClick={() => loadSurah(ALL_SURAHS[selectedSurah.n])} style={{
+                      padding:"9px 22px", borderRadius:4,
+                      border:`1px solid ${P.goldBr}`, background:P.goldBg,
+                      color:P.gold, fontFamily:F_UI, fontWeight:600, fontSize:12, cursor:"pointer",
+                      display:"inline-flex", alignItems:"center", gap:8
+                    }}>
+                      Suivant : {ALL_SURAHS[selectedSurah.n].ar} <Icon.ChevR/>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Floating audio bar — always visible at bottom */}
+          <div style={{
+            position:"absolute", bottom:0, left:0, right:0,
+            background:`linear-gradient(0deg, ${P.bg0} 70%, transparent)`,
+            padding:"18px 32px 22px",
+            backdropFilter:"blur(12px)",
+            borderTop:`1px solid ${P.br1}`,
+          }}>
+            {/* Reciter selector */}
+            <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10, flexWrap:"wrap" }}>
+              <Icon.Volume/>
+              <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:4 }}>RÉCITATEUR</span>
+              {RECITERS.map(r => (
+                <button key={r.id} onClick={() => setReciter(r.id)} className="reciter-btn" style={{
+                  padding:"3px 10px", borderRadius:4,
+                  border:`1px solid ${reciter===r.id ? P.gold : P.br2}`,
+                  background: reciter===r.id ? P.goldBg : "transparent",
+                  color: reciter===r.id ? P.gold : P.ink3,
+                  fontFamily:F_UI, fontSize:9.5,
+                  fontWeight: reciter===r.id ? 600 : 400,
+                  cursor:"pointer", transition:"all .12s"
+                }}>{r.name}</button>
+              ))}
+            </div>
+            {/* Audio player */}
+            <AudioPlayer key={`fs-${selectedSurah.n}-${reciter}`} src={audioSrc} reciterName={rec.name}/>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
