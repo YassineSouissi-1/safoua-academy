@@ -48,6 +48,50 @@ const P = {
 const F_DISPLAY = "'Cormorant Garamond', Georgia, serif";
 const F_UI = "'Inter', system-ui, sans-serif";
 
+/* ── TAJWID — color rules, mapped to the official Quran.com/Quran
+   Foundation `text_uthmani_tajweed` class names. This is the same
+   scholar-verified tajweed-tagging used by quran.com / Tarteel,
+   so it's accurate (not a regex guess) — each letter/combination
+   is already classified by them; we just recolor their classes. ── */
+const TAJWEED_RULES = [
+  { classes:["ghunnah","ghunnah_shafawi"],            color:"#e6c34f", label:"Ghunnah (غُنّة)",                 desc:"Nasal hum, ~2 counts — noon/meem mushaddad" },
+  { classes:["ikhafa","ikhafa_shafawi"],              color:"#d97757", label:"Ikhfa' (إخفاء)",                  desc:"Hidden/nasalized noon sakinah before certain letters" },
+  { classes:["idgham_ghunnah"],                       color:"#7fb069", label:"Idgham with Ghunnah (إدغام بغنة)", desc:"Merging into next letter, with nasal hum" },
+  { classes:["idgham_wo_ghunnah"],                    color:"#4f8a5b", label:"Idgham without Ghunnah (إدغام بلا غنة)", desc:"Merging into next letter, no nasal hum" },
+  { classes:["idgham_shafawi"],                       color:"#5b9aa0", label:"Idgham Shafawi (إدغام شفوي)",     desc:"Meem sakinah merging into a following meem" },
+  { classes:["idgham_mutajanisin","idgham_mutaqaribayn"], color:"#3f7d8a", label:"Idgham Mutajanisayn/Mutaqaribayn", desc:"Merging of similar/close articulation points" },
+  { classes:["iqlab"],                                color:"#6fa8dc", label:"Iqlab (إقلاب)",                   desc:"Noon sakinah/tanween flipped to a hidden meem before ب" },
+  { classes:["qalaqah","qalqalah"],                   color:"#c2185b", label:"Qalqalah (قلقلة)",                desc:"Echoing bounce on ق ط ب ج د when sakinah" },
+  { classes:["madda_normal"],                         color:"#9b6fd6", label:"Madd Normal (مد طبيعي)",          desc:"Natural elongation, 2 counts" },
+  { classes:["madda_permissible"],                    color:"#b08fd6", label:"Madd Permissible (مد جائز)",      desc:"Elongation that may vary, 2–4–6 counts" },
+  { classes:["madda_necessary"],                      color:"#8a4fc2", label:"Madd Necessary (مد لازم)",        desc:"Mandatory elongation, 6 counts" },
+  { classes:["madda_obligatory"],                     color:"#a05fd9", label:"Madd Obligatory (مد واجب)",       desc:"Obligatory connected elongation, 4–5 counts" },
+  { classes:["ham_wasl"],                             color:"#8a8a8a", label:"Hamzat al-Wasl (همزة الوصل)",     desc:"Silent connecting hamza, dropped mid-recitation" },
+  { classes:["laam_shamsiyah"],                       color:"#8a8a8a", label:"Lam Shamsiyyah (لام شمسية)",      desc:"Silent assimilated lam (sun letters)" },
+  { classes:["silent","slnt"],                        color:"#6b6b6b", label:"Silent Letter (حرف ساكت)",        desc:"Letter written but not pronounced" },
+];
+// quick lookup: tajweed class name -> color
+const TAJWEED_COLOR_MAP = TAJWEED_RULES.reduce((acc, rule) => {
+  rule.classes.forEach(c => { acc[c] = rule.color; });
+  return acc;
+}, {});
+
+/* Convert the `text_uthmani_tajweed` markup (e.g. quran.com's
+   `<tajweed class=ham_wasl>ٱ</tajweed>`) into safe inline-styled
+   spans we control, and strip the trailing verse-number <span class=end>
+   marker since we render our own ayah-end star separately. */
+function tajweedToReactHtml(raw) {
+  if (!raw) return "";
+  let html = raw
+    .replace(/<span class=end>[^<]*<\/span>/gi, "")
+    .replace(/<tajweed class=([a-zA-Z_]+)>/gi, (_, cls) => {
+      const color = TAJWEED_COLOR_MAP[cls] || "#f3ead2";
+      return `<span style="color:${color};font-weight:600" data-tajweed="${cls}">`;
+    })
+    .replace(/<\/tajweed>/gi, "</span>");
+  return html.trim();
+}
+
 /* ── RECITERS ────────────────────────────────────────────────── */
 const RECITERS = [
   { id:"mishari",    name:"Mishari Al-Afasy",  ar:"مشاري العفاسي", server:"https://server8.mp3quran.net/afs" },
@@ -484,6 +528,10 @@ export default function QuranReader() {
   const [sidebarTab,    setSidebarTab]    = useState("surahs");
   const [showAllPron,   setShowAllPron]   = useState(false);
   const [showAllTrans,  setShowAllTrans]  = useState(false);
+  const [showAllTajwid, setShowAllTajwid] = useState(false);
+  const [tajwidMap,      setTajwidMap]      = useState({});   // {verseNum: html}
+  const [tajwidAvailable,setTajwidAvailable]= useState(true);
+  const [showTajwidLegend, setShowTajwidLegend] = useState(false);
   const [fullscreen,    setFullscreen]    = useState(false);
   const [bookmarks,     setBookmarks]     = useState(() => {
     try { return JSON.parse(localStorage.getItem("qr_bookmarks") || "[]"); } catch { return []; }
@@ -518,6 +566,7 @@ export default function QuranReader() {
     setVerses(null); setBasmala(null);
     setHighlightedVerse(null);
     setShowAllPron(false); setShowAllTrans(false);
+    setTajwidMap({}); setTajwidAvailable(true);
     setLoading(true);
     if (contentRef.current) contentRef.current.scrollTop = 0;
     try {
@@ -544,6 +593,26 @@ export default function QuranReader() {
       setVerses([{ ar: "تعذّر تحميل الآيات", num:1, fr:"Impossible de charger les versets." }]);
     }
     setLoading(false);
+
+    // Fetch official scholar-verified tajweed-tagged text (quran.com).
+    // Independent try/catch: if it fails the rest of the reader still works,
+    // we just disable the TAJWID toggle for this surah.
+    try {
+      const twRes = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${surah.n}&per_page=300`);
+      const twData = await twRes.json();
+      const list = twData.verses || [];
+      if (list.length === 0) throw new Error("empty");
+      const map = {};
+      list.forEach(v => {
+        const verseNum = parseInt(String(v.verse_key).split(":")[1], 10);
+        map[verseNum] = tajweedToReactHtml(v.text_uthmani_tajweed);
+      });
+      setTajwidMap(map);
+      setTajwidAvailable(true);
+    } catch (e) {
+      setTajwidMap({});
+      setTajwidAvailable(false);
+    }
   }
 
   function toggleBookmark(surahN, verseNum) {
@@ -554,6 +623,43 @@ export default function QuranReader() {
     setBookmarks(next);
     try { localStorage.setItem("qr_bookmarks", JSON.stringify(next)); } catch {}
   }
+
+  /* ── TAJWID LEGEND — fixed panel, stays visible while scrolling ── */
+  const TajwidLegend = () => (
+    <div style={{
+      position:"fixed", top:90, right:18, bottom:100, zIndex:10000,
+      width:230, background:P.bg1, border:`1px solid ${P.goldBr}`, borderRadius:8,
+      padding:"14px 14px 10px", boxShadow:"0 8px 28px rgba(0,0,0,0.45)",
+      display:"flex", flexDirection:"column",
+      animation:"fadeUp .2s ease both",
+    }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10, flexShrink:0 }}>
+        <span style={{ fontFamily:F_UI, fontSize:10, fontWeight:700, color:P.gold, letterSpacing:"0.12em" }}>
+          LÉGENDE TAJWID
+        </span>
+        <button onClick={() => setShowTajwidLegend(false)} style={{ background:"transparent", border:"none", color:P.ink3, cursor:"pointer" }}>
+          <Icon.X/>
+        </button>
+      </div>
+      <div style={{ overflowY:"auto", display:"flex", flexDirection:"column", gap:10, paddingRight:2 }}>
+        {TAJWEED_RULES.map(rule => (
+          <div key={rule.label} style={{ display:"flex", alignItems:"flex-start", gap:8 }}>
+            <span style={{
+              width:10, height:10, borderRadius:"50%", background:rule.color,
+              flexShrink:0, marginTop:3, boxShadow:`0 0 6px ${rule.color}80`
+            }}/>
+            <div>
+              <div style={{ fontFamily:F_UI, fontSize:11, fontWeight:700, color:rule.color }}>{rule.label}</div>
+              <div style={{ fontFamily:F_UI, fontSize:9.5, color:P.ink3, marginTop:1, lineHeight:1.35 }}>{rule.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  /* Portal-less fixed render: mount once, controlled purely by showTajwidLegend */
+  const TajwidLegendFixed = () => showTajwidLegend ? <TajwidLegend/> : null;
 
   function isBookmarked(surahN, verseNum) {
     return bookmarks.includes(`${surahN}:${verseNum}`);
@@ -573,13 +679,15 @@ export default function QuranReader() {
   );
 
   /* ── VERSE CARD — per-verse PRON. + EXPL. toggles ────────── */
-  function VerseCard({ verse, index, globalPron, globalTrans }) {
+  function VerseCard({ verse, index, globalPron, globalTrans, globalTajwid, tajwidHtml, tajwidAvailable }) {
     const [localPron,  setLocalPron]  = useState(false);
     const [localTrans, setLocalTrans] = useState(false);
+    const [localTajwid, setLocalTajwid] = useState(false);
 
     // Sync when global toggles change
     useEffect(() => { setLocalPron(globalPron);   }, [globalPron]);
     useEffect(() => { setLocalTrans(globalTrans);  }, [globalTrans]);
+    useEffect(() => { setLocalTajwid(globalTajwid); }, [globalTajwid]);
 
     const pronunciation = pronunciations[index] || null;
     const bk = isBookmarked(selectedSurah.n, verse.num);
@@ -615,14 +723,35 @@ export default function QuranReader() {
 
           <div style={{ flex:1 }}>
             {/* Arabic text */}
-            <p style={{
-              direction:"rtl", fontFamily:"'Amiri', 'Cormorant Garamond', serif",
-              fontSize:fontSize, color:P.ink1, lineHeight:2.15,
-              margin:"0 0 10px", letterSpacing:"0.01em"
-            }}>{verse.ar}</p>
+            {localTajwid && tajwidHtml ? (
+              <p
+                style={{
+                  direction:"rtl", fontFamily:"'Amiri', 'Cormorant Garamond', serif",
+                  fontSize:fontSize, color:P.ink1, lineHeight:2.15,
+                  margin:"0 0 10px", letterSpacing:"0.01em"
+                }}
+                dangerouslySetInnerHTML={{ __html: tajwidHtml }}
+              />
+            ) : (
+              <p style={{
+                direction:"rtl", fontFamily:"'Amiri', 'Cormorant Garamond', serif",
+                fontSize:fontSize, color:P.ink1, lineHeight:2.15,
+                margin:"0 0 10px", letterSpacing:"0.01em"
+              }}>{verse.ar}</p>
+            )}
 
             {/* Toggle buttons row — PRON. and EXPL. side by side */}
             <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap", marginBottom:6 }}>
+
+              {/* TAJWID toggle — gold, only shown if tajweed data loaded for this surah */}
+              {tajwidAvailable && tajwidHtml && (
+                <button
+                  onClick={() => setLocalTajwid(v => !v)}
+                  style={toggleBtnStyle(localTajwid, P.gold, P.goldBg, P.goldBr)}
+                >
+                  {localTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} TAJWID
+                </button>
+              )}
 
               {/* PRON. toggle — purple */}
               {pronunciation && (
@@ -710,6 +839,7 @@ export default function QuranReader() {
       display:"flex", height:"calc(100vh - 70px)", marginTop:70,
       background:P.bg1, color:P.ink1, overflow:"hidden", position:"relative"
     }}>
+      <TajwidLegendFixed/>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
         @keyframes spin{to{transform:rotate(360deg)}}
@@ -892,6 +1022,29 @@ export default function QuranReader() {
                 </button>
               )}
 
+              {/* TAJWID global toggle + legend */}
+              {tajwidAvailable && Object.keys(tajwidMap).length > 0 && (
+                <>
+                  <button onClick={() => setShowAllTajwid(v => !v)} style={{
+                    padding:"4px 11px", borderRadius:5, cursor:"pointer",
+                    border:`1px solid ${showAllTajwid ? P.goldBr : P.br2}`,
+                    background: showAllTajwid ? P.goldBg : "transparent",
+                    color: showAllTajwid ? P.gold : P.ink3,
+                    fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
+                    display:"flex", alignItems:"center", gap:4
+                  }}>
+                    {showAllTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} TAJWID
+                  </button>
+                  <button onClick={() => setShowTajwidLegend(v => !v)} title="Légende Tajwid" style={{
+                    width:24, height:24, borderRadius:5, cursor:"pointer",
+                    border:`1px solid ${showTajwidLegend ? P.goldBr : P.br2}`,
+                    background: showTajwidLegend ? P.goldBg : "transparent",
+                    color: showTajwidLegend ? P.gold : P.ink3,
+                    fontFamily:F_UI, fontWeight:700, fontSize:11,
+                  }}>?</button>
+                </>
+              )}
+
               {/* Fullscreen toggle */}
               <button
                 onClick={() => setFullscreen(v => !v)}
@@ -1061,6 +1214,9 @@ export default function QuranReader() {
                     index={i}
                     globalPron={showAllPron}
                     globalTrans={showAllTrans}
+                    globalTajwid={showAllTajwid}
+                    tajwidHtml={tajwidMap[v.num]}
+                    tajwidAvailable={tajwidAvailable}
                   />
                 ))}
               </div>
@@ -1145,6 +1301,29 @@ export default function QuranReader() {
               </button>
             )}
 
+            {/* TAJWID toggle + legend (fullscreen) */}
+            {tajwidAvailable && Object.keys(tajwidMap).length > 0 && (
+              <>
+                <button onClick={() => setShowAllTajwid(v => !v)} style={{
+                  padding:"4px 11px", borderRadius:5, cursor:"pointer",
+                  border:`1px solid ${showAllTajwid ? P.goldBr : P.br2}`,
+                  background: showAllTajwid ? P.goldBg : "transparent",
+                  color: showAllTajwid ? P.gold : P.ink3,
+                  fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
+                  display:"flex", alignItems:"center", gap:4
+                }}>
+                  {showAllTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} TAJWID
+                </button>
+                <button onClick={() => setShowTajwidLegend(v => !v)} title="Légende Tajwid" style={{
+                  width:24, height:24, borderRadius:5, cursor:"pointer",
+                  border:`1px solid ${showTajwidLegend ? P.goldBr : P.br2}`,
+                  background: showTajwidLegend ? P.goldBg : "transparent",
+                  color: showTajwidLegend ? P.gold : P.ink3,
+                  fontFamily:F_UI, fontWeight:700, fontSize:11,
+                }}>?</button>
+              </>
+            )}
+
             {/* Close fullscreen */}
             <button
               onClick={() => setFullscreen(false)}
@@ -1220,6 +1399,9 @@ export default function QuranReader() {
                       index={i}
                       globalPron={showAllPron}
                       globalTrans={showAllTrans}
+                      globalTajwid={showAllTajwid}
+                      tajwidHtml={tajwidMap[v.num]}
+                      tajwidAvailable={tajwidAvailable}
                     />
                   ))}
                 </div>
