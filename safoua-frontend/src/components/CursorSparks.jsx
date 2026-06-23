@@ -108,6 +108,7 @@ export default function CursorSparks() {
   return (
     <canvas
       ref={canvasRef}
+      className="cursor-sparks"
       style={{
         position:       'fixed',
         inset:          0,

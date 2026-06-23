@@ -115,7 +115,7 @@ function Footer() {
         <GoldLine />
 
         {/* ── MAIN CONTENT ────────────────────────────────────── */}
-        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "72px 24px 60px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 56 }}>
+        <div className="footer-grid" style={{ maxWidth: 1180, margin: "0 auto", padding: "72px 24px 60px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 56 }}>
 
           {/* BRAND */}
           <FadeIn delay={0} style={{ gridColumn: "span 1" }}>

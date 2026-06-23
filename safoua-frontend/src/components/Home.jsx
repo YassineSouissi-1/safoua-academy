@@ -350,6 +350,7 @@ export default function Home() {
         <motion.div
           style={{ opacity: heroOp, position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '120px 24px 80px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}
           className="hero-grid"
+
         >
           {/* Left: text */}
           <div>
@@ -377,6 +378,7 @@ export default function Home() {
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.34, ease: easeOut }}
+              className="hero-cta-row"
               style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 52 }}>
               <Link to="/register" style={{ textDecoration: 'none' }}>
                 <motion.button whileHover={{ scale: 1.04, boxShadow: `0 0 44px rgba(201,168,76,0.45)` }} whileTap={{ scale: 0.97 }}

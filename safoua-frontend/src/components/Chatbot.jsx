@@ -110,10 +110,10 @@ function ChatBot() {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div className="chatbot-fab" style={{ position: "fixed", bottom: 24, right: 24, zIndex: 999, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* Chat window */}
       {isOpen && (
-        <div style={{
+        <div className="chatbot-window" style={{
           marginBottom: 12, width: 360, height: 520,
           background: G.surface,
           borderRadius: 24, border: `1px solid ${G.border}`,

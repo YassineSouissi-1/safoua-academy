@@ -1355,9 +1355,9 @@ export default function Dashboard() {
           transition={{ duration: 0.7, ease: [.22, .68, 0, 1] }}
           style={{ marginBottom: 32 }}
         >
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 22 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 22 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.dim, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif" }}>{greeting} 👋</p>
                 <Pill color={roleColor}>{isTeacher ? "Enseignant" : "Étudiant"}</Pill>
               </div>
@@ -1509,7 +1509,7 @@ export default function Dashboard() {
           </div>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="dash-sidebar" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <GlassCard>
               <SectionTitle icon={<Calendar size={15} />} color={roleColor}>Calendrier Islamique</SectionTitle>
               <MiniCalendar sessions={sessions} roleColor={roleColor} />

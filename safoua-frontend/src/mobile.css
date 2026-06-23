@@ -1,0 +1,338 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Safoua Academy — Mobile Responsive Stylesheet
+   Breakpoints: sm=480px, md=768px, lg=1024px
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── GLOBALS ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent horizontal overflow on mobile */
+#root, .app-wrapper {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Touch target minimum size */
+button, a { min-height: 44px; min-width: 44px; }
+a { display: inline-flex; align-items: center; justify-content: center; }
+
+/* ── NAVBAR ───────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Navbar height reduced on mobile */
+  nav[style*="height: 70px"] {
+    height: 60px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Logo text size */
+  nav span[style*="font-size: 17px"] {
+    font-size: 15px !important;
+  }
+
+  /* Hide desktop links, show hamburger */
+  .hidden-mobile { display: none !important; }
+  .show-mobile   { display: block !important; }
+
+  /* Mobile drawer full-width padding */
+  .mobile-drawer {
+    padding: 8px 16px 24px !important;
+  }
+}
+
+/* ── HOME HERO ────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Hero grid: stack vertically */
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+    padding: 90px 16px 48px !important;
+  }
+
+  /* Floating Quran 3D model: hide or shrink on small screens */
+  .hero-quran-col {
+    height: 320px !important;
+  }
+
+  /* Hero heading */
+  .hero-h1 {
+    font-size: clamp(2rem, 8vw, 3rem) !important;
+  }
+
+  /* CTA buttons: stack on mobile */
+  .hero-cta-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .hero-cta-row a,
+  .hero-cta-row button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Stats row */
+  .hero-stats {
+    gap: 20px !important;
+  }
+
+  /* Watermark text hidden on mobile */
+  .hero-watermark {
+    display: none !important;
+  }
+}
+
+/* ── FEATURE CARDS & TESTIMONIALS ─────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Auto-grid to single column */
+  div[style*="grid-template-columns: repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── COURSES PAGE ─────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  /* Course roadmap cards */
+  .course-roadmap {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .course-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .course-filter-row {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .course-filter-row button {
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* ── DASHBOARD ────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  /* Main 2-col grid → single col */
+  .dash-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Sidebar moves below on mobile */
+  .dash-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Student stats: 2x2 grid instead of 4-col */
+  div[style*="grid-template-columns: repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* Teacher stats: 3 → 1 col on tiny screens */
+  div[style*="grid-template-columns: repeat(3, 1fr)"] {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Dashboard header actions: wrap nicely */
+  .dash-header-actions {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+
+  .dash-header-actions button {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── SESSION MODAL ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Modal padding and width */
+  div[style*="maxWidth: 560"] {
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Grid inside modal */
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── SESSION CARD ─────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Action buttons wrap */
+  .session-actions {
+    flex-wrap: wrap !important;
+  }
+
+  .session-actions button,
+  .session-actions a button {
+    flex: 1 !important;
+    justify-content: center !important;
+    min-width: 120px !important;
+  }
+}
+
+/* ── CHATBOT ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Full-width chatbot on tiny screens */
+  .chatbot-window {
+    width: calc(100vw - 32px) !important;
+    right: 0 !important;
+    left: 16px !important;
+  }
+
+  /* Fab button stays bottom-right */
+  .chatbot-fab {
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+}
+
+/* ── DICTIONARY ───────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Search area full-width */
+  .dict-search-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .dict-search-row button {
+    width: 100% !important;
+  }
+
+  /* Word result grid */
+  .dict-result-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── LOGIN / REGISTER ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Card takes full width with small padding */
+  .auth-card {
+    padding: 24px 16px !important;
+    border-radius: 20px !important;
+    margin: 0 12px !important;
+  }
+}
+
+/* ── COURSE VIEWS (AlphabetArabe, Tajwid, etc.) ───────────────────── */
+@media (max-width: 860px) {
+  /* Sidebar + content → stack */
+  .course-layout {
+    flex-direction: column !important;
+  }
+
+  .course-sidebar {
+    width: 100% !important;
+    position: static !important;
+    max-height: 280px !important;
+    overflow-y: auto !important;
+  }
+
+  .course-content-main {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .course-letter-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .course-audio-controls {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ── FOOTER ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+    text-align: center !important;
+  }
+
+  .footer-social-row {
+    justify-content: center !important;
+  }
+}
+
+/* ── ARABIC FLOATING LETTERS — hide on tiny screens ──────────────── */
+@media (max-width: 480px) {
+  .floating-letter {
+    display: none !important;
+  }
+}
+
+/* ── CALENDAR (mini) ─────────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .cal-day {
+    font-size: 9px !important;
+  }
+}
+
+/* ── ISLAMIC NOTIFICATIONS BELL ──────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Dropdown: constrain within viewport */
+  .notif-dropdown {
+    right: -60px !important;
+    width: 280px !important;
+  }
+}
+
+/* ── TOUCH IMPROVEMENTS ──────────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* Disable cursor sparks on touch devices */
+  .cursor-sparks { display: none !important; }
+
+  /* Bigger tap targets for course lesson items */
+  .lesson-item {
+    padding: 14px 12px !important;
+    min-height: 52px !important;
+  }
+
+  /* Scroll indicator hidden on touch */
+  .scroll-cue { display: none !important; }
+}
+
+/* ── SAFE AREA (notch/home bar) ──────────────────────────────────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .chatbot-fab {
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    right:  calc(24px + env(safe-area-inset-right))  !important;
+  }
+
+  .mobile-drawer-bottom {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* ── MISC UTILITIES ──────────────────────────────────────────────── */
+.mobile-full-width { width: 100% !important; }
+.mobile-center     { text-align: center !important; }
+.mobile-stack      { flex-direction: column !important; }
+.mobile-hidden     { display: none !important; }
+
+@media (min-width: 768px) {
+  .mobile-hidden  { display: initial !important; }
+  .desktop-hidden { display: none    !important; }
+}

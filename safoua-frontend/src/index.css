@@ -1,15 +1,43 @@
 @import "tailwindcss";
 
-/* On réinitialise les styles de base pour éviter le mode sombre forcé */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #f8fafc; /* Gris très clair */
-  color: #0f172a; /* Bleu très foncé presque noir */
+  font-family: 'DM Sans', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: #080b0f;
+  color: #f2ede6;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  display: block;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* Prevent App.css from overriding layout */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #080b0f; }
+::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.22); border-radius: 99px; }
+
+/* Selection */
+::selection { background: rgba(201,168,76,0.22); color: #f2ede6; }
+
+/* Touch-friendly tap highlight */
+* { -webkit-tap-highlight-color: transparent; }

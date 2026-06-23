@@ -163,7 +163,8 @@ export default function Navbar() {
           <button
             onClick={() => setMenuOpen(o => !o)}
             className="show-mobile"
-            style={{ background: 'none', border: 'none', color: 'rgba(242,237,230,0.8)', cursor: 'pointer', padding: 6, display: 'none' }}
+            aria-label="Menu"
+            style={{ background: 'none', border: 'none', color: 'rgba(242,237,230,0.8)', cursor: 'pointer', padding: 8, display: 'none', minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
