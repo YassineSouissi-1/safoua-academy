@@ -632,7 +632,7 @@ export default function QuranReader() {
 
   /* ── TAJWID LEGEND — fixed panel, stays visible while scrolling ── */
   const TajwidLegend = () => (
-    <div style={{
+    <div className="tajwid-legend-panel" style={{
       position:"fixed", top:90, right:18, bottom:100, zIndex:10000,
       width:230, background:P.bg1, border:`1px solid ${P.goldBr}`, borderRadius:8,
       padding:"14px 14px 10px", boxShadow:"0 8px 28px rgba(0,0,0,0.45)",
@@ -841,9 +841,9 @@ export default function QuranReader() {
 
   /* ── RENDER ─────────────────────────────────────────────── */
   return (
-    <div style={{
-      display:"flex", height:"calc(100vh - 70px)", marginTop:70,
-      background:P.bg1, color:P.ink1, overflow:"hidden", position:"relative"
+    <div className="quran-reader-root" style={{
+      display:'flex', height:'calc(100vh - 70px)', marginTop:70,
+      background:P.bg1, color:P.ink1, overflow:'hidden', position:'relative'
     }}>
       <TajwidLegendFixed/>
       <style>{`
@@ -866,11 +866,25 @@ export default function QuranReader() {
           background-size:26px 26px;
           mask-image: radial-gradient(ellipse 80% 60% at 18% 0%, black 0%, transparent 70%);
         }
+        /* Mobile: sidebar stacks above reader */
+        @media (max-width: 767px) {
+          .quran-reader-root { flex-direction: column !important; height: auto !important; min-height: calc(100vh - 60px); overflow: visible !important; }
+          .quran-sidebar { width: 100% !important; max-height: 42vh !important; border-right: none !important; border-bottom: 1px solid ${P.br1} !important; flex-shrink: 0 !important; }
+          .quran-main { flex: 1; min-height: 58vh; overflow: visible !important; display: flex; flex-direction: column; }
+          .quran-toolbar { flex-wrap: wrap !important; height: auto !important; padding: 8px 12px !important; gap: 6px !important; }
+          .quran-content { overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+          .quran-reciter-bar { padding: 10px 12px !important; }
+          .quran-reciter-bar .reciter-btns { flex-wrap: wrap !important; gap: 4px !important; }
+          .tajwid-legend-panel { top: 60px !important; right: 8px !important; width: calc(100vw - 16px) !important; left: 8px !important; }
+          .verse-row { padding: 12px 0 !important; }
+          .verse-actions { opacity: 1 !important; }
+          .audio-controls { flex-wrap: wrap !important; gap: 4px !important; justify-content: center !important; }
+        }
       `}</style>
       <div className="qr-lattice"/>
 
       {/* ══ SIDEBAR ═══════════════════════════════════════════ */}
-      <aside style={{
+      <aside className="quran-sidebar" style={{
         width:280, background:P.bg0, borderRight:`1px solid ${P.br1}`,
         display:"flex", flexDirection:"column", flexShrink:0, overflow:"hidden",
         position:"relative", zIndex:1,
@@ -972,10 +986,10 @@ export default function QuranReader() {
       </aside>
 
       {/* ══ MAIN READER ═══════════════════════════════════════ */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zIndex:1 }}>
+      <div className="quran-main" style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", zIndex:1 }}>
 
         {/* Toolbar */}
-        <div style={{
+        <div className="quran-toolbar" style={{
           height:52, background:P.bg2, borderBottom:`1px solid ${P.br1}`,
           display:"flex", alignItems:"center", padding:"0 20px", gap:12, flexShrink:0
         }}>
@@ -1076,7 +1090,7 @@ export default function QuranReader() {
 
         {/* Reciter bar + full audio player */}
         {selectedSurah && (
-          <div style={{
+          <div className="quran-reciter-bar" style={{
             background:P.bg0, borderBottom:`1px solid ${P.br2}`,
             padding:"13px 20px", flexShrink:0
           }}>
@@ -1102,7 +1116,7 @@ export default function QuranReader() {
         )}
 
         {/* Content area */}
-        <div ref={contentRef} style={{ flex:1, overflowY:"auto", background:P.bg1 }}>
+        <div ref={contentRef} className="quran-content" style={{ flex:1, overflowY:"auto", background:P.bg1 }}>
 
           {/* Welcome */}
           {!selectedSurah && (

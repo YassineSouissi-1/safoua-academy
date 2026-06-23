@@ -342,13 +342,13 @@ export default function Home() {
       <HomeBg />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1, overflow: 'hidden' }}>
+      <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
         <motion.div style={{ y: heroY, position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
-          <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(260px,38vw,580px)', color: 'rgba(201,168,76,0.025)', lineHeight: 1, userSelect: 'none' }}>بسم</span>
+          <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(120px,38vw,580px)', color: 'rgba(201,168,76,0.025)', lineHeight: 1, userSelect: 'none' }}>بسم</span>
         </motion.div>
 
         <motion.div
-          style={{ opacity: heroOp, position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '120px 24px 80px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}
+          style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '120px 24px 80px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}
           className="hero-grid"
 
         >
@@ -408,7 +408,9 @@ export default function Home() {
 
           {/* Right: 3D Quran */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.3, ease: [.22, .68, 0, 1] }}
-            style={{ position: 'relative', height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ position: 'relative', height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            className="hero-quran-col"
+          >
             <FloatingQuran />
           </motion.div>
         </motion.div>

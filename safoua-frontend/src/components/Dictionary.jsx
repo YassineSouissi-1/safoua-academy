@@ -331,7 +331,9 @@ export default function Dictionary() {
     stopArabicAudio();
     setActiveAyah(null);
     setReciterState("idle");
-    speakArabic(arabic);
+    speakArabic(arabic, {
+      onUnavailable: () => setTtsState("error"),
+    });
   };
 
   const handleStop = () => {
@@ -538,8 +540,11 @@ export default function Dictionary() {
             {ttsState==="error" && (
               <motion.div initial={{ opacity:0,y:-10 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0 }}
                 style={{ padding:"14px 20px",borderRadius:14,background:"rgba(239,68,68,0.07)",border:"1px solid rgba(239,68,68,0.18)",
-                  color:C.red,fontFamily:"'DM Sans',sans-serif",fontSize:13,fontWeight:600,marginBottom:20,display:"flex",alignItems:"center",gap:8 }}>
-                🔇 Prononciation indisponible. Vérifiez votre connexion.
+                  color:C.red,fontFamily:"'DM Sans',sans-serif",fontSize:13,fontWeight:600,marginBottom:20,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
+                🔇 Prononciation indisponible sur ce navigateur.
+                {/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) && (
+                  <span style={{fontWeight:400,fontSize:12}}>Sur mobile, activez la synthèse vocale dans les paramètres système.</span>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

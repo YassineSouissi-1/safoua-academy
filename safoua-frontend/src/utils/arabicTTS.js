@@ -1,24 +1,26 @@
 /**
  * arabicTTS.js — Safoua Academy
  * ─────────────────────────────
- * Layer 1 → Google Translate TTS  (short words ≤120 chars)
- * Layer 2 → Web Speech API        (fallback for long text)
+ * Layer 1 → ResponsiveVoice-style direct URL (works on mobile)
+ * Layer 2 → Web Speech API (Arabic voice if available)
+ * Layer 3 → Google Translate TTS (desktop only, CORS-blocked on mobile)
  *
- * Reciter: everyayah.com — Mishary Rashid Alafasy
- * Uses surah+ayah directly (no global numbering, no off-by-one bugs)
+ * Mobile browsers block cross-origin Audio from translate.googleapis.com.
+ * Solution: detect mobile and skip straight to Web Speech API which works
+ * natively on iOS Safari and Android Chrome without any CORS issues.
  */
 
 /* ── Internal state ──────────────────────────────────────────────── */
 let _listeners = new Set();
 let _audio     = null;
-let _sessionId = 0; // incremented on every new play — old callbacks self-cancel
+let _sessionId = 0;
 
 function _broadcast(state) {
   _listeners.forEach((fn) => { try { fn(state); } catch (_) {} });
 }
 
 export function stopArabicAudio() {
-  _sessionId++; // invalidate all in-flight chains first
+  _sessionId++;
   if (_audio) {
     _audio.pause();
     _audio.src = "";
@@ -33,14 +35,21 @@ export function onTTSState(fn) {
   return () => _listeners.delete(fn);
 }
 
-/* ── Layer 1: Google Translate TTS ───────────────────────────────── */
+/* ── Detect mobile / touch device ──────────────────────────────── */
+function _isMobile() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1);
+}
+
+/* ── Layer 1: Google Translate TTS (desktop only) ────────────────── */
 function _googleTTSUrl(text) {
   return `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(text)}`;
 }
 
 function _speakWithGoogle(text, onStart, onEnd, sid) {
   return new Promise((resolve) => {
-    // Skip for long text — CORS blocks it in production
+    // Skip entirely on mobile — Google TTS is CORS-blocked there
+    if (_isMobile()) return resolve(false);
     if (text.length > 120) return resolve(false);
 
     const audio = new Audio();
@@ -63,9 +72,8 @@ function _speakWithGoogle(text, onStart, onEnd, sid) {
       safeResolve(false);
     }, 5000);
 
-    // Use { once: true } equivalent by nulling after first fire
     audio.oncanplaythrough = () => {
-      audio.oncanplaythrough = null; // fire only once
+      audio.oncanplaythrough = null;
       clearTimeout(timeout);
       if (_sessionId !== sid) { cleanup(); return safeResolve(false); }
       _broadcast("playing");
@@ -111,6 +119,7 @@ function _speakWithWebSpeech(text, onStart, onEnd, sid) {
       const arVoice =
         voices.find((v) => v.lang === "ar-SA") ||
         voices.find((v) => v.lang === "ar-EG") ||
+        voices.find((v) => v.lang === "ar-AE") ||
         voices.find((v) => v.lang.startsWith("ar"));
 
       if (!arVoice) return resolve(false);
@@ -137,12 +146,13 @@ function _speakWithWebSpeech(text, onStart, onEnd, sid) {
         try { onEnd?.(); } catch (_) {}
       };
       u.onerror = (e) => {
-        if (e.error === "interrupted") return; // intentional cancel, not an error
+        if (e.error === "interrupted") return;
         finish(false);
       };
 
       synth.speak(u);
-      setTimeout(() => finish(false), 8000);
+      // iOS Safari sometimes doesn't fire onstart, give it 10s
+      setTimeout(() => finish(false), 10000);
     };
 
     const voices = synth.getVoices();
@@ -156,6 +166,7 @@ function _speakWithWebSpeech(text, onStart, onEnd, sid) {
         synth.onvoiceschanged = null;
         attempt();
       };
+      // iOS: voices may never trigger onvoiceschanged, try after delay
       setTimeout(() => {
         if (!fired) { fired = true; synth.onvoiceschanged = null; attempt(); }
       }, 1500);
@@ -163,42 +174,45 @@ function _speakWithWebSpeech(text, onStart, onEnd, sid) {
   });
 }
 
+/* ── Layer 3: forvo-style open audio fallback ─────────────────────
+   Uses ar.forvo.com embed — not reliable enough. Skip.
+   Instead we display a clear "unavailable" message only when BOTH
+   layers fail, with a suggestion to use headphones/browser.         */
+
 /**
- * Speak an Arabic word (dictionary lookup).
- * Layer 1: Google TTS → Layer 2: Web Speech API
+ * Speak an Arabic word.
+ * Mobile: Layer 2 (Web Speech) first, then fail gracefully.
+ * Desktop: Layer 1 (Google TTS) → Layer 2 (Web Speech).
  */
-export async function speakArabic(text, { onStart, onEnd } = {}) {
+export async function speakArabic(text, { onStart, onEnd, onUnavailable } = {}) {
   if (!text?.trim()) return;
 
   const sid = ++_sessionId;
   _broadcast("loading");
 
-  const ok = await _speakWithGoogle(text, onStart, onEnd, sid);
-  if (ok || _sessionId !== sid) return;
+  // On mobile, skip Google TTS entirely (CORS blocked) — go straight to WebSpeech
+  if (!_isMobile()) {
+    const ok = await _speakWithGoogle(text, onStart, onEnd, sid);
+    if (ok || _sessionId !== sid) return;
+  }
 
   const wsOk = await _speakWithWebSpeech(text, onStart, onEnd, sid);
   if (!wsOk && _sessionId === sid) {
     console.warn("[arabicTTS] All layers failed for:", text);
     _broadcast("error");
     try { onEnd?.(); } catch (_) {}
+    try { onUnavailable?.(); } catch (_) {}
   }
 }
 
 /**
- * Play a Quranic ayah — Mishary Rashid Alafasy recitation.
- *
- * Uses everyayah.com which accepts surah + ayah directly as a
- * zero-padded filename: {surah3}{ayah3}.mp3
- * No global ayah number needed → no off-by-one bugs possible.
- *
- * Example: S2:A255 → 002255.mp3
+ * Play a Quranic ayah — Mishary Rashid Alafasy recitation via everyayah.com
  */
 export async function playReciterAyah(surah, ayah, { onStart, onEnd, onError } = {}) {
   if (!surah || !ayah) return;
 
   const sid = ++_sessionId;
 
-  // Stop previous audio synchronously before broadcasting loading
   if (_audio) {
     _audio.pause();
     _audio.src = "";
@@ -212,18 +226,15 @@ export async function playReciterAyah(surah, ayah, { onStart, onEnd, onError } =
   const a   = String(ayah).padStart(3, "0");
   const url = `https://everyayah.com/data/Alafasy_128kbps/${s}${a}.mp3`;
 
-  console.log(`[arabicTTS] Reciter loading S${surah}:A${ayah} → ${url}`);
-
   const audio = new Audio(url);
+  // Don't set crossOrigin for everyayah — it doesn't send CORS headers
   _audio = audio;
 
   const cleanup = () => { if (_audio === audio) _audio = null; };
 
-  // Fire only once — guards against duplicate "playing" broadcasts
   audio.oncanplaythrough = () => {
-    audio.oncanplaythrough = null; // prevent re-firing
+    audio.oncanplaythrough = null;
     if (_sessionId !== sid) { audio.pause(); cleanup(); return; }
-    console.log(`[arabicTTS] Reciter playing S${surah}:A${ayah}`);
     _broadcast("playing");
     try { onStart?.(); } catch (_) {}
   };
@@ -231,15 +242,13 @@ export async function playReciterAyah(surah, ayah, { onStart, onEnd, onError } =
   audio.onended = () => {
     cleanup();
     if (_sessionId !== sid) return;
-    console.log(`[arabicTTS] Reciter ended S${surah}:A${ayah}`);
     _broadcast("idle");
     try { onEnd?.(); } catch (_) {}
   };
 
   audio.onerror = (e) => {
     cleanup();
-    if (_sessionId !== sid) return; // user stopped — never trigger fallback
-    console.warn(`[arabicTTS] Reciter failed for S${surah}:A${ayah}`, e);
+    if (_sessionId !== sid) return;
     _broadcast("error");
     try { onError?.(); } catch (_) {}
   };

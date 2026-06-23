@@ -82,7 +82,7 @@ export default function Navbar() {
     { label: 'Accueil',     to: '/' },
     { label: 'Cours',       to: '/courses' },
     { label: 'Dictionnaire',to: '/dictionary' },
-    { label: 'القرآن الكريم', to: '/quran', isQuran: true },
+    { label: 'Quran',       to: '/quran', isQuran: true },
     ...(loggedIn
       ? [{ label: 'Mon Espace', to: '/dashboard' }]
       : [{ label: 'Connexion', to: '/login' }, { label: "S'inscrire", to: '/register' }]

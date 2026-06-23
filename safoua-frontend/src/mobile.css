@@ -301,8 +301,8 @@ a { display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── TOUCH IMPROVEMENTS ──────────────────────────────────────────── */
 @media (hover: none) and (pointer: coarse) {
-  /* Disable cursor sparks on touch devices */
-  .cursor-sparks { display: none !important; }
+  /* Keep cursor sparks on touch — they respond to touch move */
+  /* .cursor-sparks { display: none !important; } */
 
   /* Bigger tap targets for course lesson items */
   .lesson-item {
