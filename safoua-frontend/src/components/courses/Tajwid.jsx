@@ -119,12 +119,12 @@ export const RULES = [
         ]
       },
     ],
-    testWord: "إِنَّا",
-    testTranslit: "In-nā",
-    testInstruction: "Dites uniquement « In-nā » — maintenez le son nasal 'nn' 2 temps dans le nez avant d'ouvrir sur 'aa'.",
+    testWord: "النَّاسِ",
+    testTranslit: "an-nā-si",
+    testInstruction: "Dites uniquement « an-nā-si » — maintenez le son nasal 'nn' 2 temps dans le nez avant d'ouvrir sur 'aa'.",
     testHint: "Ne lisez pas toute l'ayah. Sentez votre nez vibrer quand vous dites 'nnn'. Pincez le nez : le son doit changer.",
     testType: "nasal",
-    testUrl: "https://everyayah.com/data/Alafasy_128kbps/108001.mp3",
+    testUrl: "https://everyayah.com/data/Alafasy_128kbps/114001.mp3",
   },
   {
     id: "idgham",
@@ -265,12 +265,12 @@ export const RULES = [
         ]
       },
     ],
-    testWord: "قُلْ",
-    testTranslit: "Qul",
-    testInstruction: "Dites uniquement « Qul » — court, fort et net, avec un rebond sonore sur le قْ.",
-    testHint: "Ne lisez pas toute l'ayah. Un seul mot, bref et percutant. Après قْ, un petit son 'uh' sort naturellement — ne l'étouffez pas.",
+    testWord: "لَمْ يَلِدْ",
+    testTranslit: "lam ya-lid",
+    testInstruction: "Dites uniquement « lam ya-lid » — court, fort et net, avec un rebond sonore sur le دْ final.",
+    testHint: "Ne lisez pas toute l'ayah. Les deux mots seulement, brefs et percutants. Après دْ, un petit son 'uh' sort naturellement — ne l'étouffez pas.",
     testType: "echo",
-    testUrl: "https://everyayah.com/data/Alafasy_128kbps/112001.mp3",
+    testUrl: "https://everyayah.com/data/Alafasy_128kbps/112003.mp3",
   },
   {
     id: "izhar",
@@ -682,9 +682,9 @@ function useMic() {
         const attackPts = Math.min(25, (peakToMean / 3.0) * 25);
         const brevPts   = speechRatio <= 0.25 ? 15 : speechRatio <= 0.45 ? 8 : 0;
         techScore = Math.round(60 + attackPts + brevPts);
-        if      (peakToMean < 1.8)   { techFeedback = "Rebond trop doux.";      techTip = "Frappez plus fort sur قْ — coup net et bref."; }
-        else if (speechRatio > 0.50) { techFeedback = "Son trop long.";          techTip = "Juste « Qul » — court et percutant."; }
-        else { techFeedback = techScore >= 88 ? "Qalqala nette — rebond bien marqué !" : "Correct — accentuez le rebond sur قْ."; }
+        if      (peakToMean < 1.8)   { techFeedback = "Rebond trop doux.";      techTip = "Frappez plus fort sur دْ — coup net et bref."; }
+        else if (speechRatio > 0.50) { techFeedback = "Son trop long.";          techTip = "Juste « lam ya-lid » — court et percutant."; }
+        else { techFeedback = techScore >= 88 ? "Qalqala nette — rebond bien marqué !" : "Correct — accentuez le rebond sur دْ final."; }
         break;
       }
       case "blend": {

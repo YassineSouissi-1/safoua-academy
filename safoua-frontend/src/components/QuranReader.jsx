@@ -586,7 +586,13 @@ export default function QuranReader() {
         setBasmala(bas);
         setVerses(mainVerses.map((v, i) => ({
           ar: v.text, num: v.numberInSurah,
-          fr: frRaw[bas ? i+1 : i]?.text || ""
+          fr: frRaw[bas ? i+1 : i]?.text || "",
+          // Our pronunciations[] arrays start at verse 1 with no Basmala
+          // slot, so the index into them is always the verse's own
+          // position among the *main* verses — never offset by the
+          // Basmala (that offset is only valid for the AR/FR arrays,
+          // which come straight from the API and do include verse 0 = Basmala).
+          pronIndex: i,
         })));
       }
     } catch(e) {
@@ -689,7 +695,7 @@ export default function QuranReader() {
     useEffect(() => { setLocalTrans(globalTrans);  }, [globalTrans]);
     useEffect(() => { setLocalTajwid(globalTajwid); }, [globalTajwid]);
 
-    const pronunciation = pronunciations[index] || null;
+    const pronunciation = pronunciations[verse.pronIndex ?? index] || null;
     const bk = isBookmarked(selectedSurah.n, verse.num);
     const hl = highlightedVerse === verse.num;
 
