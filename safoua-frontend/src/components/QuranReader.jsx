@@ -6,6 +6,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
+import { loadBookmark, saveBookmark, clearBookmark } from "../utils/quranProgressAPI";
 
 /* ── ICONS ───────────────────────────────────────────────────── */
 const Icon = {
@@ -539,6 +540,22 @@ export default function QuranReader() {
   });
   const [highlightedVerse, setHighlightedVerse] = useState(null);
   const [fontSize, setFontSize] = useState(26);
+
+  // ── Reading position bookmark ───────────────────────────────────
+  const [readingMark,     setReadingMark]     = useState(null);  // {surahNumber, ayahNumber, ...}
+  const [markSaving,      setMarkSaving]      = useState(false);
+  const [markSaved,       setMarkSaved]       = useState(false);  // brief "✓ Saved" flash
+  const [showMarkBanner,  setShowMarkBanner]  = useState(false);  // resume banner
+
+  // Load reading bookmark on mount
+  useEffect(() => {
+    loadBookmark().then(bm => {
+      if (bm) {
+        setReadingMark(bm);
+        setReciter(bm.reciter || 'mishari');
+      }
+    });
+  }, []);
   const contentRef = useRef(null);
 
   const { pronunciations, loadingPron } = usePronunciations(selectedSurah?.n);
@@ -562,6 +579,29 @@ export default function QuranReader() {
     String(s.n).includes(search)
   );
 
+  // Save current reading position
+  async function saveReadingMark(surah, ayahNumber) {
+    setMarkSaving(true);
+    const bm = {
+      surahNumber: surah.n,
+      surahNameAr: surah.ar,
+      surahNameEn: surah.en,
+      ayahNumber,
+      totalAyahs:  surah.verses,
+      reciter,
+    };
+    const saved = await saveBookmark(bm);
+    setReadingMark(saved || bm);
+    setMarkSaving(false);
+    setMarkSaved(true);
+    setTimeout(() => setMarkSaved(false), 2200);
+  }
+
+  async function clearReadingMark() {
+    await clearBookmark();
+    setReadingMark(null);
+  }
+
   async function loadSurah(surah) {
     setSelectedSurah(surah);
     setVerses(null); setBasmala(null);
@@ -569,7 +609,11 @@ export default function QuranReader() {
     setShowAllPron(false); setShowAllTrans(false);
     setTajwidMap({}); setTajwidAvailable(true);
     setLoading(true);
-    setSidebarOpen(false); // close mobile drawer on selection
+    setSidebarOpen(false);
+    // Show resume banner if bookmark is on this surah
+    setShowMarkBanner(
+      readingMark !== null && readingMark.surahNumber === surah.n
+    );
     if (contentRef.current) contentRef.current.scrollTop = 0;
     try {
       const [arRes, frRes] = await Promise.all([
@@ -687,7 +731,7 @@ export default function QuranReader() {
   );
 
   /* ── VERSE CARD — per-verse PRON. + EXPL. toggles ────────── */
-  function VerseCard({ verse, index, globalPron, globalTrans, globalTajwid, tajwidHtml, tajwidAvailable }) {
+  function VerseCard({ verse, index, globalPron, globalTrans, globalTajwid, tajwidHtml, tajwidAvailable, isReadingMark }) {
     const [localPron,  setLocalPron]  = useState(false);
     const [localTrans, setLocalTrans] = useState(false);
     const [localTajwid, setLocalTajwid] = useState(false);
@@ -720,12 +764,34 @@ export default function QuranReader() {
     });
 
     return (
-      <div className="verse-row" style={{
-        padding:"17px 0", borderBottom:`1px solid ${P.br2}`,
-        background: hl ? P.goldBg : "transparent",
-        borderRadius: hl ? 4 : 0, transition:"background .2s",
-        animation:`fadeUp .3s ease ${index*0.018}s both`
-      }}>
+      <div
+        id={`verse-${verse.num}`}
+        className="verse-row"
+        style={{
+          padding:"17px 0", borderBottom:`1px solid ${P.br2}`,
+          background: hl ? P.goldBg : isReadingMark ? "rgba(205,160,83,0.04)" : "transparent",
+          borderRadius: (hl || isReadingMark) ? 4 : 0,
+          borderLeft: isReadingMark ? `3px solid ${P.gold}` : "3px solid transparent",
+          paddingLeft: isReadingMark ? 10 : 0,
+          transition:"background .2s",
+          animation:`fadeUp .3s ease ${index*0.018}s both`,
+          scrollMarginTop: 80,
+        }}
+      >
+        {/* Reading bookmark label */}
+        {isReadingMark && (
+          <div style={{
+            display:"flex", alignItems:"center", gap:6, marginBottom:8,
+            fontFamily:F_UI, fontSize:10, fontWeight:700, color:P.gold, letterSpacing:"0.08em",
+          }}>
+            <span>🔖</span> DERNIÈRE POSITION LUES
+            <button
+              onClick={clearReadingMark}
+              title="Effacer ce signet"
+              style={{marginLeft:"auto", background:"transparent", border:`1px solid ${P.br2}`, borderRadius:4, color:P.ink3, fontSize:9, padding:"1px 6px", cursor:"pointer", fontFamily:F_UI}}
+            >Effacer</button>
+          </div>
+        )}
         <div style={{ display:"flex", alignItems:"flex-start", gap:14 }}>
           <VerseNumber n={verse.num}/>
 
@@ -808,7 +874,7 @@ export default function QuranReader() {
             )}
           </div>
 
-          {/* Hover actions: bookmark + highlight */}
+          {/* Hover/touch actions: bookmark + highlight + mark position */}
           <div className="verse-actions" style={{
             opacity:0, transition:"opacity .15s",
             display:"flex", flexDirection:"column", gap:4, flexShrink:0
@@ -835,6 +901,18 @@ export default function QuranReader() {
                 fontSize:10, display:"flex", alignItems:"center", justifyContent:"center"
               }}
             >◉</button>
+            {/* Save reading position at THIS verse */}
+            <button
+              onClick={() => saveReadingMark(selectedSurah, verse.num)}
+              title="Marquer ma position ici"
+              style={{
+                width:26, height:26, borderRadius:4, cursor:"pointer",
+                border:`1px solid ${P.goldBr}`,
+                background: P.goldBg,
+                color: P.gold,
+                fontSize:11, display:"flex", alignItems:"center", justifyContent:"center"
+              }}
+            >🔖</button>
           </div>
         </div>
       </div>
@@ -1088,6 +1166,9 @@ export default function QuranReader() {
                   <span style={{ color: s.type==="Meccan" ? P.teal : "#c09060" }}>{s.revelation}</span>
                   &ensp;·&ensp;{s.verses}v
                   {selectedSurah?.n===s.n && <span style={{ color:P.gold, marginLeft:5 }}>Juz' {s.juz}</span>}
+                  {readingMark?.surahNumber === s.n && (
+                    <span style={{ color:P.gold, marginLeft:6, fontSize:9, opacity:0.85 }}>🔖 v.{readingMark.ayahNumber}</span>
+                  )}
                 </div>
                 {s.fr && selectedSurah?.n===s.n && (
                   <div style={{ fontSize:9, color:P.pur, fontFamily:F_UI, fontStyle:"italic", marginTop:2 }}>{s.fr}</div>
@@ -1198,6 +1279,52 @@ export default function QuranReader() {
                   }}>?</button>
                 </>
               )}
+
+              {/* ── SAVE READING POSITION ── */}
+              <div style={{ display:"flex", alignItems:"center", gap:4, marginLeft:4, flexShrink:0 }}>
+                <button
+                  onClick={() => {
+                    // Save at first visible verse (verse 1 if nothing highlighted, else highlighted)
+                    const ayah = highlightedVerse || 1;
+                    saveReadingMark(selectedSurah, ayah);
+                  }}
+                  title="Sauvegarder ma position de lecture"
+                  style={{
+                    padding:"4px 10px", borderRadius:5, cursor:"pointer",
+                    border:`1px solid ${markSaved ? P.tealBr : P.goldBr}`,
+                    background: markSaved ? P.tealBg : P.goldBg,
+                    color: markSaved ? P.teal : P.gold,
+                    fontFamily:F_UI, fontWeight:600, fontSize:10,
+                    display:"flex", alignItems:"center", gap:4, whiteSpace:"nowrap",
+                    transition:"all .25s",
+                  }}
+                >
+                  {markSaving
+                    ? <div style={{width:8,height:8,border:`1.5px solid currentColor`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .6s linear infinite"}}/>
+                    : markSaved ? "✓" : "🔖"}
+                  {markSaved ? "Sauvegardé" : "Ma position"}
+                </button>
+
+                {/* Show where the bookmark is if it's on a different surah */}
+                {readingMark && readingMark.surahNumber !== selectedSurah?.n && (
+                  <button
+                    onClick={() => {
+                      const s = ALL_SURAHS[readingMark.surahNumber - 1];
+                      if (s) loadSurah(s);
+                    }}
+                    title={`Reprendre : ${readingMark.surahNameEn} v.${readingMark.ayahNumber}`}
+                    style={{
+                      padding:"4px 9px", borderRadius:5, cursor:"pointer",
+                      border:`1px solid ${P.purBr}`,
+                      background: P.purBg, color:P.pur,
+                      fontFamily:F_UI, fontWeight:600, fontSize:10,
+                      display:"flex", alignItems:"center", gap:4, whiteSpace:"nowrap",
+                    }}
+                  >
+                    ↩ Reprendre
+                  </button>
+                )}
+              </div>
 
               {/* Fullscreen toggle */}
               <button
@@ -1359,6 +1486,53 @@ export default function QuranReader() {
                 </div>
               )}
 
+              {/* ── RESUME BANNER — shown when bookmark is on this surah ── */}
+              {showMarkBanner && readingMark && readingMark.surahNumber === selectedSurah.n && (
+                <div style={{
+                  display:"flex", alignItems:"center", justifyContent:"space-between",
+                  flexWrap:"wrap", gap:10, padding:"12px 16px", marginBottom:20,
+                  background:`linear-gradient(135deg,${P.goldBg},rgba(205,160,83,0.04))`,
+                  border:`1px solid ${P.goldBr}`, borderRadius:8,
+                  animation:"fadeUp .3s ease both",
+                }}>
+                  <div style={{display:"flex", alignItems:"center", gap:10}}>
+                    <span style={{fontSize:18}}>🔖</span>
+                    <div>
+                      <div style={{fontFamily:F_UI, fontSize:12, fontWeight:700, color:P.gold}}>
+                        Position sauvegardée — Verset {readingMark.ayahNumber}
+                      </div>
+                      <div style={{fontFamily:F_UI, fontSize:10, color:P.ink3, marginTop:1}}>
+                        Reprendre votre lecture là où vous vous êtes arrêté.
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
+                    <button
+                      onClick={() => {
+                        // Scroll to the bookmarked verse
+                        const el = document.getElementById(`verse-${readingMark.ayahNumber}`);
+                        if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+                        setHighlightedVerse(readingMark.ayahNumber);
+                        setShowMarkBanner(false);
+                      }}
+                      style={{
+                        padding:"6px 14px", borderRadius:6, cursor:"pointer",
+                        border:`1px solid ${P.gold}`, background:P.gold,
+                        color:P.bg0, fontFamily:F_UI, fontWeight:700, fontSize:11,
+                      }}
+                    >↓ Aller au verset {readingMark.ayahNumber}</button>
+                    <button
+                      onClick={() => setShowMarkBanner(false)}
+                      style={{
+                        padding:"6px 10px", borderRadius:6, cursor:"pointer",
+                        border:`1px solid ${P.br2}`, background:"transparent",
+                        color:P.ink3, fontFamily:F_UI, fontSize:11,
+                      }}
+                    >✕</button>
+                  </div>
+                </div>
+              )}
+
               {/* Verse list */}
               <div style={{ animation:"fadeUp .4s ease both" }}>
                 {verses.map((v, i) => (
@@ -1371,6 +1545,11 @@ export default function QuranReader() {
                     globalTajwid={showAllTajwid}
                     tajwidHtml={tajwidMap[v.num]}
                     tajwidAvailable={tajwidAvailable}
+                    isReadingMark={
+                      readingMark !== null &&
+                      readingMark.surahNumber === selectedSurah?.n &&
+                      readingMark.ayahNumber === v.num
+                    }
                   />
                 ))}
               </div>
@@ -1526,6 +1705,11 @@ export default function QuranReader() {
                       globalPron={showAllPron} globalTrans={showAllTrans}
                       globalTajwid={showAllTajwid} tajwidHtml={tajwidMap[v.num]}
                       tajwidAvailable={tajwidAvailable}
+                      isReadingMark={
+                        readingMark !== null &&
+                        readingMark.surahNumber === selectedSurah?.n &&
+                        readingMark.ayahNumber === v.num
+                      }
                     />
                   ))}
                 </div>

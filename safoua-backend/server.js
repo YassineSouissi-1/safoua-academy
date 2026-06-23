@@ -22,6 +22,7 @@ import sessionsRouter      from './routes/sessions.js';
 import chatRouter          from './routes/chat.js';
 import pronunciationsRouter from './routes/pronunciations.js';
 import dictionaryRouter    from './routes/dictionary.js';
+import quranProgressRouter from './routes/quranProgress.js';
 import authMiddleware      from './middleware/authMiddleware.js';
 
 dotenv.config();
@@ -72,6 +73,7 @@ app.use('/api/pronunciations', pronunciationsRouter);
 
 // Dictionary  →  /api/dictionary/** (protected)
 app.use('/api/dictionary', authMiddleware, dictionaryRouter);
+app.use('/api/quran-progress', quranProgressRouter);
 
 // ── HEALTH ───────────────────────────────────────────────────────────
 app.get('/', (_req, res) => res.send('Safoua Academy API 🚀'));
