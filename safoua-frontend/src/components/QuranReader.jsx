@@ -526,6 +526,7 @@ export default function QuranReader() {
   const [reciter,       setReciter]       = useState("mishari");
   const [search,        setSearch]        = useState("");
   const [sidebarTab,    setSidebarTab]    = useState("surahs");
+  const [sidebarOpen,   setSidebarOpen]   = useState(false);   // mobile drawer
   const [showAllPron,   setShowAllPron]   = useState(false);
   const [showAllTrans,  setShowAllTrans]  = useState(false);
   const [showAllTajwid, setShowAllTajwid] = useState(false);
@@ -568,6 +569,7 @@ export default function QuranReader() {
     setShowAllPron(false); setShowAllTrans(false);
     setTajwidMap({}); setTajwidAvailable(true);
     setLoading(true);
+    setSidebarOpen(false); // close mobile drawer on selection
     if (contentRef.current) contentRef.current.scrollTop = 0;
     try {
       const [arRes, frRes] = await Promise.all([
@@ -852,7 +854,7 @@ export default function QuranReader() {
         @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
         *{box-sizing:border-box} button:focus{outline:none}
-        ::-webkit-scrollbar{width:5px}
+        ::-webkit-scrollbar{width:4px}
         ::-webkit-scrollbar-track{background:${P.bg0}}
         ::-webkit-scrollbar-thumb{background:${P.br1};border-radius:99px}
         ::-webkit-scrollbar-thumb:hover{background:${P.goldBr}}
@@ -861,34 +863,165 @@ export default function QuranReader() {
         .reciter-btn:hover{background:${P.bg3}!important}
         .qr-lattice{
           position:absolute; inset:0; pointer-events:none; z-index:0; opacity:0.5;
-          background-image:
-            radial-gradient(circle at 1px 1px, rgba(205,160,83,0.10) 1px, transparent 1.6px);
+          background-image: radial-gradient(circle at 1px 1px, rgba(205,160,83,0.10) 1px, transparent 1.6px);
           background-size:26px 26px;
           mask-image: radial-gradient(ellipse 80% 60% at 18% 0%, black 0%, transparent 70%);
         }
-        /* Mobile: sidebar stacks above reader */
+
+        /* ── MOBILE ── */
         @media (max-width: 767px) {
-          .quran-reader-root { flex-direction: column !important; height: auto !important; min-height: calc(100vh - 60px); overflow: visible !important; }
-          .quran-sidebar { width: 100% !important; max-height: 42vh !important; border-right: none !important; border-bottom: 1px solid ${P.br1} !important; flex-shrink: 0 !important; }
-          .quran-main { flex: 1; min-height: 58vh; overflow: visible !important; display: flex; flex-direction: column; }
-          .quran-toolbar { flex-wrap: wrap !important; height: auto !important; padding: 8px 12px !important; gap: 6px !important; }
-          .quran-content { overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
-          .quran-reciter-bar { padding: 10px 12px !important; }
-          .quran-reciter-bar .reciter-btns { flex-wrap: wrap !important; gap: 4px !important; }
-          .tajwid-legend-panel { top: 60px !important; right: 8px !important; width: calc(100vw - 16px) !important; left: 8px !important; }
-          .verse-row { padding: 12px 0 !important; }
+          /* Root: full-height flex column, no overflow clipping */
+          .quran-reader-root {
+            flex-direction: column !important;
+            height: calc(100vh - 60px) !important;
+            overflow: hidden !important;
+          }
+
+          /* Sidebar: collapsed drawer at top, fixed height, scrollable */
+          .quran-sidebar {
+            width: 100% !important;
+            height: 44px !important;
+            max-height: 44px !important;
+            border-right: none !important;
+            border-bottom: 1px solid ${P.br1} !important;
+            flex-shrink: 0 !important;
+            overflow: hidden !important;
+            transition: max-height 0.3s cubic-bezier(.22,.68,0,1) !important;
+          }
+          .quran-sidebar.open {
+            max-height: 55vmax !important;
+            height: auto !important;
+            overflow: hidden !important;
+          }
+          .quran-sidebar-inner {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          /* Sidebar toggle button — shown only on mobile */
+          .sidebar-toggle-btn { display: flex !important; }
+
+          /* Main reader: takes remaining height, no overflow on container */
+          .quran-main {
+            flex: 1 !important;
+            min-height: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+          }
+
+          /* Toolbar: scrollable horizontally, compact */
+          .quran-toolbar {
+            height: auto !important;
+            min-height: 44px !important;
+            padding: 6px 10px !important;
+            gap: 5px !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+          }
+          .quran-toolbar::-webkit-scrollbar { display: none; }
+
+          /* Reciter bar: compact */
+          .quran-reciter-bar { padding: 8px 12px !important; }
+          .quran-reciter-bar .reciter-row {
+            overflow-x: auto !important;
+            flex-wrap: nowrap !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding-bottom: 2px !important;
+            scrollbar-width: none !important;
+          }
+          .quran-reciter-bar .reciter-row::-webkit-scrollbar { display: none; }
+
+          /* Content: smooth native scroll */
+          .quran-content {
+            flex: 1 !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+          }
+
+          /* Verse actions always visible on touch */
           .verse-actions { opacity: 1 !important; }
-          .audio-controls { flex-wrap: wrap !important; gap: 4px !important; justify-content: center !important; }
+
+          /* Verse padding */
+          .verse-row { padding: 14px 0 !important; }
+
+          /* Tajwid legend: full width sheet */
+          .tajwid-legend-panel {
+            top: 60px !important;
+            left: 8px !important;
+            right: 8px !important;
+            width: auto !important;
+          }
+
+          /* Audio player controls: compact row */
+          .audio-player-controls {
+            gap: 3px !important;
+          }
+          .audio-skip-sm { display: none !important; }
+
+          /* Fullscreen: proper safe-area handling */
+          .qr-fullscreen {
+            padding-top: env(safe-area-inset-top, 0px) !important;
+          }
+          .qr-fullscreen-bar {
+            height: auto !important;
+            min-height: 48px !important;
+            flex-wrap: nowrap !important;
+            padding: 8px 12px !important;
+            gap: 6px !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+          }
+          .qr-fullscreen-bar::-webkit-scrollbar { display: none; }
+          .qr-fullscreen-audio {
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+          }
+          .qr-fullscreen-audio .reciter-row {
+            overflow-x: auto !important;
+            flex-wrap: nowrap !important;
+            scrollbar-width: none !important;
+          }
+          .qr-fullscreen-audio .reciter-row::-webkit-scrollbar { display: none; }
         }
+
+        /* Always hide sidebar toggle on desktop */
+        .sidebar-toggle-btn { display: none; }
       `}</style>
       <div className="qr-lattice"/>
 
       {/* ══ SIDEBAR ═══════════════════════════════════════════ */}
-      <aside className="quran-sidebar" style={{
+      <aside className={`quran-sidebar${sidebarOpen ? " open" : ""}`} style={{
         width:280, background:P.bg0, borderRight:`1px solid ${P.br1}`,
         display:"flex", flexDirection:"column", flexShrink:0, overflow:"hidden",
-        position:"relative", zIndex:1,
+        position:"relative", zIndex:2,
       }}>
+        {/* Mobile toggle bar — only visible on mobile via CSS */}
+        <button
+          className="sidebar-toggle-btn"
+          onClick={() => setSidebarOpen(o => !o)}
+          style={{
+            display:"none", width:"100%", height:44, padding:"0 16px",
+            background:"transparent", border:"none", borderBottom:`1px solid ${P.br1}`,
+            color:P.ink1, cursor:"pointer", alignItems:"center", gap:10,
+            fontFamily:F_UI, fontSize:12, fontWeight:600, flexShrink:0,
+          }}
+        >
+          <span style={{fontSize:16}}>{sidebarOpen ? "▲" : "▼"}</span>
+          <span style={{color:P.gold, fontFamily:"'Amiri',serif", fontSize:16}}>القرآن الكريم</span>
+          {selectedSurah && (
+            <span style={{color:P.ink3, fontSize:11, marginLeft:"auto"}}>
+              {selectedSurah.en} · {selectedSurah.verses}v
+            </span>
+          )}
+          {!selectedSurah && <span style={{color:P.ink3, fontSize:11, marginLeft:"auto"}}>Choisir une sourate</span>}
+        </button>
+
+        <div className="quran-sidebar-inner" style={{flex:1, display:"flex", flexDirection:"column", overflow:"hidden"}}>
         <div style={{ padding:"20px 18px 15px", borderBottom:`1px solid ${P.br2}` }}>
           <div style={{ display:"flex", alignItems:"center", gap:11, marginBottom:16 }}>
             <div style={{
@@ -983,6 +1116,7 @@ export default function QuranReader() {
             </button>
           ))}
         </div>
+        </div>{/* end quran-sidebar-inner */}
       </aside>
 
       {/* ══ MAIN READER ═══════════════════════════════════════ */}
@@ -1095,7 +1229,7 @@ export default function QuranReader() {
             padding:"13px 20px", flexShrink:0
           }}>
             {/* Reciter selector */}
-            <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:11, flexWrap:"wrap" }}>
+            <div className="reciter-row" style={{ display:"flex", alignItems:"center", gap:7, marginBottom:11, flexWrap:"wrap" }}>
               <Icon.Volume/>
               <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:4 }}>RÉCITATEUR</span>
               {RECITERS.map(r => (
@@ -1267,42 +1401,39 @@ export default function QuranReader() {
 
       {/* ══ FULLSCREEN OVERLAY ════════════════════════════════ */}
       {fullscreen && selectedSurah && (
-        <div style={{
+        <div className="qr-fullscreen" style={{
           position:"fixed", inset:0, zIndex:9999,
           background:P.bg1, display:"flex", flexDirection:"column",
           animation:"fadeUp .22s ease both",
         }}>
           {/* Fullscreen top bar */}
-          <div style={{
+          <div className="qr-fullscreen-bar" style={{
             height:52, background:P.bg0, borderBottom:`1px solid ${P.br1}`,
-            display:"flex", alignItems:"center", padding:"0 24px", gap:14, flexShrink:0,
+            display:"flex", alignItems:"center", padding:"0 24px", gap:10, flexShrink:0,
           }}>
             {/* Surah name */}
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <span style={{ fontFamily:"'Amiri',serif", fontSize:19, fontWeight:700, color:P.goldL }}>{selectedSurah.ar}</span>
-              <span style={{ fontFamily:F_DISPLAY, fontSize:13, color:P.gold, fontStyle:"italic" }}>{selectedSurah.en}</span>
-              <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:600, background:P.bg3, border:`1px solid ${P.br2}`, borderRadius:4, padding:"3px 8px" }}>
-                {selectedSurah.verses} versets · Juz' {selectedSurah.juz}
-              </span>
+            <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+              <span style={{ fontFamily:"'Amiri',serif", fontSize:17, fontWeight:700, color:P.goldL }}>{selectedSurah.ar}</span>
+              <span style={{ fontFamily:F_DISPLAY, fontSize:12, color:P.gold, fontStyle:"italic" }}>{selectedSurah.en}</span>
             </div>
 
             <div style={{ flex:1 }}/>
 
             {/* Font size */}
-            <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-              <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>−</button>
-              <span style={{ fontSize:10,color:P.ink3,fontFamily:F_UI,width:26,textAlign:"center" }}>{fontSize}</span>
-              <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>+</button>
+            <div style={{ display:"flex", alignItems:"center", gap:3, flexShrink:0 }}>
+              <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:28,height:28,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:13,fontWeight:700 }}>−</button>
+              <span style={{ fontSize:10,color:P.ink3,fontFamily:F_UI,width:24,textAlign:"center" }}>{fontSize}</span>
+              <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:28,height:28,borderRadius:4,border:`1px solid ${P.br2}`,background:P.bg3,color:P.ink2,cursor:"pointer",fontFamily:F_UI,fontSize:13,fontWeight:700 }}>+</button>
             </div>
 
             {/* TRAD toggle */}
             <button onClick={() => setShowAllTrans(v => !v)} style={{
-              padding:"4px 11px", borderRadius:5, cursor:"pointer",
+              padding:"4px 9px", borderRadius:5, cursor:"pointer", flexShrink:0,
               border:`1px solid ${showAllTrans ? P.tealBr : P.br2}`,
               background: showAllTrans ? P.tealBg : "transparent",
               color: showAllTrans ? P.teal : P.ink3,
               fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
-              display:"flex", alignItems:"center", gap:4
+              display:"flex", alignItems:"center", gap:3, whiteSpace:"nowrap",
             }}>
               {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} TRAD.
             </button>
@@ -1310,85 +1441,65 @@ export default function QuranReader() {
             {/* PRON toggle */}
             {hasPron && (
               <button onClick={() => setShowAllPron(v => !v)} style={{
-                padding:"4px 11px", borderRadius:5, cursor:"pointer",
+                padding:"4px 9px", borderRadius:5, cursor:"pointer", flexShrink:0,
                 border:`1px solid ${showAllPron ? P.purBr : P.br2}`,
                 background: showAllPron ? P.purBg : "transparent",
                 color: showAllPron ? P.pur : P.ink3,
                 fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
-                display:"flex", alignItems:"center", gap:4
+                display:"flex", alignItems:"center", gap:3, whiteSpace:"nowrap",
               }}>
-                {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} Pron. FR
+                {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} Pron.
               </button>
             )}
 
-            {/* TAJWID toggle + legend (fullscreen) */}
+            {/* TAJWID toggle */}
             {tajwidAvailable && Object.keys(tajwidMap).length > 0 && (
-              <>
-                <button onClick={() => setShowAllTajwid(v => !v)} style={{
-                  padding:"4px 11px", borderRadius:5, cursor:"pointer",
-                  border:`1px solid ${showAllTajwid ? P.goldBr : P.br2}`,
-                  background: showAllTajwid ? P.goldBg : "transparent",
-                  color: showAllTajwid ? P.gold : P.ink3,
-                  fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
-                  display:"flex", alignItems:"center", gap:4
-                }}>
-                  {showAllTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} TAJWID
-                </button>
-                <button onClick={() => setShowTajwidLegend(v => !v)} title="Légende Tajwid" style={{
-                  width:24, height:24, borderRadius:5, cursor:"pointer",
-                  border:`1px solid ${showTajwidLegend ? P.goldBr : P.br2}`,
-                  background: showTajwidLegend ? P.goldBg : "transparent",
-                  color: showTajwidLegend ? P.gold : P.ink3,
-                  fontFamily:F_UI, fontWeight:700, fontSize:11,
-                }}>?</button>
-              </>
+              <button onClick={() => setShowAllTajwid(v => !v)} style={{
+                padding:"4px 9px", borderRadius:5, cursor:"pointer", flexShrink:0,
+                border:`1px solid ${showAllTajwid ? P.goldBr : P.br2}`,
+                background: showAllTajwid ? P.goldBg : "transparent",
+                color: showAllTajwid ? P.gold : P.ink3,
+                fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
+                display:"flex", alignItems:"center", gap:3, whiteSpace:"nowrap",
+              }}>
+                {showAllTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} TAJWID
+              </button>
             )}
 
             {/* Close fullscreen */}
             <button
               onClick={() => setFullscreen(false)}
-              title="Quitter le plein écran (Échap)"
               style={{
-                width:32, height:32, borderRadius:6, cursor:"pointer",
-                border:`1px solid ${P.br2}`, background:"transparent",
-                color:P.ink3, display:"flex", alignItems:"center", justifyContent:"center",
-                transition:"all .15s", marginLeft:4,
+                width:34, height:34, borderRadius:8, cursor:"pointer", flexShrink:0,
+                border:`1px solid ${P.br2}`, background:"rgba(200,80,60,0.08)",
+                color:"#c86450", display:"flex", alignItems:"center", justifyContent:"center",
+                transition:"all .15s", marginLeft:2,
               }}
             ><Icon.X/></button>
           </div>
 
           {/* Scrollable verse area */}
-          <div style={{ flex:1, overflowY:"auto", background:P.bg1, paddingBottom:110 }}>
-            <div style={{ maxWidth:720, margin:"0 auto", padding:"36px 32px 20px" }}>
+          <div style={{
+            flex:1, overflowY:"auto", background:P.bg1, paddingBottom:180,
+            WebkitOverflowScrolling:"touch", overscrollBehavior:"contain",
+          }}>
+            <div style={{ maxWidth:720, margin:"0 auto", padding:"28px 18px 20px" }}>
 
               {/* Surah medallion header */}
               <div style={{
-                textAlign:"center", marginBottom:32,
+                textAlign:"center", marginBottom:28,
                 background:`linear-gradient(180deg, ${P.bg2}, ${P.bg1})`,
                 border:`1px solid ${P.br1}`, borderRadius:6,
-                padding:"28px 32px", position:"relative", overflow:"hidden"
+                padding:"22px 20px", position:"relative", overflow:"hidden"
               }}>
                 <div style={{ position:"absolute", inset:8, border:`1px solid ${P.br2}`, borderRadius:3, pointerEvents:"none" }}/>
-                {[0,1,2,3].map(i => (
-                  <svg key={i} width="26" height="26" viewBox="0 0 30 30" style={{
-                    position:"absolute",
-                    top: i<2 ? 5 : "auto", bottom: i>=2 ? 5 : "auto",
-                    left: i%2===0 ? 5 : "auto", right: i%2===1 ? 5 : "auto",
-                    transform: i===1?"scaleX(-1)":i===2?"scaleY(-1)":i===3?"scale(-1,-1)":"none"
-                  }}>
-                    <path d="M2 2 Q12 2 12 12" fill="none" stroke={P.goldBr} strokeWidth="1"/>
-                    <path d="M2 2 Q2 12 12 12" fill="none" stroke={P.goldBr} strokeWidth="1"/>
-                    <path d="M2 2 L2 9 M2 2 L9 2" fill="none" stroke={P.gold} strokeWidth="1.3"/>
-                    <circle cx="2" cy="2" r="1.6" fill={P.gold}/>
-                  </svg>
-                ))}
-                <div style={{ fontFamily:F_UI, fontSize:9, fontWeight:700, color:P.ink3, letterSpacing:"0.18em", marginBottom:10 }}>
+                <div style={{ fontFamily:F_UI, fontSize:9, fontWeight:700, color:P.ink3, letterSpacing:"0.18em", marginBottom:8 }}>
                   {selectedSurah.revelation} · SOURATE {selectedSurah.n} SUR 114
                 </div>
-                <div style={{ fontFamily:"'Amiri',serif", fontSize:42, fontWeight:700, color:P.goldL, marginBottom:4, lineHeight:1.2, textShadow:`0 0 22px ${P.gold}25` }}>
+                <div style={{ fontFamily:"'Amiri',serif", fontSize:38, fontWeight:700, color:P.goldL, marginBottom:4, lineHeight:1.2 }}>
                   {selectedSurah.ar}
                 </div>
-                <div style={{ fontFamily:F_DISPLAY, fontSize:18, color:P.ink2, marginBottom:6, fontStyle:"italic" }}>
+                <div style={{ fontFamily:F_DISPLAY, fontSize:16, color:P.ink2, marginBottom:5, fontStyle:"italic" }}>
                   {selectedSurah.en}
                 </div>
                 <div style={{ fontFamily:F_UI, fontSize:11, color:P.ink3, fontStyle:"italic" }}>
@@ -1399,12 +1510,9 @@ export default function QuranReader() {
 
               {/* Basmala */}
               {basmala && (
-                <div style={{ textAlign:"center", marginBottom:28 }}>
-                  <div style={{ display:"inline-block", padding:"14px 36px", background:P.goldBg, border:`1px solid ${P.goldBr}`, borderRadius:4 }}>
-                    <div style={{ fontFamily:"'Amiri',serif", fontSize:26, color:P.goldL, lineHeight:1.9 }}>{basmala.ar}</div>
-                    <div style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, letterSpacing:"0.1em", marginTop:3 }}>
-                      BASMALA — Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux
-                    </div>
+                <div style={{ textAlign:"center", marginBottom:24 }}>
+                  <div style={{ display:"inline-block", padding:"12px 24px", background:P.goldBg, border:`1px solid ${P.goldBr}`, borderRadius:4 }}>
+                    <div style={{ fontFamily:"'Amiri',serif", fontSize:24, color:P.goldL, lineHeight:1.9 }}>{basmala.ar}</div>
                   </div>
                 </div>
               )}
@@ -1414,13 +1522,9 @@ export default function QuranReader() {
                 <div style={{ animation:"fadeUp .4s ease both" }}>
                   {verses.map((v, i) => (
                     <VerseCard
-                      key={v.num}
-                      verse={v}
-                      index={i}
-                      globalPron={showAllPron}
-                      globalTrans={showAllTrans}
-                      globalTajwid={showAllTajwid}
-                      tajwidHtml={tajwidMap[v.num]}
+                      key={v.num} verse={v} index={i}
+                      globalPron={showAllPron} globalTrans={showAllTrans}
+                      globalTajwid={showAllTajwid} tajwidHtml={tajwidMap[v.num]}
                       tajwidAvailable={tajwidAvailable}
                     />
                   ))}
@@ -1428,13 +1532,13 @@ export default function QuranReader() {
               )}
 
               {/* Footer nav */}
-              <div style={{ textAlign:"center", marginTop:40 }}>
+              <div style={{ textAlign:"center", marginTop:32 }}>
                 <OrnamentDivider/>
-                <div style={{ marginTop:13, fontFamily:"'Amiri',serif", fontSize:19, color:P.goldBr }}>
+                <div style={{ marginTop:10, fontFamily:"'Amiri',serif", fontSize:17, color:P.goldBr }}>
                   ﴾ {selectedSurah.ar} ﴿
                 </div>
                 {selectedSurah.n < 114 && (
-                  <div style={{ marginTop:20 }}>
+                  <div style={{ marginTop:16 }}>
                     <button onClick={() => loadSurah(ALL_SURAHS[selectedSurah.n])} style={{
                       padding:"9px 22px", borderRadius:4,
                       border:`1px solid ${P.goldBr}`, background:P.goldBg,
@@ -1449,31 +1553,29 @@ export default function QuranReader() {
             </div>
           </div>
 
-          {/* Floating audio bar — always visible at bottom */}
-          <div style={{
+          {/* Floating audio bar */}
+          <div className="qr-fullscreen-audio" style={{
             position:"absolute", bottom:0, left:0, right:0,
-            background:`linear-gradient(0deg, ${P.bg0} 70%, transparent)`,
-            padding:"18px 32px 22px",
-            backdropFilter:"blur(12px)",
+            background:`linear-gradient(0deg, ${P.bg0} 60%, transparent)`,
+            padding:"14px 20px 18px",
+            backdropFilter:"blur(16px)",
             borderTop:`1px solid ${P.br1}`,
           }}>
-            {/* Reciter selector */}
-            <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10, flexWrap:"wrap" }}>
+            <div className="reciter-row" style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8, flexWrap:"wrap" }}>
               <Icon.Volume/>
-              <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:4 }}>RÉCITATEUR</span>
+              <span style={{ fontSize:9, color:P.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:3, whiteSpace:"nowrap" }}>RÉCITATEUR</span>
               {RECITERS.map(r => (
                 <button key={r.id} onClick={() => setReciter(r.id)} className="reciter-btn" style={{
-                  padding:"3px 10px", borderRadius:4,
+                  padding:"3px 10px", borderRadius:4, whiteSpace:"nowrap",
                   border:`1px solid ${reciter===r.id ? P.gold : P.br2}`,
                   background: reciter===r.id ? P.goldBg : "transparent",
                   color: reciter===r.id ? P.gold : P.ink3,
-                  fontFamily:F_UI, fontSize:9.5,
+                  fontFamily:F_UI, fontSize:10,
                   fontWeight: reciter===r.id ? 600 : 400,
                   cursor:"pointer", transition:"all .12s"
                 }}>{r.name}</button>
               ))}
             </div>
-            {/* Audio player */}
             <AudioPlayer key={`fs-${selectedSurah.n}-${reciter}`} src={audioSrc} reciterName={rec.name}/>
           </div>
         </div>
