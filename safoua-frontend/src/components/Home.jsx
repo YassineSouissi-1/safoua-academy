@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Link }                        from 'react-router-dom';
+import { Link, useNavigate }           from 'react-router-dom';
 import { Helmet }                      from 'react-helmet-async';
 import {
   motion, useScroll, useTransform,
@@ -168,20 +168,21 @@ const ARABIC_LETTERS = [
   { char: 'ح', x: '8%',  y: '58%', size: 40, color: C.teal,   dur: 3.9, delay: 0.5 },
 ];
 
-function FloatingQuran() {
-  const [rot, setRot]         = useState({ x: -12, y: 20 });
+function FloatingQuran({ onOpen }) {
+  const [rot, setRot]           = useState({ x: -12, y: 20 });
   const [dragging, setDragging] = useState(false);
+  const [hovered, setHovered]   = useState(false);
   const dragStart               = useRef(null);
   const floatY                  = useSpring(0, { stiffness: 22, damping: 8 });
 
   const onMouseDown = (e) => {
     e.preventDefault();
     setDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY, rot: { ...rot } };
+    dragStart.current = { x: e.clientX, y: e.clientY, rot: { ...rot }, moved: false };
   };
   const onTouchStart = (e) => {
     setDragging(true);
-    dragStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, rot: { ...rot } };
+    dragStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, rot: { ...rot }, moved: false };
   };
 
   useEffect(() => {
@@ -189,12 +190,18 @@ function FloatingQuran() {
       if (!dragging || !dragStart.current) return;
       const cx = e.touches ? e.touches[0].clientX : e.clientX;
       const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      const dx = Math.abs(cx - dragStart.current.x);
+      const dy = Math.abs(cy - dragStart.current.y);
+      if (dx > 4 || dy > 4) dragStart.current.moved = true;
       setRot({
         x: Math.max(-45, Math.min(45, dragStart.current.rot.x - (cy - dragStart.current.y) * 0.35)),
         y: Math.max(-65, Math.min(65, dragStart.current.rot.y + (cx - dragStart.current.x) * 0.35)),
       });
     };
-    const onUp = () => setDragging(false);
+    const onUp = () => {
+      if (dragStart.current && !dragStart.current.moved && onOpen) onOpen();
+      setDragging(false);
+    };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
     window.addEventListener('touchmove', onMove, { passive: true });
@@ -233,8 +240,12 @@ function FloatingQuran() {
       ))}
 
       <motion.div
-        style={{ position: 'absolute', top: '50%', left: '50%', x: '-50%', y: floatY, marginTop: -110, cursor: dragging ? 'grabbing' : 'grab', zIndex: 10, transformStyle: 'preserve-3d', userSelect: 'none' }}
+        style={{ position: 'absolute', top: '50%', left: '50%', x: '-50%', y: floatY, marginTop: -110, cursor: dragging ? 'grabbing' : 'pointer', zIndex: 10, transformStyle: 'preserve-3d', userSelect: 'none' }}
         onMouseDown={onMouseDown} onTouchStart={onTouchStart}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        animate={hovered && !dragging ? { filter: 'drop-shadow(0 0 32px rgba(201,168,76,0.55))' } : { filter: 'drop-shadow(0 0 0px rgba(201,168,76,0))' }}
+        transition={{ duration: 0.3 }}
       >
         <div style={{ width: 170, height: 228, transformStyle: 'preserve-3d', transform: `rotateX(${rot.x}deg) rotateY(${rot.y}deg)`, transition: dragging ? 'none' : 'transform 1s cubic-bezier(.22,.68,0,1)', position: 'relative' }}>
           {/* Front cover */}
@@ -295,8 +306,9 @@ function FloatingQuran() {
       <motion.div style={{ y: floatY }} animate={{ opacity: [0.4, 0.7, 0.4], scaleX: [1, 1.08, 1] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
         <div style={{ position: 'absolute', top: '64%', left: '50%', transform: 'translate(-50%,0)', width: 150, height: 28, background: `radial-gradient(ellipse,${C.gold}28,transparent 70%)`, filter: 'blur(10px)', pointerEvents: 'none' }} />
       </motion.div>
-      <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: 'rgba(242,237,230,0.28)', fontFamily: "'DM Sans',sans-serif", letterSpacing: '0.1em', whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none' }}>
-        Glissez le livre · Déplacez les lettres
+      <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: 'rgba(242,237,230,0.28)', fontFamily: "'DM Sans',sans-serif", letterSpacing: '0.1em', whiteSpace: 'nowrap', userSelect: 'none', pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+        <span>Cliquez pour lire · Glissez pour pivoter</span>
+        <span style={{ color: 'rgba(201,168,76,0.35)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Déplacez les lettres</span>
       </div>
     </div>
   );
@@ -328,6 +340,7 @@ export default function Home() {
   const testRef     = useRef(null);
   const testInView  = useInView(testRef, { once: true, margin: '-60px' });
   const typed       = useTypewriter(TYPEWRITER_PHRASES, 75, 1900);
+  const navigate    = useNavigate();
 
   return (
     <div style={{ fontFamily: "'DM Sans',sans-serif", position: 'relative', overflowX: 'hidden' }}>
@@ -411,7 +424,7 @@ export default function Home() {
             style={{ position: 'relative', height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             className="hero-quran-col"
           >
-            <FloatingQuran />
+            <FloatingQuran onOpen={() => navigate('/quran')} />
           </motion.div>
         </motion.div>
 
