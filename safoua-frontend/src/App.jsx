@@ -8,6 +8,7 @@
  * FIX: was ~1000 lines; now ~60 lines.
  */
 
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -43,6 +44,17 @@ import Calligraphy          from './components/courses/Calligraphy';
 import BecomeMuslim         from './components/courses/BecomeMuslim';
 import ArabeModerneStandard from './components/courses/ArabeModerneStandard';
 
+/* ── Reset scroll position on every route change ───────────────── */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+}
+
 /* ── Page fade transition ──────────────────────────────────────── */
 function PageTransition({ children }) {
   const location = useLocation();
@@ -68,6 +80,7 @@ function AppInner() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#080b0f', display: 'flex', flexDirection: 'column' }}>
+      <ScrollToTop />
       <CursorSparks />
       <Navbar />
       <main style={{ flex: 1 }}>
