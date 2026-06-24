@@ -16,6 +16,8 @@ import dotenv     from 'dotenv';
 import mongoose   from 'mongoose';
 import helmet     from 'helmet';
 import rateLimit  from 'express-rate-limit';
+import ttsRouter from './routes/tts.js';
+app.use('/api/tts', ttsRouter);
 
 import authRouter          from './routes/auth.js';
 import sessionsRouter      from './routes/sessions.js';

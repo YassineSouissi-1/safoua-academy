@@ -1072,7 +1072,7 @@ function AlphabetArabe() {
                           }
                           return (
                             <button key={i} onClick={() => handleMcqAnswer(i)} disabled={quizAnswered !== null}
-                              style={{ background: bg, border: `1.5px solid ${border}`, color, borderRadius: 14, padding: "14px 16px", cursor: quizAnswered !== null ? "default" : "pointer", fontSize: 14, fontWeight: 600, transition: "all 0.2s", textAlign: "left", fontFamily: opt.match(/[\u0600-\u06FF]/) ? "'Amiri', serif" : "inherit", fontSize: opt.match(/[\u0600-\u06FF]/) ? 24 : 14 }}>
+                              style={{ background: bg, border: `1.5px solid ${border}`, color, borderRadius: 14, padding: "14px 16px", cursor: quizAnswered !== null ? "default" : "pointer", fontWeight: 600, transition: "all 0.2s", textAlign: "left", fontFamily: opt.match(/[\u0600-\u06FF]/) ? "'Amiri', serif" : "inherit", fontSize: opt.match(/[\u0600-\u06FF]/) ? 24 : 14 }}>
                               {opt}
                             </button>
                           );

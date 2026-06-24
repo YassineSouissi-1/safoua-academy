@@ -1255,7 +1255,7 @@ export default function ArabeModerneStandard() {
               <div style={{ display:"flex", gap:0, borderTop:`1px solid ${C.border}` }}>
                 {TABS.map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    style={{ flex:1, padding:"12px 8px", fontSize:11, fontWeight:700, color:activeTab===tab.id?activeModule.color:C.dim, borderBottom:`2px solid ${activeTab===tab.id?activeModule.color:"transparent"}`, background:"transparent", border:"none", borderBottom:`2px solid ${activeTab===tab.id?activeModule.color:"transparent"}`, cursor:"pointer", transition:"all 0.2s", fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.01em" }}>
+                    style={{ flex:1, padding:"12px 8px", fontSize:11, fontWeight:700, color:activeTab===tab.id?activeModule.color:C.dim, background:"transparent", border:"none", borderBottom:`2px solid ${activeTab===tab.id?activeModule.color:"transparent"}`, cursor:"pointer", transition:"all 0.2s", fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.01em" }}>
                     {tab.label}
                   </button>
                 ))}

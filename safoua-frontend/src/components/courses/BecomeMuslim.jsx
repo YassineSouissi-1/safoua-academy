@@ -175,10 +175,10 @@ const SURAHS = [
 ═══════════════════════════════════════════════ */
 const COURSE_AYAT = {
   islam_def: {
-    ar: "شَهِدَ اللَّهُ أَنَّهُ لَا إِلَٰهَ إِلَّا هُوَ وَالْمَلَائِكَةُ وَأُولُو الْعِلْمِ قَائِمًا بِالْقِسْطِ ۚ لَا إِلَٰهَ إِلَّا هُوَ الْعَزِيزُ الْحَكِيمُ ۚ إِنَّ الدِّينَ عِندَ اللَّهِ الْإِسْلَامُ",
-    highlight: "إِنَّ الدِّينَ عِندَ اللَّهِ الْإِسْلَامُ",
-    tr: "Inna d-dīna ʿinda-llāhi l-islām",
-    fr: "Certes, la religion agréée d'Allah, c'est l'Islam",
+    ar: "شَهِدَ اللَّهُ أَنَّهُ لَا إِلَٰهَ إِلَّا هُوَ وَالْمَلَائِكَةُ وَأُولُو الْعِلْمِ قَائِمًا بِالْقِسْطِ ۚ لَا إِلَٰهَ إِلَّا هُوَ الْعَزِيزُ الْحَكِيمُ",
+    highlight: "لَا إِلَٰهَ إِلَّا هُوَ الْعَزِيزُ الْحَكِيمُ",
+    tr: "Shahida Allāhu 'Annahu Lā 'Ilāha 'Illā Huwa Wa Al-Malā'ikatu Wa 'Ūlū Al-`Ilmi Qā'imāan Bil-Qisţi Lā 'Ilāha 'Illā Huwa Al-`Azīzu Al-Ĥakīmu",
+    fr: "Dieu témoigne qu'il n'y a de divinité que Lui, et les anges et les connaisseurs le confirment également, défendant la justice. Il n'y a de divinité que Lui, le Puissant, le Sage.",
     ref: "Sourate Âl Imrân 3:18–19",
     audioUrl: ayahUrl(3, 18)
   },
