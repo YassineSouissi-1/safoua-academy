@@ -1,11 +1,6 @@
 /**
  * App.jsx — Safoua Academy
- * ─────────────────────────
- * Only responsibilities: routing + page transition.
- * All large components (Home, Navbar, CursorSparks) are now
- * in their own files under src/components/.
- *
- * FIX: was ~1000 lines; now ~60 lines.
+ * Adds ThemeProvider so every child can call useTheme().
  */
 
 import { useEffect } from 'react';
@@ -13,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { isLoggedIn }     from './utils/auth';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 // ── Layout ─────────────────────────────────────────────────────────
 import Navbar         from './components/Navbar';
@@ -32,7 +28,6 @@ import Dictionary from './components/Dictionary';
 import NotFound   from './components/NotFound';
 import QuranReader from './components/QuranReader';
 
-
 // ── Course views ───────────────────────────────────────────────────
 import AlphabetArabe        from './components/courses/AlphabetArabe';
 import Tajwid               from './components/courses/Tajwid';
@@ -44,18 +39,16 @@ import Calligraphy          from './components/courses/Calligraphy';
 import BecomeMuslim         from './components/courses/BecomeMuslim';
 import ArabeModerneStandard from './components/courses/ArabeModerneStandard';
 
-/* ── Reset scroll position on every route change ───────────────── */
+/* ── Reset scroll on route change ─────────────────────────────── */
 function ScrollToTop() {
   const { pathname } = useLocation();
-
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [pathname]);
-
   return null;
 }
 
-/* ── Page fade transition ──────────────────────────────────────── */
+/* ── Page fade transition ─────────────────────────────────────── */
 function PageTransition({ children }) {
   const location = useLocation();
   return (
@@ -73,13 +66,14 @@ function PageTransition({ children }) {
   );
 }
 
-/* ── Inner app (needs Router context for useLocation) ─────────── */
+/* ── Inner app (needs Router + Theme context) ─────────────────── */
 function AppInner() {
   const location = useLocation();
   const loggedIn = isLoggedIn();
+  const { C }    = useTheme();          // ← live palette
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080b0f', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: C.bg, display: 'flex', flexDirection: 'column', transition: 'background 0.3s' }}>
       <ScrollToTop />
       <CursorSparks />
       <Navbar />
@@ -90,17 +84,16 @@ function AppInner() {
             <Route path="/"         element={<Home />} />
             <Route path="/courses"  element={<Courses />} />
 
-
-            {/* Auth — redirect if already logged in */}
+            {/* Auth */}
             <Route path="/login"    element={loggedIn ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/register" element={loggedIn ? <Navigate to="/dashboard" replace /> : <Register />} />
 
             {/* Protected */}
-            <Route path="/dashboard"      element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dictionary"     element={<ProtectedRoute><Dictionary /></ProtectedRoute>} />
-            <Route path="/quran"          element={<ProtectedRoute><QuranReader /></ProtectedRoute>} />
+            <Route path="/dashboard"  element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dictionary" element={<ProtectedRoute><Dictionary /></ProtectedRoute>} />
+            <Route path="/quran"      element={<ProtectedRoute><QuranReader /></ProtectedRoute>} />
 
-            {/* Course views — specific routes MUST come before the generic :id catch-all */}
+            {/* Course views */}
             <Route path="/course-view/1" element={<ProtectedRoute><AlphabetArabe /></ProtectedRoute>} />
             <Route path="/course-view/2" element={<ProtectedRoute><Tajwid /></ProtectedRoute>} />
             <Route path="/course-view/3" element={<ProtectedRoute><Memorisation /></ProtectedRoute>} />
@@ -110,8 +103,6 @@ function AppInner() {
             <Route path="/course-view/7" element={<ProtectedRoute><Calligraphy /></ProtectedRoute>} />
             <Route path="/course-view/8" element={<ProtectedRoute><BecomeMuslim /></ProtectedRoute>} />
             <Route path="/course-view/9" element={<ProtectedRoute><ArabeModerneStandard /></ProtectedRoute>} />
-
-            {/* Generic fallback for any other course ID */}
             <Route path="/course-view/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
 
             {/* 404 */}
@@ -125,6 +116,13 @@ function AppInner() {
   );
 }
 
+/* ── Root export — ThemeProvider wraps everything ─────────────── */
 export default function App() {
-  return <Router><AppInner /></Router>;
+  return (
+    <ThemeProvider>
+      <Router>
+        <AppInner />
+      </Router>
+    </ThemeProvider>
+  );
 }
