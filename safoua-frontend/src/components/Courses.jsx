@@ -63,7 +63,7 @@ const ROADMAP = [
     ],
   },
   {
-    phase: "CORAN", phaseAr: "القرآن الكريم", phaseColor: "#9d7bea", num: "03",
+    phase: "QURAN", phaseAr: "القرآن الكريم", phaseColor: "#9d7bea", num: "03",
     courses: [
       {
         id: 2, title: "Tajwid : Récitation Sacrée", titleAr: "أحكام التجويد",
