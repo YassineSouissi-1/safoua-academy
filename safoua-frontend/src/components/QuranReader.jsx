@@ -377,21 +377,26 @@ function AudioPlayer({ src, reciterName, AP }) {
     seek(((e.clientX - r.left) / r.width) * (dur || 0));
   };
 
+  const isLight = C.bg0 === "#faf7f0";
+
   const ctrlStyle = (accent) => ({
     display:"flex", alignItems:"center", justifyContent:"center",
-    width:31, height:31, borderRadius:5, cursor:"pointer", border:"none",
-    background:`${C.gold}08`, color: accent || C.ink3,
+    width:31, height:31, borderRadius:5, cursor:"pointer",
+    border:`1px solid ${isLight ? "rgba(26,21,16,0.18)" : C.br1}`,
+    background: isLight ? "rgba(26,21,16,0.06)" : `${C.gold}08`,
+    color: accent || (isLight ? "rgba(26,21,16,0.6)" : C.ink3),
     transition:"all .15s", flexShrink:0,
   });
 
   const skipLabelStyle = {
-    fontSize:9, fontWeight:700, fontFamily:F_UI, lineHeight:1, letterSpacing:"0.03em"
+    fontSize:9, fontWeight:700, fontFamily:F_UI, lineHeight:1, letterSpacing:"0.03em",
+    color:"inherit",
   };
 
   return (
     <div style={{
-      background:`linear-gradient(135deg, ${C.goldBg}, ${C.tealBg})`,
-      border:`1px solid ${C.br1}`, borderRadius:6,
+      background: isLight ? "#ddd6c4" : `linear-gradient(135deg, ${C.goldBg}, ${C.tealBg})`,
+      border:`1px solid ${isLight ? "rgba(26,21,16,0.18)" : C.br1}`, borderRadius:6,
       padding:"15px 17px", position:"relative",
     }}>
       {/* corner brackets */}
@@ -412,12 +417,12 @@ function AudioPlayer({ src, reciterName, AP }) {
       <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:11 }}>
         <div style={{
           width:6, height:6, borderRadius:"50%",
-          background: playing ? C.gold : C.ink4,
+          background: playing ? C.gold : (isLight ? "rgba(26,21,16,0.25)" : C.ink4),
           boxShadow: playing ? `0 0 8px ${C.gold}` : "none",
           transition:"all .3s", flexShrink:0
         }}/>
         <Icon.Volume/>
-        <span style={{ fontSize:10, color: playing ? C.gold : C.ink3, fontFamily:F_UI, fontWeight:600, letterSpacing:"0.12em" }}>
+        <span style={{ fontSize:10, color: playing ? C.gold : (isLight ? "rgba(26,21,16,0.55)" : C.ink3), fontFamily:F_UI, fontWeight:600, letterSpacing:"0.12em" }}>
           {(reciterName || "RÉCITATION").toUpperCase()}
         </span>
         {playing && (
@@ -435,7 +440,9 @@ function AudioPlayer({ src, reciterName, AP }) {
 
       {/* Progress bar */}
       <div onClick={handleBar}
-        style={{ position:"relative", height:4, borderRadius:99, background:C.ink4, cursor:"pointer", marginBottom:13 }}
+        style={{ position:"relative", height:5, borderRadius:99,
+          background: isLight ? "rgba(26,21,16,0.18)" : C.ink4,
+          cursor:"pointer", marginBottom:13 }}
       >
         <div style={{
           position:"absolute", left:0, top:0, height:"100%",
@@ -447,7 +454,7 @@ function AudioPlayer({ src, reciterName, AP }) {
         <div style={{
           position:"absolute", top:"50%", left:`${pct}%`,
           width:12, height:12, borderRadius:"50%",
-          background:C.gold, border:`2px solid ${C.bg0}`,
+          background:C.gold, border:`2px solid ${isLight ? "#e8e2d4" : C.bg0}`,
           transform:"translate(-50%,-50%)",
           boxShadow:`0 0 8px ${C.gold}80`,
           transition:"left .1s", cursor:"grab"
@@ -456,9 +463,14 @@ function AudioPlayer({ src, reciterName, AP }) {
 
       {/* Controls */}
       <div className="audio-player-controls" style={{ display:"flex", alignItems:"center", gap:6 }}>
-        <button onClick={() => skip(-30)} style={ctrlStyle(C.ink3)} title="-30s" className="audio-skip-sm"><Icon.SkipB/></button>
-        <button onClick={() => skip(-10)} style={ctrlStyle(C.ink2)} title="-10s" className="audio-skip-sm"><span style={skipLabelStyle}>−10</span></button>
-        <button onClick={() => skip(-5)} style={{ ...ctrlStyle(C.gold), background:`${C.gold}18`, border:`1px solid ${C.gold}30`, width:35, height:35, borderRadius:6 }} title="-5s">
+        <button onClick={() => skip(-30)} style={ctrlStyle()} title="-30s" className="audio-skip-sm"><Icon.SkipB/></button>
+        <button onClick={() => skip(-10)} style={ctrlStyle()} title="-10s" className="audio-skip-sm"><span style={skipLabelStyle}>−10</span></button>
+        <button onClick={() => skip(-5)} style={{
+          ...ctrlStyle(C.gold),
+          background: isLight ? `${C.gold}20` : `${C.gold}18`,
+          border:`1px solid ${C.gold}50`,
+          width:35, height:35, borderRadius:6,
+        }} title="-5s">
           <span style={{...skipLabelStyle, color:C.gold}}>−5</span>
         </button>
         <button onClick={toggle} style={{
@@ -475,13 +487,24 @@ function AudioPlayer({ src, reciterName, AP }) {
             ? <div style={{width:14,height:14,border:`2px solid currentColor`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
             : playing ? <Icon.Pause/> : <Icon.Play/>}
         </button>
-        <button onClick={() => skip(5)} style={{ ...ctrlStyle(C.gold), background:`${C.gold}18`, border:`1px solid ${C.gold}30`, width:35, height:35, borderRadius:6 }} title="+5s">
+        <button onClick={() => skip(5)} style={{
+          ...ctrlStyle(C.gold),
+          background: isLight ? `${C.gold}20` : `${C.gold}18`,
+          border:`1px solid ${C.gold}50`,
+          width:35, height:35, borderRadius:6,
+        }} title="+5s">
           <span style={{...skipLabelStyle, color:C.gold}}>+5</span>
         </button>
-        <button onClick={() => skip(10)} style={ctrlStyle(C.ink2)} title="+10s" className="audio-skip-sm"><span style={skipLabelStyle}>+10</span></button>
-        <button onClick={() => skip(30)} style={ctrlStyle(C.ink3)} title="+30s" className="audio-skip-sm"><Icon.SkipF/></button>
-        <button onClick={stop} style={{ ...ctrlStyle("#c86450"), background:"rgba(200,80,60,0.08)", marginLeft:"auto" }} title="Stop"><Icon.Stop/></button>
-        <span style={{ fontSize:11, color:C.ink3, fontFamily:"monospace", whiteSpace:"nowrap", letterSpacing:"0.04em" }}>
+        <button onClick={() => skip(10)} style={ctrlStyle()} title="+10s" className="audio-skip-sm"><span style={skipLabelStyle}>+10</span></button>
+        <button onClick={() => skip(30)} style={ctrlStyle()} title="+30s" className="audio-skip-sm"><Icon.SkipF/></button>
+        <button onClick={stop} style={{
+          ...ctrlStyle(),
+          background:"rgba(200,80,60,0.10)",
+          border:"1px solid rgba(200,80,60,0.25)",
+          color:"#c86450",
+          marginLeft:"auto",
+        }} title="Stop"><Icon.Stop/></button>
+        <span style={{ fontSize:11, color: isLight ? "rgba(26,21,16,0.5)" : C.ink3, fontFamily:"monospace", whiteSpace:"nowrap", letterSpacing:"0.04em" }}>
           {fmt(time)} / {fmt(dur)}
         </span>
       </div>
@@ -1344,27 +1367,26 @@ export default function QuranReader() {
         {/* Reciter bar + full audio player */}
         {selectedSurah && (
           <div className="quran-reciter-bar" style={{
-            background: RD.bg2, borderBottom:`1px solid ${RD.br1}`,
-            padding:"13px 20px", flexShrink:0
+            background: RD.bg2,
+            borderTop:`1px solid ${RD.br1}`,
+            borderBottom:`1px solid ${RD.br1}`,
+            padding:"10px 20px 12px", flexShrink:0,
           }}>
-            {/* Reciter selector */}
             <div className="reciter-row" style={{ display:"flex", alignItems:"center", gap:7, marginBottom:11, flexWrap:"wrap", color:RD.ink3 }}>
               <Icon.Volume/>
               <span style={{ fontSize:9, color:RD.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:4 }}>RÉCITATEUR</span>
               {RECITERS.map(r => (
                 <button key={r.id} onClick={() => setReciter(r.id)} className="reciter-btn" style={{
-                  padding:"4px 12px", borderRadius:6,
-                  border:`1px solid ${reciter===r.id ? RD.gold : RD.br1}`,
-                  background: reciter===r.id ? RD.goldBg : (isDark ? "transparent" : RD.bg3),
+                  padding:"5px 14px", borderRadius:8,
+                  border:`1.5px solid ${reciter===r.id ? RD.gold : RD.br1}`,
+                  background: reciter===r.id ? RD.goldBg : RD.bg0,
                   color: reciter===r.id ? RD.gold : RD.ink2,
-                  fontFamily:F_UI, fontSize:10,
-                  fontWeight: reciter===r.id ? 600 : 400,
-                  cursor:"pointer", transition:"all .12s",
-                  boxShadow: reciter===r.id ? `0 0 0 2px ${RD.goldBr}` : "none",
+                  fontFamily:F_UI, fontSize:11,
+                  fontWeight: reciter===r.id ? 700 : 500,
+                  cursor:"pointer", transition:"all .15s",
                 }}>{r.name}</button>
               ))}
             </div>
-            {/* Full player */}
             <AudioPlayer key={`${selectedSurah.n}-${reciter}`} src={audioSrc} reciterName={rec.name} AP={RD}/>
           </div>
         )}
@@ -1649,9 +1671,9 @@ export default function QuranReader() {
             ><Icon.X/></button>
           </div>
 
-          {/* Scrollable verse area */}
+          {/* Scrollable verse area — paddingBottom leaves room for the fixed audio bar */}
           <div style={{
-            flex:1, overflowY:"auto", background:RD.bg1, paddingBottom:180,
+            flex:1, overflowY:"auto", background:RD.bg1, paddingBottom:20,
             WebkitOverflowScrolling:"touch", overscrollBehavior:"contain",
           }}>
             <div style={{ maxWidth:720, margin:"0 auto", padding:"28px 18px 20px" }}>
@@ -1729,30 +1751,29 @@ export default function QuranReader() {
             </div>
           </div>
 
-          {/* Floating audio bar */}
+          {/* Audio bar — pinned at bottom, follows theme */}
           <div className="qr-fullscreen-audio" style={{
-            position:"absolute", bottom:0, left:0, right:0,
-            background:`linear-gradient(0deg, ${RD.bg0} 60%, transparent)`,
-            padding:"14px 20px 18px",
-            backdropFilter:"blur(16px)",
-            borderTop:`1px solid ${RD.br1}`,
+            flexShrink:0,
+            background: RD.bg2,
+            padding:"12px 20px 16px",
+            borderTop:`2px solid ${RD.br1}`,
           }}>
-            <div className="reciter-row" style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8, flexWrap:"wrap" }}>
+            <div className="reciter-row" style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8, flexWrap:"wrap", color:RD.ink3 }}>
               <Icon.Volume/>
               <span style={{ fontSize:9, color:RD.ink3, fontFamily:F_UI, fontWeight:700, letterSpacing:"0.14em", marginRight:3, whiteSpace:"nowrap" }}>RÉCITATEUR</span>
               {RECITERS.map(r => (
                 <button key={r.id} onClick={() => setReciter(r.id)} className="reciter-btn" style={{
-                  padding:"3px 10px", borderRadius:4, whiteSpace:"nowrap",
-                  border:`1px solid ${reciter===r.id ? RD.gold : RD.br2}`,
-                  background: reciter===r.id ? RD.goldBg : "transparent",
-                  color: reciter===r.id ? RD.gold : RD.ink3,
-                  fontFamily:F_UI, fontSize:10,
-                  fontWeight: reciter===r.id ? 600 : 400,
+                  padding:"5px 14px", borderRadius:8, whiteSpace:"nowrap",
+                  border:`1.5px solid ${reciter===r.id ? RD.gold : RD.br1}`,
+                  background: reciter===r.id ? RD.goldBg : RD.bg0,
+                  color: reciter===r.id ? RD.gold : RD.ink2,
+                  fontFamily:F_UI, fontSize:11,
+                  fontWeight: reciter===r.id ? 700 : 500,
                   cursor:"pointer", transition:"all .12s"
                 }}>{r.name}</button>
               ))}
             </div>
-            <AudioPlayer key={`fs-${selectedSurah.n}-${reciter}`} src={audioSrc} reciterName={rec.name} AP={MANUSCRIPT}/>
+            <AudioPlayer key={`fs-${selectedSurah.n}-${reciter}`} src={audioSrc} reciterName={rec.name} AP={RD}/>
           </div>
         </div>
       )}
