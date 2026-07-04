@@ -73,6 +73,47 @@ function studentDisplay(s) { return isMongoId(s) ? `Étudiant …${s.slice(-4)}`
 
 const islamicEventsCache = {};
 
+/* Verses shown only where the Quran itself references the occasion.
+   Purely Hadith-based practices (e.g. the 6 days of Shawwal, Ashoura fasting,
+   Ayyam al-Bidh) intentionally have no verse attached below. */
+const EVENT_VERSES = {
+  "Ramadan": {
+    ar: "شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ",
+    fr: "« Le mois de Ramadan, durant lequel le Coran a été révélé comme guide pour les gens. »",
+    ref: "Sourate Al-Baqara, 2:185",
+  },
+  "10 Dernières Nuits": {
+    ar: "إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ ۚ وَمَا أَدْرَاكَ مَا لَيْلَةُ الْقَدْرِ ۚ لَيْلَةُ الْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ",
+    fr: "« Nous l'avons fait descendre pendant la Nuit du Destin. Et qui te dira ce qu'est la Nuit du Destin ? La Nuit du Destin est meilleure que mille mois. »",
+    ref: "Sourate Al-Qadr, 97:1-3",
+  },
+  "Aïd el-Fitr": {
+    ar: "وَلِتُكْمِلُوا الْعِدَّةَ وَلِتُكَبِّرُوا اللَّهَ عَلَىٰ مَا هَدَاكُمْ وَلَعَلَّكُمْ تَشْكُرُونَ",
+    fr: "« … afin que vous en complétiez le nombre et que vous proclamiez la grandeur d'Allah pour vous avoir guidés, et afin que vous soyez reconnaissants. »",
+    ref: "Sourate Al-Baqara, 2:185",
+  },
+  "Aïd el-Adha": {
+    ar: "وَفَدَيْنَاهُ بِذِبْحٍ عَظِيمٍ",
+    fr: "« Et Nous le rançonnâmes d'un sacrifice immense. »",
+    ref: "Sourate As-Saffat, 37:107",
+  },
+  "Jour d'Arafah": {
+    ar: "الْيَوْمَ أَكْمَلْتُ لَكُمْ دِينَكُمْ وَأَتْمَمْتُ عَلَيْكُمْ نِعْمَتِي وَرَضِيتُ لَكُمُ الْإِسْلَامَ دِينًا",
+    fr: "« Aujourd'hui, J'ai parachevé pour vous votre religion, accompli sur vous Mon bienfait et agréé pour vous l'islam comme religion. »",
+    ref: "Sourate Al-Mâ'ida, 5:3",
+  },
+  "Isra' & Mi'raj": {
+    ar: "سُبْحَانَ الَّذِي أَسْرَىٰ بِعَبْدِهِ لَيْلًا مِّنَ الْمَسْجِدِ الْحَرَامِ إِلَى الْمَسْجِدِ الْأَقْصَى",
+    fr: "« Gloire à Celui qui a fait voyager de nuit Son serviteur, de la Mosquée sacrée à la Mosquée la plus éloignée. »",
+    ref: "Sourate Al-Isrâ, 17:1",
+  },
+  "Nouvel An Hégirien": {
+    ar: "لَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا",
+    fr: "« Ne t'afflige pas, Allah est avec nous. »",
+    ref: "Sourate At-Tawba, 9:40 — parole du Prophète ﷺ pendant l'Hégire",
+  },
+};
+
 async function fetchIslamicEventsForMonth(gYear, gMonth) {
   const key = `${gYear}-${gMonth}`;
   if (islamicEventsCache[key]) return islamicEventsCache[key];
@@ -90,7 +131,7 @@ async function fetchIslamicEventsForMonth(gYear, gMonth) {
       const dateStr = `${gy}-${gm}-${gd}`;
       const add = (label, type, desc) => {
         if (!events[dateStr]) events[dateStr] = [];
-        if (!events[dateStr].some(e => e.label === label)) events[dateStr].push({ label, type, desc });
+        if (!events[dateStr].some(e => e.label === label)) events[dateStr].push({ label, type, desc, verse: EVENT_VERSES[label] || null });
       };
       if (hMonth===1&&hDay===1)  add("Nouvel An Hégirien","special","1 Muharram — Nouvel An Islamique");
       if (hMonth===1&&hDay===9)  add("Tassua","sunnah","9 Muharram — jeûne sunnah avant Achoura");
@@ -465,11 +506,19 @@ function MiniCalendar({ sessions, roleColor, C }) {
             {tooltip.events.map((ev,i)=>{
               const cfg=EVENT_TYPES[ev.type]||EVENT_TYPES.special;
               return (
-                <div key={i} style={{ display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<tooltip.events.length-1?7:0 }}>
+                <div key={i} style={{ display:"flex",alignItems:"flex-start",gap:8,marginBottom:i<tooltip.events.length-1?10:0 }}>
                   <div style={{ width:6,height:6,borderRadius:"50%",background:cfg.dot,marginTop:4,flexShrink:0 }}/>
-                  <div>
+                  <div style={{ flex:1,minWidth:0 }}>
                     <div style={{ fontSize:12,fontWeight:700,color:cfg.color,fontFamily:"'DM Sans',sans-serif",lineHeight:1.3 }}>{ev.label}</div>
                     <div style={{ fontSize:11,color:C.muted,fontFamily:"'DM Sans',sans-serif",lineHeight:1.4,marginTop:1 }}>{ev.desc}</div>
+                    {ev.verse && (
+                      <div style={{ marginTop:7,padding:"9px 11px",borderRadius:10,
+                        background:`${cfg.color}0d`,border:`1px solid ${cfg.color}25` }}>
+                        <p dir="rtl" style={{ fontSize:14,color:C.text,lineHeight:1.9,marginBottom:5,textAlign:"right" }}>{ev.verse.ar}</p>
+                        <p style={{ fontSize:11,color:C.muted,fontStyle:"italic",lineHeight:1.5,marginBottom:4,fontFamily:"'DM Sans',sans-serif" }}>{ev.verse.fr}</p>
+                        <p style={{ fontSize:10,color:cfg.color,fontWeight:700,fontFamily:"'DM Sans',sans-serif" }}>{ev.verse.ref}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -864,7 +913,15 @@ function IslamicNotificationsBell({ C }) {
         <div style={{ width:3,borderRadius:99,background:cfg.dot,alignSelf:"stretch",minHeight:32,flexShrink:0 }}/>
         <div style={{ flex:1,minWidth:0 }}>
           <div style={{ fontSize:12,fontWeight:700,color:C.text,lineHeight:1.3,marginBottom:2,fontFamily:"'DM Sans',sans-serif" }}>{evt.label}</div>
-          <div style={{ fontSize:11,color:C.muted,lineHeight:1.4,marginBottom:5,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'DM Sans',sans-serif" }}>{evt.desc}</div>
+          <div style={{ fontSize:11,color:C.muted,lineHeight:1.4,marginBottom:5,fontFamily:"'DM Sans',sans-serif" }}>{evt.desc}</div>
+          {evt.verse && (
+            <div style={{ marginBottom:6,padding:"8px 10px",borderRadius:9,
+              background:`${cfg.color}0d`,border:`1px solid ${cfg.color}25` }}>
+              <p dir="rtl" style={{ fontSize:13,color:C.text,lineHeight:1.85,marginBottom:4,textAlign:"right" }}>{evt.verse.ar}</p>
+              <p style={{ fontSize:10.5,color:C.muted,fontStyle:"italic",lineHeight:1.5,marginBottom:3,fontFamily:"'DM Sans',sans-serif" }}>{evt.verse.fr}</p>
+              <p style={{ fontSize:9.5,color:cfg.color,fontWeight:700,fontFamily:"'DM Sans',sans-serif" }}>{evt.verse.ref}</p>
+            </div>
+          )}
           <span style={{ display:"inline-flex",fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:99,background:b.bg,color:b.color,fontFamily:"'DM Sans',sans-serif" }}>{b.text}</span>
         </div>
       </div>
