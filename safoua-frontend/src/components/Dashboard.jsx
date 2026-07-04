@@ -78,7 +78,7 @@ async function fetchIslamicEventsForMonth(gYear, gMonth) {
   if (islamicEventsCache[key]) return islamicEventsCache[key];
   const events = {};
   try {
-    const res = await fetch(`https://api.aladhan.com/v1/gToHCalendar/${gYear}/${gMonth}`);
+    const res = await fetch(`https://api.aladhan.com/v1/gToHCalendar/${gMonth}/${gYear}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (json.code !== 200 || !Array.isArray(json.data)) throw new Error("Réponse API inattendue");
@@ -99,11 +99,11 @@ async function fetchIslamicEventsForMonth(gYear, gMonth) {
       if (hMonth===8&&hDay===15) add("Laylat al-Barâ'a","special","15 Sha'ban — Nuit du pardon");
       if (hMonth===9) {
         if (hDay===1)  add("Ramadan","ramadan","1 Ramadan — début du jeûne obligatoire 🌙");
-        else if (hDay===27) add("Laylat al-Qadr","laylatul","27 Ramadan — Nuit du Destin ✨");
+        else if (hDay===21) add("10 Dernières Nuits","laylatul","Laylat al-Qadr se trouve parmi ces nuits — probablement une nuit impaire (21, 23, 25, 27 ou 29). La date exacte n'est pas connue ✨");
         else add("Ramadan","ramadan",`${hDay} Ramadan — jeûne obligatoire`);
       }
       if (hMonth===10&&hDay===1) add("Aïd el-Fitr","eid","1 Shawwal — fête de la rupture du jeûne 🌙");
-      if (hMonth===10&&hDay>=2&&hDay<=7) add("Jeûne Shawwal","fast",`${hDay-1}/6 — jeûne de Shawwal`);
+      if (hMonth===10&&hDay===2) add("Jeûne des 6 jours de Shawwal","fast","Rappel : 6 jours de jeûne à faire quand vous voulez durant le mois de Shawwal, consécutifs ou non");
       if (hMonth===12&&hDay>=1&&hDay<=8) add("10 jours Dhul Hijja","special",`${hDay} Dhul Hijja`);
       if (hMonth===12&&hDay===9) add("Jour d'Arafah","arafah","9 Dhul Hijja — jeûne efface 2 ans 🤲");
       if (hMonth===12&&hDay===10) add("Aïd el-Adha","eid","10 Dhul Hijja — fête du sacrifice 🐑");
@@ -130,7 +130,7 @@ const EVENT_TYPES = {
 };
 
 const LEGEND = [
-  { type:"eid",label:"Aïd" },{ type:"ramadan",label:"Ramadan" },{ type:"laylatul",label:"Laylat al-Qadr" },
+  { type:"eid",label:"Aïd" },{ type:"ramadan",label:"Ramadan" },{ type:"laylatul",label:"10 Dernières Nuits" },
   { type:"arafah",label:"Arafah" },{ type:"fast",label:"Jeûne recommandé" },
   { type:"sunnah",label:"Sunnah" },{ type:"special",label:"Jour spécial" },
 ];
