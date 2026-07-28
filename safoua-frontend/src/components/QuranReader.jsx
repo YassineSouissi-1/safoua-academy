@@ -1073,6 +1073,16 @@ export default function QuranReader() {
             width: auto !important;
           }
 
+          /* Toolbar buttons: icon-only on phones so the row fits without
+             getting clipped or needing to scroll as far. Full labels
+             come back once there's room (tablet range and up). */
+          .qr-tb-label { display: none !important; }
+          .qr-tb-btn {
+            padding: 8px !important;
+            min-width: 32px !important;
+            justify-content: center !important;
+          }
+
           /* Audio player controls: compact row */
           .audio-player-controls {
             gap: 3px !important;
@@ -1248,32 +1258,32 @@ export default function QuranReader() {
         }}>
           {selectedSurah ? (
             <>
-              <div style={{ display:"flex", alignItems:"center", gap:9 }}>
-                <span style={{ fontFamily:"'Amiri',serif", fontSize:17, fontWeight:700, color:UI.uiText }}>{selectedSurah.ar}</span>
-                <span style={{ fontFamily:F_DISPLAY, fontSize:13, color:RD.gold, fontStyle:"italic" }}>{selectedSurah.en}</span>
-                <span style={{ fontSize:9, color:UI.uiMuted, fontFamily:F_UI, fontWeight:600, background:UI.uiBg2, border:`1px solid ${UI.uiBr2}`, borderRadius:4, padding:"3px 8px" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:9, flexShrink:0 }}>
+                <span style={{ fontFamily:"'Amiri',serif", fontSize:17, fontWeight:700, color:UI.uiText, flexShrink:0 }}>{selectedSurah.ar}</span>
+                <span style={{ fontFamily:F_DISPLAY, fontSize:13, color:RD.gold, fontStyle:"italic", flexShrink:0 }}>{selectedSurah.en}</span>
+                <span style={{ fontSize:9, color:UI.uiMuted, fontFamily:F_UI, fontWeight:600, background:UI.uiBg2, border:`1px solid ${UI.uiBr2}`, borderRadius:4, padding:"3px 8px", whiteSpace:"nowrap", flexShrink:0 }}>
                   {selectedSurah.verses} versets · Juz' {selectedSurah.juz}
                 </span>
               </div>
               <div style={{ flex:1 }}/>
 
               {/* Font size */}
-              <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${UI.uiBr}`,background:UI.uiBg2,color:UI.uiText,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>−</button>
-                <span style={{ fontSize:10,color:UI.uiMuted,fontFamily:F_UI,width:26,textAlign:"center" }}>{fontSize}</span>
-                <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${UI.uiBr}`,background:UI.uiBg2,color:UI.uiText,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700 }}>+</button>
+              <div style={{ display:"flex", alignItems:"center", gap:4, flexShrink:0 }}>
+                <button onClick={() => setFontSize(f => Math.max(18,f-2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${UI.uiBr}`,background:UI.uiBg2,color:UI.uiText,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700,flexShrink:0 }}>−</button>
+                <span style={{ fontSize:10,color:UI.uiMuted,fontFamily:F_UI,width:26,textAlign:"center",flexShrink:0 }}>{fontSize}</span>
+                <button onClick={() => setFontSize(f => Math.min(40,f+2))} style={{ width:24,height:24,borderRadius:4,border:`1px solid ${UI.uiBr}`,background:UI.uiBg2,color:UI.uiText,cursor:"pointer",fontFamily:F_UI,fontSize:12,fontWeight:700,flexShrink:0 }}>+</button>
               </div>
 
               {/* EXPL. global toggle */}
-              <button onClick={() => setShowAllTrans(v => !v)} style={{
+              <button onClick={() => setShowAllTrans(v => !v)} className="qr-tb-btn" style={{
                 padding:"4px 11px", borderRadius:5, cursor:"pointer",
                 border:`1px solid ${showAllTrans ? RD.tealBr : UI.uiBr}`,
                 background: showAllTrans ? RD.tealBg : "transparent",
                 color: showAllTrans ? RD.teal : UI.uiMuted,
                 fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
-                display:"flex", alignItems:"center", gap:4
+                display:"flex", alignItems:"center", gap:4, flexShrink:0, whiteSpace:"nowrap"
               }}>
-                {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} TRAD.
+                {showAllTrans ? <Icon.Eye/> : <Icon.EyeOff/>} <span className="qr-tb-label">TRAD.</span>
               </button>
 
               {/* PRON. global toggle — only when API returned data */}
@@ -1283,33 +1293,33 @@ export default function QuranReader() {
                   <span style={{ fontSize:9, color:RD.ink3, fontFamily:F_UI }}>Pron…</span>
                 </div>
               ) : hasPron && (
-                <button onClick={() => setShowAllPron(v => !v)} style={{
+                <button onClick={() => setShowAllPron(v => !v)} className="qr-tb-btn" style={{
                   padding:"4px 11px", borderRadius:5, cursor:"pointer",
                   border:`1px solid ${showAllPron ? RD.purBr : UI.uiBr}`,
                   background: showAllPron ? RD.purBg : "transparent",
                   color: showAllPron ? RD.pur : UI.uiMuted,
                   fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
-                  display:"flex", alignItems:"center", gap:4
+                  display:"flex", alignItems:"center", gap:4, flexShrink:0, whiteSpace:"nowrap"
                 }}>
-                  {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} Prononciation FR
+                  {showAllPron ? <Icon.Eye/> : <Icon.EyeOff/>} <span className="qr-tb-label">Prononciation FR</span>
                 </button>
               )}
 
               {/* TAJWID global toggle + legend */}
               {tajwidAvailable && Object.keys(tajwidMap).length > 0 && (
                 <>
-                  <button onClick={() => setShowAllTajwid(v => !v)} style={{
+                  <button onClick={() => setShowAllTajwid(v => !v)} className="qr-tb-btn" style={{
                     padding:"4px 11px", borderRadius:5, cursor:"pointer",
                     border:`1px solid ${showAllTajwid ? RD.goldBr : UI.uiBr}`,
                     background: showAllTajwid ? RD.goldBg : "transparent",
                     color: showAllTajwid ? RD.gold : UI.uiMuted,
                     fontFamily:F_UI, fontWeight:600, fontSize:10, transition:"all .15s",
-                    display:"flex", alignItems:"center", gap:4
+                    display:"flex", alignItems:"center", gap:4, flexShrink:0, whiteSpace:"nowrap"
                   }}>
-                    {showAllTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} TAJWID
+                    {showAllTajwid ? <Icon.Eye/> : <Icon.EyeOff/>} <span className="qr-tb-label">TAJWID</span>
                   </button>
                   <button onClick={() => setShowTajwidLegend(v => !v)} title="Légende Tajwid" style={{
-                    width:24, height:24, borderRadius:5, cursor:"pointer",
+                    width:24, height:24, borderRadius:5, cursor:"pointer", flexShrink:0,
                     border:`1px solid ${showTajwidLegend ? RD.goldBr : UI.uiBr}`,
                     background: showTajwidLegend ? RD.goldBg : "transparent",
                     color: showTajwidLegend ? RD.gold : UI.uiMuted,
@@ -1327,20 +1337,21 @@ export default function QuranReader() {
                     saveReadingMark(selectedSurah, ayah);
                   }}
                   title="Sauvegarder ma position de lecture"
+                  className="qr-tb-btn"
                   style={{
                     padding:"4px 10px", borderRadius:5, cursor:"pointer",
                     border:`1px solid ${markSaved ? RD.tealBr : RD.goldBr}`,
                     background: markSaved ? RD.tealBg : RD.goldBg,
                     color: markSaved ? RD.teal : RD.gold,
                     fontFamily:F_UI, fontWeight:600, fontSize:10,
-                    display:"flex", alignItems:"center", gap:4, whiteSpace:"nowrap",
+                    display:"flex", alignItems:"center", gap:4, whiteSpace:"nowrap", flexShrink:0,
                     transition:"all .25s",
                   }}
                 >
                   {markSaving
                     ? <div style={{width:8,height:8,border:`1.5px solid currentColor`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .6s linear infinite"}}/>
                     : markSaved ? "✓" : "🔖"}
-                  {markSaved ? "Sauvegardé" : "Ma position"}
+                  <span className="qr-tb-label">{markSaved ? "Sauvegardé" : "Ma position"}</span>
                 </button>
 
                 {/* Show where the bookmark is if it's on a different surah */}
@@ -1351,15 +1362,16 @@ export default function QuranReader() {
                       if (s) loadSurah(s);
                     }}
                     title={`Reprendre : ${readingMark.surahNameEn} v.${readingMark.ayahNumber}`}
+                    className="qr-tb-btn"
                     style={{
                       padding:"4px 9px", borderRadius:5, cursor:"pointer",
                       border:`1px solid ${RD.purBr}`,
                       background: RD.purBg, color:RD.pur,
                       fontFamily:F_UI, fontWeight:600, fontSize:10,
-                      display:"flex", alignItems:"center", gap:4, whiteSpace:"nowrap",
+                      display:"flex", alignItems:"center", gap:4, whiteSpace:"nowrap", flexShrink:0,
                     }}
                   >
-                    ↩ Reprendre
+                    ↩ <span className="qr-tb-label">Reprendre</span>
                   </button>
                 )}
               </div>
@@ -1369,7 +1381,7 @@ export default function QuranReader() {
                 onClick={() => setFullscreen(v => !v)}
                 title={fullscreen ? "Quitter le plein écran (Échap)" : "Plein écran immersif"}
                 style={{
-                  width:30, height:30, borderRadius:5, cursor:"pointer",
+                  width:30, height:30, borderRadius:5, cursor:"pointer", flexShrink:0,
                   border:`1px solid ${fullscreen ? RD.goldBr : UI.uiBr}`,
                   background: fullscreen ? RD.goldBg : "transparent",
                   color: fullscreen ? RD.gold : UI.uiMuted,
@@ -1407,6 +1419,7 @@ export default function QuranReader() {
                   fontFamily:F_UI, fontSize:11,
                   fontWeight: reciter===r.id ? 700 : 500,
                   cursor:"pointer", transition:"all .15s",
+                  whiteSpace:"nowrap", flexShrink:0,
                 }}>{r.name}</button>
               ))}
             </div>

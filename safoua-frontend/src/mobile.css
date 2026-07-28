@@ -121,7 +121,42 @@ a { display: inline-flex; align-items: center; justify-content: center; }
   }
 }
 
-/* ── COURSE PAGES: FIXED-WIDTH SIDEBAR GRIDS (TABLET FIX) ─────────
+/* ── DE-WEIGHT: OVERSIZED FIXED FONT SIZES ─────────────────────────
+   Several course pages (AlphabetArabe, Calligraphy, Grammaire, Sira,
+   Memorisation, etc.) use large fixed-pixel font sizes for headings,
+   decorative Arabic letters and stat numbers — sizes like 72px, 96px,
+   even 110px that never scale down. That's the main cause of pages
+   feeling oversized/heavy on a phone. This scales them down uniformly
+   across every course page without needing per-file edits. ───────── */
+@media (max-width: 900px) {
+  [style*="fontSize: 110"], [style*="fontSize:110"] { font-size: 60px !important; }
+  [style*="fontSize: 100"], [style*="fontSize:100"] { font-size: 58px !important; }
+  [style*="fontSize: 96"],  [style*="fontSize:96"]  { font-size: 56px !important; }
+  [style*="fontSize: 80"],  [style*="fontSize:80"]  { font-size: 50px !important; }
+  [style*="fontSize: 72"],  [style*="fontSize:72"]  { font-size: 46px !important; }
+  [style*="fontSize: 64"],  [style*="fontSize:64"]  { font-size: 42px !important; }
+  [style*="fontSize: 56"],  [style*="fontSize:56"]  { font-size: 38px !important; }
+  [style*="fontSize: 52"],  [style*="fontSize:52"]  { font-size: 36px !important; }
+  [style*="fontSize: 48"],  [style*="fontSize:48"]  { font-size: 34px !important; }
+  [style*="fontSize: 46"],  [style*="fontSize:46"]  { font-size: 34px !important; }
+  [style*="fontSize: 44"],  [style*="fontSize:44"]  { font-size: 32px !important; }
+  [style*="fontSize: 42"],  [style*="fontSize:42"]  { font-size: 32px !important; }
+  [style*="fontSize: 40"],  [style*="fontSize:40"]  { font-size: 30px !important; }
+  [style*="fontSize: 38"],  [style*="fontSize:38"]  { font-size: 28px !important; }
+  [style*="fontSize: 36"],  [style*="fontSize:36"]  { font-size: 28px !important; }
+}
+
+@media (max-width: 480px) {
+  /* Phones get an extra step down on the biggest offenders */
+  [style*="fontSize: 110"], [style*="fontSize:110"] { font-size: 46px !important; }
+  [style*="fontSize: 100"], [style*="fontSize:100"] { font-size: 44px !important; }
+  [style*="fontSize: 96"],  [style*="fontSize:96"]  { font-size: 42px !important; }
+  [style*="fontSize: 80"],  [style*="fontSize:80"]  { font-size: 40px !important; }
+  [style*="fontSize: 72"],  [style*="fontSize:72"]  { font-size: 36px !important; }
+  [style*="fontSize: 64"],  [style*="fontSize:64"]  { font-size: 34px !important; }
+}
+
+
    These pages (CourseDetail, AlphabetArabe, ArabeModerneStandard,
    Calligraphy) use a fixed-pixel sidebar column that was never
    actually responsive — the .course-layout/.course-sidebar rules
