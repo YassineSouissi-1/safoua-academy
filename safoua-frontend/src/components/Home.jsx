@@ -333,9 +333,9 @@ export default function Home() {
           <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(140px,38vw,600px)', color: isDark ? 'rgba(201,168,76,0.022)' : 'rgba(154,111,30,0.05)', lineHeight: 1, userSelect: 'none' }}>بسم</span>
         </motion.div>
 
-        <motion.div style={{ opacity: heroOp }}
+        <motion.div
           className="hero-grid"
-          style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '120px 24px 80px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}>
+          style={{ opacity: heroOp, position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '120px 24px 80px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}>
 
           {/* LEFT */}
           <div>

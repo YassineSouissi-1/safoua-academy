@@ -2,8 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
+import { initNative } from './native.js'
 import './index.css'
 import './mobile.css'
+
+initNative();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

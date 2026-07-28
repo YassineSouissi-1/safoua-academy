@@ -1085,7 +1085,7 @@ export default function Memorisation() {
         ::-webkit-scrollbar-thumb{background:${BR};border-radius:99px}
         .lsnbtn:hover{background:${SURF2}!important}
         .taббtn:hover{background:${SURF2}!important}
-        @media(max-width:760px){
+        @media(max-width:900px){
           .main-layout{grid-template-columns:1fr!important}
           .sidebar-col{position:static!important;padding-right:0!important;margin-bottom:20px}
         }

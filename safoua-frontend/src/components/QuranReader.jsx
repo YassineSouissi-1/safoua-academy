@@ -960,6 +960,29 @@ export default function QuranReader() {
           mask-image: radial-gradient(ellipse 80% 60% at 18% 0%, black 0%, transparent 70%);
         }
 
+        /* ── TABLET (768–1024) ── */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          /* Narrower sidebar instead of the full 280px desktop width,
+             so the reading column isn't squeezed */
+          .quran-sidebar {
+            width: 230px !important;
+          }
+
+          /* Let the toolbar wrap instead of relying on horizontal
+             scroll — tablets have the vertical room for it */
+          .quran-toolbar {
+            flex-wrap: wrap !important;
+            height: auto !important;
+            padding: 10px 14px !important;
+            row-gap: 8px !important;
+          }
+
+          /* Reciter row: wrap instead of forcing horizontal scroll */
+          .quran-reciter-bar .reciter-row {
+            flex-wrap: wrap !important;
+          }
+        }
+
         /* ── MOBILE ── */
         @media (max-width: 767px) {
           /* Root: full-height flex column, no overflow clipping */

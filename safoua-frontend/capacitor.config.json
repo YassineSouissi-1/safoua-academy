@@ -1,0 +1,25 @@
+{
+  "appId": "com.safouaacademy.app",
+  "appName": "Safoua Academy",
+  "webDir": "dist",
+  "backgroundColor": "#080b0f",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#080b0f",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "overlaysWebView": false,
+      "style": "DARK",
+      "backgroundColor": "#080b0f"
+    }
+  }
+}

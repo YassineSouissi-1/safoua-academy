@@ -35,8 +35,26 @@ const app = express();
 app.use(helmet());
 
 // ── CORS ────────────────────────────────────────────────────────────
+// Multiple allowed origins: the deployed web frontend (CLIENT_URL),
+// local Vite dev server, and the Capacitor Android/iOS app shells
+// (which present as https://localhost / capacitor://localhost, not
+// your real domain).
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'https://localhost',
+  'capacitor://localhost',
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin(origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 

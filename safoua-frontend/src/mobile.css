@@ -121,6 +121,25 @@ a { display: inline-flex; align-items: center; justify-content: center; }
   }
 }
 
+/* ── COURSE PAGES: FIXED-WIDTH SIDEBAR GRIDS (TABLET FIX) ─────────
+   These pages (CourseDetail, AlphabetArabe, ArabeModerneStandard,
+   Calligraphy) use a fixed-pixel sidebar column that was never
+   actually responsive — the .course-layout/.course-sidebar rules
+   above never matched real markup. This targets the real inline
+   styles directly so the layout stacks into one readable column on
+   tablets and phones instead of squeezing the content column. ─── */
+@media (max-width: 900px) {
+  div[style*="grid-template-columns: 1fr 340px"],   /* CourseDetail main layout */
+  div[style*="grid-template-columns: 1fr 390px"],   /* AlphabetArabe lesson layout */
+  div[style*="grid-template-columns: 1fr 300px"],   /* AlphabetArabe lesson layout */
+  div[style*="grid-template-columns: 1fr 200px"],   /* AlphabetArabe side panel */
+  div[style*="grid-template-columns: 252px 1fr"],   /* ArabeModerneStandard layout */
+  div[style*="grid-template-columns: 270px 1fr"],   /* Calligraphy layout */
+  div[style*="grid-template-columns: 248px 1fr"] {  /* Memorisation layout (belt & suspenders) */
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* ── DASHBOARD ────────────────────────────────────────────────────── */
 @media (max-width: 860px) {
   /* Main 2-col grid → single col */
