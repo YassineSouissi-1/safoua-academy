@@ -10,6 +10,21 @@ import { motion, useScroll, useTransform, useSpring, useInView, easeOut } from '
 import { Sparkles, ArrowRight, BookOpen, Mic, Trophy, Brain, ChevronDown, Star, Users, Zap } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
+/* ── VIEWPORT ─────────────────────────────────────────────────────── */
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 /* ── TYPEWRITER ──────────────────────────────────────────────────── */
 function useTypewriter(words, speed = 80, pause = 1800) {
   const [display, setDisplay] = useState('');
@@ -141,7 +156,7 @@ function FloatingQuran({ onOpen, isDark }) {
       ))}
 
       <motion.div
-        style={{ position: 'absolute', top: '50%', left: '50%', x: '-50%', y: floatY, marginTop: -110, cursor: dragging ? 'grabbing' : 'pointer', zIndex: 10, transformStyle: 'preserve-3d', userSelect: 'none' }}
+        style={{ position: 'absolute', top: '50%', left: '50%', x: '-50%', y: floatY, marginTop: -110, cursor: dragging ? 'grabbing' : 'pointer', zIndex: 10, transformStyle: 'preserve-3d', userSelect: 'none', touchAction: 'none' }}
         onMouseDown={onMouseDown} onTouchStart={onTouchStart}
         onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
         animate={hovered && !dragging ? { filter: 'drop-shadow(0 0 32px rgba(201,168,76,0.6))' } : { filter: 'drop-shadow(0 0 0px rgba(201,168,76,0))' }}
@@ -290,10 +305,11 @@ export default function Home() {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const typed = useTypewriter(PHRASES, 75, 1900);
+  const isMobile = useIsMobile();
 
   const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 600], [0, 120]);
-  const heroOp = useTransform(scrollY, [0, 500], [1, 0]);
+  const heroY = useTransform(scrollY, v => isMobile ? 0 : Math.min(120, v * 0.2));
+  const heroOp = useTransform(scrollY, v => isMobile ? 1 : Math.max(0, 1 - v / 500));
 
   const featRef = useRef(null);
   const testRef = useRef(null);
@@ -506,11 +522,11 @@ export default function Home() {
         }
 
         /* 3D Quran: scale down (not hide) on small screens */
-        .quran-3d-stage { transform: scale(1); transform-origin: center; }
+        .quran-3d-stage { transform: scale(1); transform-origin: center; touch-action: none; }
         @media (max-width: 767px) {
           .hero-grid      { grid-template-columns: 1fr !important; }
           .hero-quran-col { order: -1; margin-bottom: var(--space-xs); }
-          .quran-3d-stage { transform: scale(0.62); height: 320px !important; }
+          .quran-3d-stage { transform: scale(0.88); height: 400px !important; }
         }
         @media (min-width: 768px) and (max-width: 1023px) {
           .quran-3d-stage { transform: scale(0.85); height: 420px !important; }
