@@ -418,21 +418,24 @@ export default function Sira() {
       </div>
 
       {/* Timeline scroll */}
-      <div style={{ overflowX:"auto", borderBottom:`1px solid ${C.border}`, background:C.surface }}>
-        <div style={{ display:"flex", minWidth:"max-content", padding:"0 24px" }}>
-          {filtered.map(e => (
-            <button key={e.id} onClick={() => setSelectedIdx(e.id)}
-              style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5, padding:"12px 16px", border:"none", background:"transparent", cursor:"pointer", position:"relative", transition:"all .2s" }}>
-              <div style={{ width:34, height:34, borderRadius:"50%", background:selectedIdx===e.id?e.color:`${e.color}20`, border:`2px solid ${selectedIdx===e.id?e.color:`${e.color}40`}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, transition:"all .2s", position:"relative" }}>
-                {e.icon}
-                {readEvents.has(e.id) && <div style={{ position:"absolute", top:-3, right:-3, width:12, height:12, background:"#10b981", borderRadius:"50%", border:"2px solid "+C.surface, fontSize:7, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff" }}>✓</div>}
-              </div>
-              <div style={{ fontSize:10, fontWeight:700, color:selectedIdx===e.id?e.color:C.mutedLt, fontFamily:"sans-serif", whiteSpace:"nowrap" }}>{e.year}</div>
-              <div style={{ fontSize:10, color:selectedIdx===e.id?"#fff":C.muted, whiteSpace:"nowrap", fontFamily:"sans-serif", maxWidth:90, textAlign:"center", lineHeight:1.3 }}>{e.title.split(" ").slice(0,3).join(" ")}</div>
-              {selectedIdx===e.id && <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", height:2, background:e.color }} />}
-            </button>
-          ))}
+      <div style={{ position:"relative", borderBottom:`1px solid ${C.border}`, background:C.surface }}>
+        <div style={{ overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+          <div style={{ display:"flex", minWidth:"max-content", padding:"0 24px" }}>
+            {filtered.map(e => (
+              <button key={e.id} onClick={() => setSelectedIdx(e.id)}
+                style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5, padding:"12px 16px", border:"none", background:"transparent", cursor:"pointer", position:"relative", transition:"all .2s", minHeight:"var(--tap-min)" }}>
+                <div style={{ width:34, height:34, borderRadius:"50%", background:selectedIdx===e.id?e.color:`${e.color}20`, border:`2px solid ${selectedIdx===e.id?e.color:`${e.color}40`}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, transition:"all .2s", position:"relative" }}>
+                  {e.icon}
+                  {readEvents.has(e.id) && <div style={{ position:"absolute", top:-3, right:-3, width:12, height:12, background:"#10b981", borderRadius:"50%", border:"2px solid "+C.surface, fontSize:7, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff" }}>✓</div>}
+                </div>
+                <div style={{ fontSize:10, fontWeight:700, color:selectedIdx===e.id?e.color:C.mutedLt, fontFamily:"sans-serif", whiteSpace:"nowrap" }}>{e.year}</div>
+                <div style={{ fontSize:10, color:selectedIdx===e.id?"#fff":C.muted, whiteSpace:"nowrap", fontFamily:"sans-serif", maxWidth:90, textAlign:"center", lineHeight:1.3 }}>{e.title.split(" ").slice(0,3).join(" ")}</div>
+                {selectedIdx===e.id && <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", height:2, background:e.color }} />}
+              </button>
+            ))}
+          </div>
         </div>
+        <div aria-hidden="true" style={{ position:"absolute", top:0, right:0, bottom:0, width:24, background:`linear-gradient(90deg, transparent, ${C.surface})`, pointerEvents:"none" }} />
       </div>
 
       {/* Event detail */}

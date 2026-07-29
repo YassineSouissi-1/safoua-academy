@@ -8,6 +8,26 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export const COURSE_TITLE = "Alphabet Arabe & Phonétique";
 export const MODULE_LETTRES = "Alphabet Arabe & Phonétique";
 
+// The writing-practice canvas used a fixed 560px-wide internal resolution
+// designed for mouse use on desktop. On a phone it gets squeezed down to
+// container width via CSS while keeping the same wide:short ratio, which
+// leaves only ~100-120px of vertical room to trace an Arabic letter with a
+// finger — too cramped to actually write in. This hook lets DrawingPad pick
+// a taller, narrower internal canvas on small screens instead.
+function useNarrowScreen(breakpoint = 480) {
+  const [narrow, setNarrow] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < breakpoint : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const onChange = () => setNarrow(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [breakpoint]);
+  return narrow;
+}
+
 // Saves a completed lesson key to MongoDB via /api/update-progress
 async function saveProgress(lessonKey) {
   try {
@@ -483,6 +503,7 @@ function getScoreLabel(score) {
 // ─── DrawingPad ───────────────────────────────────────────────────────────────
 function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
   const canvasRef = useRef(null);
+  const narrow = useNarrowScreen();
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
   const [showTarget, setShowTarget] = useState(false);
@@ -560,7 +581,8 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
   // After 4 failed attempts, allow skip with 0 stars
   const handleForceNext = () => { onSuccess(0); };
 
-  const canvasHeight = compact ? 200 : 300;
+  const canvasHeight = narrow ? (compact ? 260 : 320) : (compact ? 200 : 300);
+  const canvasWidth = narrow ? 340 : 560;
   const formNames = ["Isolée","Initiale","Médiale","Finale"];
 
   return (
@@ -601,10 +623,10 @@ function DrawingPad({ targetName, onSuccess, forms, compact = false }) {
         </div>
       )}
 
-      <canvas ref={canvasRef} width={560} height={canvasHeight}
+      <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight}
         onMouseDown={startDraw} onMouseMove={draw} onMouseUp={endDraw} onMouseLeave={endDraw}
         onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={endDraw}
-        style={{ width: "100%", borderRadius: 12, cursor: "crosshair", touchAction: "none", display: "block" }} />
+        style={{ width: "100%", maxWidth: "100%", height: "auto", aspectRatio: `${canvasWidth} / ${canvasHeight}`, minHeight: 160, borderRadius: 12, cursor: "crosshair", touchAction: "none", display: "block" }} />
 
       {!compact && (
         <div style={{ display: "flex", gap: 6, marginTop: "0.75rem", justifyContent: "center" }}>
@@ -860,7 +882,7 @@ function AlphabetArabe() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#09080f", color: "white", fontFamily: "'Inter', sans-serif", paddingTop: 70 }}>
+    <div style={{ minHeight: "100vh", background: "#09080f", color: "white", fontFamily: "'Inter', sans-serif", paddingTop: "calc(var(--nav-h) + 2px)" }}>
 
       {/* HEADER */}
       <div style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #0f0c29 100%)", borderBottom: "1px solid rgba(139,92,246,0.2)", padding: "1rem 1.5rem" }}>
@@ -895,15 +917,24 @@ function AlphabetArabe() {
       </div>
 
       {/* TABS */}
-      <div style={{ background: "#0f0c29", borderBottom: "1px solid rgba(255,255,255,0.06)", overflowX: "auto" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex" }}>
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "1rem 1.5rem", border: "none", background: "transparent", cursor: "pointer", fontSize: 14, fontWeight: 700, color: activeTab === t.id ? "#a78bfa" : "rgba(255,255,255,0.35)", borderBottom: activeTab === t.id ? "2px solid #a78bfa" : "2px solid transparent", whiteSpace: "nowrap", transition: "all 0.2s" }}>
-              {t.icon} {t.label}
-            </button>
-          ))}
+      <div className="alphabet-tabs-wrap" style={{ position: "relative", background: "#0f0c29", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex" }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "1rem clamp(0.85rem,3vw,1.5rem)", border: "none", background: "transparent", cursor: "pointer", fontSize: "clamp(12.5px,3vw,14px)", fontWeight: 700, color: activeTab === t.id ? "#a78bfa" : "rgba(255,255,255,0.35)", borderBottom: activeTab === t.id ? "2px solid #a78bfa" : "2px solid transparent", whiteSpace: "nowrap", transition: "all 0.2s", minHeight: "var(--tap-min)" }}>
+                {t.icon} {t.label}
+              </button>
+            ))}
+          </div>
         </div>
+        {/* Fade + hint that the tab strip scrolls further — this is the fix for
+            tabs silently overflowing off-screen with no indication more exist */}
+        <div className="alphabet-tabs-fade" aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 28, background: "linear-gradient(90deg, transparent, #0f0c29)", pointerEvents: "none" }} />
       </div>
+
+      <style>{`
+        @media (min-width: 900px) { .alphabet-tabs-fade { display: none; } }
+      `}</style>
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem 1.5rem" }}>
 
