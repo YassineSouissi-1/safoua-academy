@@ -121,7 +121,7 @@ function FloatingQuran({ onOpen, isDark }) {
   }, [dragging, floatY]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 500, perspective: 1000 }}>
+    <div className="quran-3d-stage" style={{ position: 'relative', width: '100%', height: 500, perspective: 1000 }}>
       {FLOATING_LETTERS.map((l, i) => (
         <motion.div key={i} drag
           dragConstraints={{ left: -70, right: 70, top: -70, bottom: 70 }}
@@ -223,7 +223,7 @@ function FeatureCard({ icon, color, title, desc, delay, C, isDark }) {
       transition={{ duration: 0.6, delay, ease: [.22, .68, 0, 1] }}
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
       style={{
-        padding: '32px 28px', borderRadius: 20,
+        padding: 'var(--space-md) var(--space-sm)', borderRadius: 'var(--radius-lg)',
         background: isDark ? 'rgba(255,255,255,0.028)' : '#ffffff',
         border: `1px solid ${C.border}`,
         boxShadow: isDark ? 'none' : C.shadowSm,
@@ -234,8 +234,8 @@ function FeatureCard({ icon, color, title, desc, delay, C, isDark }) {
       {/* top accent bar */}
       <div style={{ position: 'absolute', top: 0, left: 28, right: 28, height: 2, background: `linear-gradient(90deg, transparent, ${color}80, transparent)` }} />
       <div style={{ width: 52, height: 52, borderRadius: 16, background: `${color}14`, border: `1.5px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, marginBottom: 20 }}>{icon}</div>
-      <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 700, color: C.text, marginBottom: 10, letterSpacing: '-0.01em' }}>{title}</h3>
-      <p style={{ color: C.muted, fontSize: 13.5, lineHeight: 1.7, fontFamily: "'DM Sans',sans-serif", fontWeight: 400 }}>{desc}</p>
+      <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'var(--text-h3)', fontWeight: 700, color: C.text, marginBottom: 10, letterSpacing: '-0.01em' }}>{title}</h3>
+      <p style={{ color: C.muted, fontSize: 'var(--text-body-sm)', lineHeight: 1.7, fontFamily: "'DM Sans',sans-serif", fontWeight: 400 }}>{desc}</p>
     </motion.div>
   );
 }
@@ -327,27 +327,27 @@ export default function Home() {
       <PageBg isDark={isDark} />
 
       {/* ════════════════ HERO ════════════════ */}
-      <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+      <section className="hero-section" style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
         {/* Parallax Arabic watermark */}
-        <motion.div style={{ y: heroY, position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
+        <motion.div className="hero-watermark" style={{ y: heroY, position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 0 }}>
           <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(140px,38vw,600px)', color: isDark ? 'rgba(201,168,76,0.022)' : 'rgba(154,111,30,0.05)', lineHeight: 1, userSelect: 'none' }}>بسم</span>
         </motion.div>
 
         <motion.div
           className="hero-grid"
-          style={{ opacity: heroOp, position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '120px 24px 80px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}>
+          style={{ opacity: heroOp, position: 'relative', zIndex: 1, maxWidth: 'var(--container-max)', margin: '0 auto', padding: 'calc(var(--nav-h) + var(--space-lg)) var(--container-pad) var(--space-xl)', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-xl)', alignItems: 'center' }}>
 
           {/* LEFT */}
           <div>
             {/* Badge */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 16px', borderRadius: 99, background: isDark ? `${C.gold}15` : `${C.gold}12`, border: `1px solid ${C.gold}35`, fontSize: 11, fontWeight: 700, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 24, fontFamily: "'DM Sans',sans-serif" }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 16px', borderRadius: 99, background: isDark ? `${C.gold}15` : `${C.gold}12`, border: `1px solid ${C.gold}35`, fontSize: 'var(--text-caption)', fontWeight: 700, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 'var(--space-sm)', fontFamily: "'DM Sans',sans-serif" }}>
               <Sparkles size={11} /> Plateforme Islamique · MERN + IA
             </motion.div>
 
             {/* Headline */}
             <motion.h1 initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.08, ease: [.22, .68, 0, 1] }}
-              style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.8rem,5.5vw,4.4rem)', fontWeight: 700, lineHeight: 1.05, color: C.text, marginBottom: 20, letterSpacing: '-0.03em' }}>
+              style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'var(--text-hero)', fontWeight: 700, lineHeight: 1.05, color: C.text, marginBottom: 'var(--space-sm)', letterSpacing: '-0.03em' }}>
               Apprenez le Quran<br />& l'Arabe{' '}
               <em style={{ fontStyle: 'italic', color: C.gold, position: 'relative', display: 'inline-block', minWidth: '2ch' }}>
                 {typed}
@@ -358,23 +358,23 @@ export default function Home() {
 
             {/* Sub */}
             <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.18, ease: easeOut }}
-              style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontStyle: 'italic', color: C.muted, lineHeight: 1.8, marginBottom: 36, maxWidth: 460 }}>
+              style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'var(--text-body-lg)', fontStyle: 'italic', color: C.muted, lineHeight: 1.8, marginBottom: 'var(--space-md)', maxWidth: 460 }}>
               Rejoignez Safoua Academy pour un apprentissage guidé par des experts, enrichi par l'intelligence artificielle.
             </motion.p>
 
             {/* CTAs */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.3, ease: easeOut }}
               className="hero-cta-row"
-              style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}>
+              style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 'var(--space-lg)' }}>
               <Link to="/register" style={{ textDecoration: 'none' }}>
                 <motion.button whileHover={{ scale: 1.03, boxShadow: `0 8px 32px ${C.gold}45` }} whileTap={{ scale: 0.97 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '14px 30px', borderRadius: 14, background: `linear-gradient(135deg, ${C.gold}, ${C.teal})`, color: '#fff', border: 'none', fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", boxShadow: isDark ? `0 4px 24px ${C.gold}35` : `0 4px 20px ${C.gold}30` }}>
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 'var(--tap-min)', padding: '14px 30px', borderRadius: 14, background: `linear-gradient(135deg, ${C.gold}, ${C.teal})`, color: '#fff', border: 'none', fontWeight: 700, fontSize: 'var(--text-body)', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", boxShadow: isDark ? `0 4px 24px ${C.gold}35` : `0 4px 20px ${C.gold}30` }}>
                   Commencer gratuitement <ArrowRight size={16} />
                 </motion.button>
               </Link>
               <Link to="/courses" style={{ textDecoration: 'none' }}>
                 <motion.button whileHover={{ borderColor: C.gold, color: C.gold }} whileTap={{ scale: 0.97 }}
-                  style={{ padding: '14px 28px', borderRadius: 14, background: 'transparent', color: C.muted, border: `1.5px solid ${C.border}`, fontWeight: 600, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", transition: 'all 0.2s' }}>
+                  style={{ minHeight: 'var(--tap-min)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px 28px', borderRadius: 14, background: 'transparent', color: C.muted, border: `1.5px solid ${C.border}`, fontWeight: 600, fontSize: 'var(--text-body-sm)', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", transition: 'all 0.2s' }}>
                   Voir les cours
                 </motion.button>
               </Link>
@@ -382,7 +382,8 @@ export default function Home() {
 
             {/* Stats */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.45 }}
-              style={{ display: 'flex', gap: 0, paddingTop: 28, borderTop: `1px solid ${C.border}` }}>
+              className="hero-stats"
+              style={{ display: 'flex', gap: 0, paddingTop: 'var(--space-sm)', borderTop: `1px solid ${C.border}` }}>
               {[['9', 'Cours'], ['4k+', 'Étudiants'], ['98%', 'Réussite']].map(([val, lbl], i) => (
                 <div key={lbl} style={{ flex: 1, textAlign: 'center', padding: '0 8px', borderRight: i < 2 ? `1px solid ${C.border}` : 'none' }}>
                   <StatItem val={val} label={lbl} C={C} isDark={isDark} />
@@ -393,14 +394,14 @@ export default function Home() {
 
           {/* RIGHT — Quran */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.25, ease: [.22, .68, 0, 1] }}
-            style={{ position: 'relative', height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             className="hero-quran-col">
             <FloatingQuran onOpen={() => navigate('/quran')} isDark={isDark} />
           </motion.div>
         </motion.div>
 
         {/* Scroll cue */}
-        <motion.div animate={{ y: [0, 9, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        <motion.div className="scroll-cue" animate={{ y: [0, 9, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
           style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: isDark ? 0.3 : 0.4, zIndex: 1 }}>
           <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.18em', color: C.gold, textTransform: 'uppercase' }}>Défiler</span>
           <ChevronDown size={13} color={C.gold} />
@@ -408,55 +409,55 @@ export default function Home() {
       </section>
 
       {/* ════════════════ FEATURES ════════════════ */}
-      <section ref={featRef} style={{ padding: '120px 24px', position: 'relative', zIndex: 1, background: isDark ? 'transparent' : 'linear-gradient(180deg, #ffffff 0%, #f8f6f1 100%)' }}>
+      <section ref={featRef} className="section" style={{ padding: 'var(--space-2xl) var(--container-pad)', position: 'relative', zIndex: 1, background: isDark ? 'transparent' : 'linear-gradient(180deg, #ffffff 0%, #f8f6f1 100%)' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto' }}>
           <motion.div initial={{ opacity: 0, y: 28 }} animate={featInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65, ease: easeOut }}
-            style={{ textAlign: 'center', marginBottom: 72 }}>
+            style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
             {/* Section eyebrow */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 16px', borderRadius: 99, background: `${C.gold}12`, border: `1px solid ${C.gold}30`, fontSize: 11, fontWeight: 700, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18, fontFamily: "'DM Sans',sans-serif" }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 16px', borderRadius: 99, background: `${C.gold}12`, border: `1px solid ${C.gold}30`, fontSize: 'var(--text-caption)', fontWeight: 700, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18, fontFamily: "'DM Sans',sans-serif" }}>
               Pourquoi Safoua
             </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.2rem,4.5vw,3.4rem)', fontWeight: 700, color: C.text, lineHeight: 1.1, letterSpacing: '-0.025em', marginBottom: 14 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'var(--text-h1)', fontWeight: 700, color: C.text, lineHeight: 1.1, letterSpacing: '-0.025em', marginBottom: 14 }}>
               Une plateforme pensée<br />
               <em style={{ fontStyle: 'italic', color: C.gold }}>pour votre voyage spirituel</em>
             </h2>
-            <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 17, color: C.muted, maxWidth: 520, margin: '0 auto' }}>
+            <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 'var(--text-body-lg)', color: C.muted, maxWidth: 520, margin: '0 auto' }}>
               Des outils modernes au service d'un apprentissage traditionnel et profond.
             </p>
           </motion.div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 20 }}>
+          <div className="grid-auto-fit">
             {FEATURES.map((f, i) => <FeatureCard key={i} {...f} delay={i * 0.08} C={C} isDark={isDark} />)}
           </div>
         </div>
       </section>
 
       {/* ════════════════ TESTIMONIALS ════════════════ */}
-      <section ref={testRef} style={{ padding: '100px 24px', position: 'relative', zIndex: 1, background: isDark ? 'transparent' : '#ffffff' }}>
+      <section ref={testRef} className="section" style={{ padding: 'var(--space-xl) var(--container-pad)', position: 'relative', zIndex: 1, background: isDark ? 'transparent' : '#ffffff' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto' }}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={testInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}
-            style={{ textAlign: 'center', marginBottom: 60 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 16px', borderRadius: 99, background: `${C.purple}12`, border: `1px solid ${C.purple}28`, fontSize: 11, fontWeight: 700, color: C.purple, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18, fontFamily: "'DM Sans',sans-serif" }}>
+            style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 16px', borderRadius: 99, background: `${C.purple}12`, border: `1px solid ${C.purple}28`, fontSize: 'var(--text-caption)', fontWeight: 700, color: C.purple, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 18, fontFamily: "'DM Sans',sans-serif" }}>
               Témoignages
             </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 700, color: C.text, letterSpacing: '-0.025em' }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'var(--text-h2)', fontWeight: 700, color: C.text, letterSpacing: '-0.025em' }}>
               Ils ont transformé leur apprentissage
             </h2>
           </motion.div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 20 }}>
+          <div className="grid-auto-fit" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,290px),1fr))' }}>
             {TESTIMONIALS.map((t, i) => <Testimonial key={i} {...t} delay={i * 0.1} C={C} isDark={isDark} />)}
           </div>
         </div>
       </section>
 
       {/* ════════════════ CTA ════════════════ */}
-      <section ref={ctaRef} style={{ padding: '100px 24px 130px', position: 'relative', zIndex: 1, background: isDark ? 'transparent' : 'linear-gradient(180deg, #f8f6f1 0%, #fff8ee 100%)' }}>
+      <section ref={ctaRef} style={{ padding: 'var(--space-xl) var(--container-pad) var(--space-2xl)', position: 'relative', zIndex: 1, background: isDark ? 'transparent' : 'linear-gradient(180deg, #f8f6f1 0%, #fff8ee 100%)' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={ctaInView ? { opacity: 1, y: 0, scale: 1 } : {}}
             transition={{ duration: 0.7, ease: [.22, .68, 0, 1] }}
             style={{
-              padding: '64px 56px', borderRadius: 32, textAlign: 'center', position: 'relative', overflow: 'hidden',
+              padding: 'var(--space-lg) var(--space-md)', borderRadius: 'var(--radius-xl)', textAlign: 'center', position: 'relative', overflow: 'hidden',
               background: isDark
                 ? `linear-gradient(135deg, rgba(201,168,76,0.07) 0%, rgba(29,181,132,0.05) 100%)`
                 : `linear-gradient(135deg, #fffbf0 0%, #f0faf5 100%)`,
@@ -468,23 +469,23 @@ export default function Home() {
             <div style={{ position: 'absolute', bottom: -40, left: -40, width: 180, height: 180, borderRadius: '50%', background: `${C.teal}06`, filter: 'blur(40px)', pointerEvents: 'none' }} />
 
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 56, color: `${C.gold}45`, marginBottom: 8, lineHeight: 1, direction: 'rtl' }}>بسم الله</div>
-              <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 700, color: C.text, marginBottom: 16, letterSpacing: '-0.025em' }}>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'clamp(2.25rem,4vw,3.5rem)', color: `${C.gold}45`, marginBottom: 8, lineHeight: 1, direction: 'rtl' }}>بسم الله</div>
+              <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 'var(--text-h2)', fontWeight: 700, color: C.text, marginBottom: 16, letterSpacing: '-0.025em' }}>
                 Prêt à commencer votre voyage ?
               </h2>
-              <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', color: C.muted, fontSize: 17, lineHeight: 1.75, maxWidth: 440, margin: '0 auto 40px' }}>
+              <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', color: C.muted, fontSize: 'var(--text-body-lg)', lineHeight: 1.75, maxWidth: 440, margin: '0 auto var(--space-md)' }}>
                 Rejoignez des milliers d'étudiants qui apprennent l'arabe et le Coran sur Safoua Academy.
               </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Link to="/register" style={{ textDecoration: 'none' }}>
                   <motion.button whileHover={{ scale: 1.04, boxShadow: `0 8px 40px ${C.gold}50` }} whileTap={{ scale: 0.97 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '15px 36px', borderRadius: 14, background: `linear-gradient(135deg, ${C.gold}, ${C.teal})`, color: '#fff', border: 'none', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, minHeight: 'var(--tap-min)', padding: '15px 36px', borderRadius: 14, background: `linear-gradient(135deg, ${C.gold}, ${C.teal})`, color: '#fff', border: 'none', fontWeight: 700, fontSize: 'var(--text-body-lg)', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
                     S'inscrire gratuitement →
                   </motion.button>
                 </Link>
                 <Link to="/courses" style={{ textDecoration: 'none' }}>
                   <motion.button whileHover={{ borderColor: C.gold, color: C.gold }} whileTap={{ scale: 0.97 }}
-                    style={{ padding: '15px 28px', borderRadius: 14, background: 'transparent', color: C.muted, border: `1.5px solid ${C.border}`, fontWeight: 600, fontSize: 15, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", transition: 'all 0.2s' }}>
+                    style={{ minHeight: 'var(--tap-min)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px 28px', borderRadius: 14, background: 'transparent', color: C.muted, border: `1.5px solid ${C.border}`, fontWeight: 600, fontSize: 'var(--text-body)', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", transition: 'all 0.2s' }}>
                     Voir les cours
                   </motion.button>
                 </Link>
@@ -497,10 +498,30 @@ export default function Home() {
       <style>{`
         * { box-sizing: border-box; }
         ::selection { background: rgba(154,111,30,0.2); }
+
+        /* Hero: content-sized on phones, full viewport from tablet up */
+        .hero-section { min-height: auto; }
+        @media (min-width: 768px) {
+          .hero-section { min-height: min(100svh, 780px); }
+        }
+
+        /* 3D Quran: scale down (not hide) on small screens */
+        .quran-3d-stage { transform: scale(1); transform-origin: center; }
         @media (max-width: 767px) {
-          .hero-grid      { grid-template-columns: 1fr !important; padding-top: 100px !important; }
-          .hero-quran-col { display: none !important; }
+          .hero-grid      { grid-template-columns: 1fr !important; }
+          .hero-quran-col { order: -1; margin-bottom: var(--space-xs); }
+          .quran-3d-stage { transform: scale(0.62); height: 320px !important; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .quran-3d-stage { transform: scale(0.85); height: 420px !important; }
+        }
+
+        @media (max-width: 767px) {
           .hero-cta-row   { flex-direction: column !important; }
+          .hero-cta-row a { width: 100%; }
+          .hero-cta-row button { width: 100%; }
+          .hero-watermark { display: none !important; }
+          .scroll-cue     { display: none !important; }
         }
       `}</style>
     </div>

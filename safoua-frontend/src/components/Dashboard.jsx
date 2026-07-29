@@ -607,7 +607,7 @@ function SessionCard({ session, currentUserId, role, onBook, onCancel, onDelete,
           </>
         )}
         {!isPast && (
-          <div style={{ display:"flex",gap:8,flexWrap:"wrap",marginTop:10 }}>
+          <div className="session-actions" style={{ display:"flex",gap:8,flexWrap:"wrap",marginTop:10 }}>
             {role==="student" && (
               isEnrolled ? (
                 <>
@@ -682,23 +682,24 @@ function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar, C 
   return (
     <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
       style={{ position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.75)",backdropFilter:"blur(12px)",
-        display:"flex",alignItems:"center",justifyContent:"center",padding:24 }}
+        display:"flex",alignItems:"center",justifyContent:"center",padding:"var(--space-sm)" }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <motion.div initial={{ opacity:0,y:24,scale:0.96 }} animate={{ opacity:1,y:0,scale:1 }}
         exit={{ opacity:0,y:12,scale:0.97 }} transition={{ duration:0.35,ease:[.22,.68,0,1] }}
-        style={{ background:C.surface,border:`1px solid ${C.border}`,borderRadius:28,padding:32,
+        className="session-modal-card"
+        style={{ background:C.surface,border:`1px solid ${C.border}`,borderRadius:"var(--radius-xl)",padding:"var(--space-md)",
           width:"100%",maxWidth:560,maxHeight:"90vh",overflowY:"auto",
           boxShadow:"0 40px 100px rgba(0,0,0,0.6)",transition:"background 0.3s" }}>
         <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24 }}>
           <h2 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:700,color:C.text }}>
             {initial?._id?"Modifier la session":"Créer une session"}
           </h2>
-          <button onClick={onClose} style={{ background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:20,lineHeight:1 }}>✕</button>
+          <button onClick={onClose} aria-label="Fermer" style={{ background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:20,lineHeight:1,minWidth:"var(--tap-min)",minHeight:"var(--tap-min)" }}>✕</button>
         </div>
         <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
           <div>
             <label style={{ display:"block",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:6,fontFamily:"'DM Sans',sans-serif" }}>Couleur accent</label>
-            <div style={{ display:"flex",gap:8 }}>
+            <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
               {ACCENT_OPTIONS.map(c=>(
                 <button key={c} onClick={()=>f("accent",c)} style={{ width:28,height:28,borderRadius:"50%",background:c,
                   border:form.accent===c?"3px solid white":"3px solid transparent",cursor:"pointer",
@@ -709,11 +710,11 @@ function SessionModal({ initial, onSave, onClose, teacherName, teacherAvatar, C 
           <Field label="Titre *"       value={form.title}       onChange={v=>f("title",v)}       placeholder="Ex: Tajwid — Les règles fondamentales" C={C}/>
           <Field label="Sujet *"       value={form.topic}       onChange={v=>f("topic",v)}       placeholder="Ex: Coran & Tajwid" C={C}/>
           <Field label="Description"   value={form.description} onChange={v=>f("description",v)} placeholder="Décrivez le contenu…" textarea C={C}/>
-          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+          <div className="session-modal-grid" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
             <Field label="Date *"  value={form.date} onChange={v=>f("date",v)} type="date" C={C}/>
             <Field label="Heure *" value={form.time} onChange={v=>f("time",v)} type="time" C={C}/>
           </div>
-          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+          <div className="session-modal-grid" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
             <Field label="Durée (min)"   value={form.duration}    onChange={v=>f("duration",parseInt(v)||60)}    type="number" C={C}/>
             <Field label="Max étudiants" value={form.maxStudents} onChange={v=>f("maxStudents",parseInt(v)||1)}  type="number" C={C}/>
           </div>
@@ -749,7 +750,7 @@ function TeacherStats({ sessions, username, C }) {
   const total=mine.reduce((a,s)=>a+(s.enrolledStudents?.length||0),0);
   const upcoming=mine.filter(s=>s.status!=="past").length;
   return (
-    <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12 }}>
+    <div className="dash-stats-grid">
       {[
         { icon:<Calendar size={18}/>,label:"Sessions créées",   value:mine.length,color:C.purple },
         { icon:<Users size={18}/>,   label:"Étudiants inscrits",value:total,      color:C.teal   },
@@ -770,7 +771,7 @@ function TeacherStats({ sessions, username, C }) {
 function StudentStats({ sessions, currentUserId, completedCount, points, C }) {
   const enrolled=sessions.filter(s=>s.enrolledStudents?.includes(currentUserId)&&s.status!=="past").length;
   return (
-    <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12 }}>
+    <div className="dash-stats-grid">
       {[
         { icon:<BookOpen size={16}/>,label:"Cours",    value:ALL_COURSES.length,color:C.teal   },
         { icon:<Star size={16}/>,    label:"Leçons",   value:completedCount,    color:C.blue   },
@@ -946,7 +947,7 @@ function IslamicNotificationsBell({ C }) {
         {open && (
           <motion.div initial={{ opacity:0,y:-8,scale:0.97 }} animate={{ opacity:1,y:0,scale:1 }}
             exit={{ opacity:0,y:-6,scale:0.97 }} transition={{ duration:0.2,ease:[.22,.68,0,1] }}
-            style={{ position:"absolute",top:"calc(100% + 10px)",right:0,width:300,zIndex:200,
+            style={{ position:"absolute",top:"calc(100% + 10px)",right:0,width:"min(300px, calc(100vw - 2 * var(--container-pad)))",zIndex:200,
               background:C.surface,border:`1px solid ${C.border}`,borderRadius:20,
               boxShadow:"0 24px 60px rgba(0,0,0,0.4)",overflow:"hidden",transition:"background 0.3s" }}>
             <div style={{ padding:"14px 16px 10px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between" }}>
@@ -1070,7 +1071,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans',sans-serif",position:"relative",
-      paddingTop:96,paddingBottom:80,transition:"background 0.3s" }}>
+      paddingTop:"calc(var(--nav-h) + var(--space-md))",paddingBottom:"var(--space-xl)",transition:"background 0.3s" }}>
       <Helmet>
         <title>Mon Espace — Safoua Academy</title>
         <meta name="description" content="Suivez votre progression, gérez vos sessions et accédez à vos cours sur Safoua Academy."/>
@@ -1081,17 +1082,21 @@ export default function Dashboard() {
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter:${isDark?"invert(0.4)":"invert(0.6)"}; }
         @media (max-width:860px) { .dash-body { grid-template-columns:1fr !important; } }
-        @media (max-width:640px) { .dash-sidebar { display:none !important; } }
+        @media (max-width:640px) { .dash-sidebar { width:100%; } }
+        .dash-stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr)); gap:12px; }
+        @media (max-width:420px) {
+          .session-modal-grid { grid-template-columns:1fr !important; }
+        }
       `}</style>
 
       <GridLines C={C}/>
       <AmbientOrbs roleColor={roleColor} isDark={isDark}/>
       <NoiseOverlay isDark={isDark}/>
 
-      <div style={{ maxWidth:1140,margin:"0 auto",padding:"0 22px",position:"relative",zIndex:3 }}>
+      <div style={{ maxWidth:1140,margin:"0 auto",padding:"0 var(--container-pad)",position:"relative",zIndex:3 }}>
         <motion.header initial={{ opacity:0,y:-20 }} animate={{ opacity:1,y:0 }}
-          transition={{ duration:0.7,ease:[.22,.68,0,1] }} style={{ marginBottom:32 }}>
-          <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:22 }}>
+          transition={{ duration:0.7,ease:[.22,.68,0,1] }} style={{ marginBottom:"var(--space-md)" }}>
+          <div className="dash-header-actions-row" style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:"var(--space-sm)" }}>
             <div>
               <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:8 }}>
                 <p style={{ fontSize:10,fontWeight:700,color:C.dim,letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif" }}>{greeting} 👋</p>
@@ -1109,7 +1114,7 @@ export default function Dashboard() {
               {isTeacher && (
                 <motion.button onClick={()=>{ setEditTarget(null); setShowModal(true); }}
                   whileHover={{ scale:1.03, boxShadow:`0 0 28px ${C.purple}40` }} whileTap={{ scale:0.97 }}
-                  style={{ display:"flex",alignItems:"center",gap:8,padding:"12px 22px",borderRadius:14,
+                  style={{ display:"flex",alignItems:"center",gap:8,padding:"12px 22px",minHeight:"var(--tap-min)",borderRadius:14,
                     background:`linear-gradient(135deg,${C.purple},${C.teal})`,color:"#fff",border:"none",
                     fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",flexShrink:0 }}>
                   <Plus size={15}/> Créer une session

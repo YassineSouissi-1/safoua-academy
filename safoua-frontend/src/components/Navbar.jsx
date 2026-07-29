@@ -71,27 +71,28 @@ export default function Navbar() {
         transition={{ duration: 0.7, ease: [.22, .68, 0, 1] }}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-          height: 68, display: 'flex', alignItems: 'center', padding: '0 24px',
+          height: 'var(--nav-h)', display: 'flex', alignItems: 'center',
+          padding: '0 var(--container-pad)',
           background: navBg, borderBottom: navBorder,
           backdropFilter: transparent ? 'none' : 'blur(20px)',
           WebkitBackdropFilter: transparent ? 'none' : 'blur(20px)',
           transition: 'background 0.3s, border-color 0.3s',
           boxShadow: scrolled && !isDark ? '0 1px 16px rgba(0,0,0,0.06)' : 'none',
         }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: 'var(--container-max)', margin: '0 auto', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Logo */}
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
             <motion.div whileHover={{ scale: 1.06 }}
-              style={{ width: 36, height: 36, borderRadius: 11, overflow: 'hidden', boxShadow: `0 0 14px ${C.gold}40`, flexShrink: 0 }}>
+              style={{ width: 34, height: 34, borderRadius: 11, overflow: 'hidden', boxShadow: `0 0 14px ${C.gold}40`, flexShrink: 0 }}>
               <img src="/images/favicon-512.png" alt="Safoua Academy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </motion.div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: C.text, fontFamily: "'Cormorant Garamond',serif", letterSpacing: '-0.01em' }}>
+            <span style={{ fontSize: 'clamp(0.9rem, 0.8rem + 0.5vw, 1.0625rem)', fontWeight: 700, color: C.text, fontFamily: "'Cormorant Garamond',serif", letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Safoua Academy
             </span>
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden-mobile" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          <div className="nav-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
             <NavLink to="/" end style={linkStyle}>Accueil</NavLink>
             <NavLink to="/courses" style={linkStyle}>Cours</NavLink>
             <NavLink to="/dictionary" style={linkStyle}>Dictionnaire</NavLink>
@@ -124,10 +125,10 @@ export default function Navbar() {
           </div>
 
           {/* Mobile */}
-          <div className="show-mobile" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
+          <div className="nav-mobile-trigger" style={{ alignItems: 'center', gap: 8 }}>
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} C={C} isDark={isDark} compact />
-            <button onClick={() => setMenuOpen(o => !o)} aria-label="Menu"
-              style={{ background: 'none', border: 'none', color: C.text, cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44 }}>
+            <button onClick={() => setMenuOpen(o => !o)} aria-label="Menu" aria-expanded={menuOpen}
+              style={{ background: 'none', border: 'none', color: C.text, cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 'var(--tap-min)', minHeight: 'var(--tap-min)' }}>
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
@@ -139,16 +140,17 @@ export default function Navbar() {
         {menuOpen && (
           <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.2 }}
-            style={{ position: 'fixed', top: 68, left: 0, right: 0, zIndex: 49, background: isDark ? 'rgba(8,11,15,0.98)' : 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${C.border}`, padding: '12px 24px 24px', boxShadow: !isDark ? '0 8px 32px rgba(0,0,0,0.08)' : 'none' }}>
+            className="mobile-drawer"
+            style={{ position: 'fixed', top: 'var(--nav-h)', left: 0, right: 0, zIndex: 49, maxHeight: 'calc(100dvh - var(--nav-h))', overflowY: 'auto', background: isDark ? 'rgba(8,11,15,0.98)' : 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${C.border}`, padding: 'var(--space-xs) var(--container-pad) var(--space-md)', boxShadow: !isDark ? '0 8px 32px rgba(0,0,0,0.08)' : 'none' }}>
             {mobileLinks.map((l, i) => (
               <Link key={i} to={l.to} onClick={() => setMenuOpen(false)}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 0', fontSize: 15, fontWeight: 600, color: C.muted, textDecoration: 'none', borderBottom: `1px solid ${C.border}`, fontFamily: "'DM Sans',sans-serif" }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 'var(--tap-min)', padding: '13px 0', fontSize: 'var(--text-body-lg)', fontWeight: 600, color: C.muted, textDecoration: 'none', borderBottom: `1px solid ${C.border}`, fontFamily: "'DM Sans',sans-serif" }}>
                 {l.label}
               </Link>
             ))}
             {loggedIn && (
               <button onClick={logout}
-                style={{ marginTop: 14, background: 'none', border: 'none', color: C.red, fontWeight: 600, fontSize: 15, cursor: 'pointer', padding: 0, fontFamily: "'DM Sans',sans-serif" }}>
+                style={{ marginTop: 14, minHeight: 'var(--tap-min)', background: 'none', border: 'none', color: C.red, fontWeight: 600, fontSize: 'var(--text-body-lg)', cursor: 'pointer', padding: 0, fontFamily: "'DM Sans',sans-serif" }}>
                 Déconnexion
               </button>
             )}
@@ -157,16 +159,11 @@ export default function Navbar() {
       </AnimatePresence>
 
       <style>{`
-        * { box-sizing: border-box; }
-        ::selection { background: rgba(154,111,30,0.2); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: var(--c-bg, #080b0f); }
-        ::-webkit-scrollbar-thumb { background: rgba(154,111,30,0.3); border-radius: 99px; }
-        .hidden-mobile { display: flex !important; }
-        .show-mobile   { display: none  !important; }
+        .nav-desktop-links { display: flex; }
+        .nav-mobile-trigger { display: none; }
         @media (max-width: 767px) {
-          .hidden-mobile { display: none !important; }
-          .show-mobile   { display: flex !important; }
+          .nav-desktop-links  { display: none !important; }
+          .nav-mobile-trigger { display: flex !important; }
         }
       `}</style>
     </>
@@ -178,7 +175,7 @@ function ThemeToggle({ theme, toggleTheme, C, isDark, compact }) {
     <motion.button onClick={toggleTheme} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
       title={isDark ? 'Mode clair' : 'Mode sombre'}
       style={{
-        width: compact ? 36 : 38, height: compact ? 36 : 38, borderRadius: 11,
+        width: compact ? 44 : 38, height: compact ? 44 : 38, borderRadius: 11,
         border: `1.5px solid ${C.border}`,
         background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
         color: C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center',

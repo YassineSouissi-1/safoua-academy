@@ -25,67 +25,26 @@ button, a { min-height: 44px; min-width: 44px; }
 a { display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── NAVBAR ───────────────────────────────────────────────────────── */
-@media (max-width: 767px) {
-  /* Navbar height reduced on mobile */
-  nav[style*="height: 70px"] {
-    height: 60px !important;
-    padding: 0 16px !important;
-  }
-
-  /* Logo text size */
-  nav span[style*="font-size: 17px"] {
-    font-size: 15px !important;
-  }
-
-  /* Hide desktop links, show hamburger */
-  .hidden-mobile { display: none !important; }
-  .show-mobile   { display: block !important; }
-
-  /* Mobile drawer full-width padding */
-  .mobile-drawer {
-    padding: 8px 16px 24px !important;
-  }
-}
+/* Migrated: Navbar.jsx now sizes itself fluidly via --nav-h /
+   --container-pad and toggles .nav-desktop-links / .nav-mobile-trigger
+   natively — no override rules needed here anymore. */
 
 /* ── HOME HERO ────────────────────────────────────────────────────── */
+/* Migrated: Home.jsx's hero, grid, floating Quran, CTA row and
+   watermark are now natively fluid (clamp-based) — see Home.jsx. */
+
+/* ── DE-WEIGHT: OVERSIZED SECTION PADDING ──────────────────────────
+   Desktop-scale vertical section padding (120px/100px top-bottom)
+   never shrunk on mobile — this is a big part of why every page felt
+   like endless scrolling. Compress it uniformly. ──────────────────── */
 @media (max-width: 767px) {
-  /* Hero grid: stack vertically */
-  .hero-grid {
-    grid-template-columns: 1fr !important;
-    gap: 32px !important;
-    padding: 90px 16px 48px !important;
+  [style*="padding: 120px 24px 80px"],
+  [style*="padding: 120px 24px"] {
+    padding: 48px 16px 32px !important;
   }
-
-  /* Floating Quran 3D model: hide or shrink on small screens */
-  .hero-quran-col {
-    height: 320px !important;
-  }
-
-  /* Hero heading */
-  .hero-h1 {
-    font-size: clamp(2rem, 8vw, 3rem) !important;
-  }
-
-  /* CTA buttons: stack on mobile */
-  .hero-cta-row {
-    flex-direction: column !important;
-    gap: 10px !important;
-  }
-
-  .hero-cta-row a,
-  .hero-cta-row button {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  /* Stats row */
-  .hero-stats {
-    gap: 20px !important;
-  }
-
-  /* Watermark text hidden on mobile */
-  .hero-watermark {
-    display: none !important;
+  [style*="padding: 100px 24px 130px"],
+  [style*="padding: 100px 24px"] {
+    padding: 40px 16px 40px !important;
   }
 }
 
@@ -129,35 +88,37 @@ a { display: inline-flex; align-items: center; justify-content: center; }
    feeling oversized/heavy on a phone. This scales them down uniformly
    across every course page without needing per-file edits. ───────── */
 @media (max-width: 900px) {
-  [style*="fontSize: 110"], [style*="fontSize:110"] { font-size: 60px !important; }
-  [style*="fontSize: 100"], [style*="fontSize:100"] { font-size: 58px !important; }
-  [style*="fontSize: 96"],  [style*="fontSize:96"]  { font-size: 56px !important; }
-  [style*="fontSize: 80"],  [style*="fontSize:80"]  { font-size: 50px !important; }
-  [style*="fontSize: 72"],  [style*="fontSize:72"]  { font-size: 46px !important; }
-  [style*="fontSize: 64"],  [style*="fontSize:64"]  { font-size: 42px !important; }
-  [style*="fontSize: 56"],  [style*="fontSize:56"]  { font-size: 38px !important; }
-  [style*="fontSize: 52"],  [style*="fontSize:52"]  { font-size: 36px !important; }
-  [style*="fontSize: 48"],  [style*="fontSize:48"]  { font-size: 34px !important; }
-  [style*="fontSize: 46"],  [style*="fontSize:46"]  { font-size: 34px !important; }
-  [style*="fontSize: 44"],  [style*="fontSize:44"]  { font-size: 32px !important; }
-  [style*="fontSize: 42"],  [style*="fontSize:42"]  { font-size: 32px !important; }
-  [style*="fontSize: 40"],  [style*="fontSize:40"]  { font-size: 30px !important; }
-  [style*="fontSize: 38"],  [style*="fontSize:38"]  { font-size: 28px !important; }
-  [style*="fontSize: 36"],  [style*="fontSize:36"]  { font-size: 28px !important; }
+  [style*="font-size: 110px"] { font-size: 60px !important; }
+  [style*="font-size: 100px"] { font-size: 58px !important; }
+  [style*="font-size: 96px"]  { font-size: 56px !important; }
+  [style*="font-size: 80px"]  { font-size: 50px !important; }
+  [style*="font-size: 72px"]  { font-size: 46px !important; }
+  [style*="font-size: 64px"]  { font-size: 42px !important; }
+  [style*="font-size: 56px"]  { font-size: 38px !important; }
+  [style*="font-size: 52px"]  { font-size: 36px !important; }
+  [style*="font-size: 48px"]  { font-size: 34px !important; }
+  [style*="font-size: 46px"]  { font-size: 34px !important; }
+  [style*="font-size: 44px"]  { font-size: 32px !important; }
+  [style*="font-size: 42px"]  { font-size: 32px !important; }
+  [style*="font-size: 40px"]  { font-size: 30px !important; }
+  [style*="font-size: 38px"]  { font-size: 28px !important; }
+  [style*="font-size: 36px"]  { font-size: 28px !important; }
 }
 
 @media (max-width: 480px) {
   /* Phones get an extra step down on the biggest offenders */
-  [style*="fontSize: 110"], [style*="fontSize:110"] { font-size: 46px !important; }
-  [style*="fontSize: 100"], [style*="fontSize:100"] { font-size: 44px !important; }
-  [style*="fontSize: 96"],  [style*="fontSize:96"]  { font-size: 42px !important; }
-  [style*="fontSize: 80"],  [style*="fontSize:80"]  { font-size: 40px !important; }
-  [style*="fontSize: 72"],  [style*="fontSize:72"]  { font-size: 36px !important; }
-  [style*="fontSize: 64"],  [style*="fontSize:64"]  { font-size: 34px !important; }
+  [style*="font-size: 110px"] { font-size: 42px !important; }
+  [style*="font-size: 100px"] { font-size: 40px !important; }
+  [style*="font-size: 96px"]  { font-size: 38px !important; }
+  [style*="font-size: 80px"]  { font-size: 36px !important; }
+  [style*="font-size: 72px"]  { font-size: 32px !important; }
+  [style*="font-size: 64px"]  { font-size: 30px !important; }
+  [style*="font-size: 56px"]  { font-size: 28px !important; }
+  [style*="font-size: 52px"]  { font-size: 26px !important; }
 }
 
 
-   These pages (CourseDetail, AlphabetArabe, ArabeModerneStandard,
+/* These pages (CourseDetail, AlphabetArabe, ArabeModerneStandard,
    Calligraphy) use a fixed-pixel sidebar column that was never
    actually responsive — the .course-layout/.course-sidebar rules
    above never matched real markup. This targets the real inline
@@ -182,50 +143,19 @@ a { display: inline-flex; align-items: center; justify-content: center; }
     grid-template-columns: 1fr !important;
   }
 
-  /* Sidebar moves below on mobile */
+  /* Sidebar moves above the main column when stacked */
   .dash-sidebar {
     order: -1;
   }
 }
-
-@media (max-width: 600px) {
-  /* Student stats: 2x2 grid instead of 4-col */
-  div[style*="grid-template-columns: repeat(4, 1fr)"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
-  }
-
-  /* Teacher stats: 3 → 1 col on tiny screens */
-  div[style*="grid-template-columns: repeat(3, 1fr)"] {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-  }
-
-  /* Dashboard header actions: wrap nicely */
-  .dash-header-actions {
-    flex-wrap: wrap !important;
-    width: 100% !important;
-  }
-
-  .dash-header-actions button {
-    flex: 1 !important;
-    justify-content: center !important;
-  }
-}
-
-/* ── SESSION MODAL ─────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  /* Modal padding and width */
-  div[style*="maxWidth: 560"] {
-    padding: 20px 16px !important;
-    border-radius: 20px !important;
-  }
-
-  /* Grid inside modal */
-  div[style*="grid-template-columns: 1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-}
+/* Migrated: stat grids (.dash-stats-grid), the session modal's width/
+   padding, and the notif dropdown's width are now natively fluid in
+   Dashboard.jsx. The rules that lived here previously never actually
+   matched anything — `[style*="maxWidth: 560"]` doesn't match React's
+   rendered DOM (which serializes as kebab-case `max-width`, not the
+   camelCase JS key), and `.notif-dropdown` / `.session-actions` /
+   `.dash-header-actions` weren't applied as classNames anywhere in
+   the component. `.session-actions` is now wired up below instead. */
 
 /* ── SESSION CARD ─────────────────────────────────────────────────── */
 @media (max-width: 480px) {
@@ -345,13 +275,9 @@ a { display: inline-flex; align-items: center; justify-content: center; }
 }
 
 /* ── ISLAMIC NOTIFICATIONS BELL ──────────────────────────────────── */
-@media (max-width: 480px) {
-  /* Dropdown: constrain within viewport */
-  .notif-dropdown {
-    right: -60px !important;
-    width: 280px !important;
-  }
-}
+/* Migrated: dropdown width is now inline in Dashboard.jsx via
+   width: min(300px, calc(100vw - 2 * var(--container-pad))), so it
+   fits any viewport without needing an override here. */
 
 /* ── TOUCH IMPROVEMENTS ──────────────────────────────────────────── */
 @media (hover: none) and (pointer: coarse) {

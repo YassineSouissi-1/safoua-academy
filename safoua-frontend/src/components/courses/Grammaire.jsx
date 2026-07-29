@@ -81,6 +81,10 @@ html{scroll-behavior:smooth}
 .mosque-app .lintel-tab:hover{ color:var(--ink) !important; }
 .mosque-app button{ font-family:inherit; }
 .mosque-app .focus-ring:focus-visible{ outline:2px solid var(--mihrab); outline-offset:2px; }
+.mosque-app img, .mosque-app svg { max-width: 100%; }
+@media (max-width: 480px) {
+  .mosque-app .mode-tab-row button { padding: 8px 14px !important; font-size: 12px !important; }
+}
 `;
 
 // ─── Mashrabiya pattern (signature element) ────────────────────────────────
@@ -1650,7 +1654,7 @@ export default function Grammaire() {
       <style>{GS}</style>
 
       {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <div style={{ position: "relative", background: "var(--wall)", borderBottom: "1px solid var(--line)", padding: "44px 32px 36px", overflow: "hidden" }}>
+      <div style={{ position: "relative", background: "var(--wall)", borderBottom: "1px solid var(--line)", padding: "clamp(24px,6vw,44px) clamp(16px,4vw,32px) clamp(20px,4vw,36px)", overflow: "hidden" }}>
         <MashrabiyaBackdrop opacity={0.16} />
         <div style={{ position: "relative", maxWidth: 1080, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
@@ -1678,14 +1682,14 @@ export default function Grammaire() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 <div style={{ width: 22, height: 1.5, background: "var(--gold)" }} />
-                <div className="arabic" style={{ fontSize: 26, color: "var(--mihrab)", fontWeight: 600 }}>{COURSE_META.title}</div>
+                <div className="arabic" style={{ fontSize: "clamp(20px,4vw,26px)", color: "var(--mihrab)", fontWeight: 600 }}>{COURSE_META.title}</div>
               </div>
-              <h1 className="display" style={{ fontSize: 32, fontWeight: 600, color: "var(--ink)", marginBottom: 10, lineHeight: 1.15 }}>{COURSE_META.subtitle}</h1>
+              <h1 className="display" style={{ fontSize: "clamp(24px,5vw,32px)", fontWeight: 600, color: "var(--ink)", marginBottom: 10, lineHeight: 1.15 }}>{COURSE_META.subtitle}</h1>
               <p style={{ fontSize: 13, color: "var(--ink-soft)", maxWidth: 480, lineHeight: 1.7 }}>{COURSE_META.forWho}</p>
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {[{ v: MODULES.length, l: "Modules" }, { v: COURSE_META.totalLessons, l: "Leçons" }, { v: `${completed.length}/${MODULES.length}`, l: "Terminés" }, { v: wordsTraced ? `${avgWritingScore}%` : "—", l: "Calligraphie" }].map(s => (
-                <div key={s.l} style={{ background: "var(--stone2)", borderRadius: 12, padding: "12px 18px", textAlign: "center", minWidth: 76 }}>
+                <div key={s.l} style={{ background: "var(--stone2)", borderRadius: 12, padding: "12px 16px", textAlign: "center", minWidth: 70, flex: "1 0 auto" }}>
                   <div className="display" style={{ fontSize: 21, fontWeight: 600, color: "var(--mihrab)" }}>{s.v}</div>
                   <div style={{ fontSize: 9.5, color: "var(--ink-faint)", marginTop: 2 }}>{s.l}</div>
                 </div>
@@ -1712,7 +1716,7 @@ export default function Grammaire() {
       </div>
 
       {/* ── Main content ──────────────────────────────────────────────── */}
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px 64px" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "clamp(20px,5vw,32px) clamp(16px,4vw,24px) 64px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
           <div>
             <div className="mono" style={{ fontSize: 10.5, color: "var(--mihrab)", letterSpacing: 1, marginBottom: 6 }}>MODULE {mod.num}</div>
@@ -1720,7 +1724,7 @@ export default function Grammaire() {
             <span className="arabic" style={{ fontSize: 18, color: "var(--mihrab)" }}>{mod.title}</span>
             <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 8, maxWidth: 480 }}>{mod.description}</p>
           </div>
-          <div style={{ display: "flex", gap: 4, background: "var(--stone2)", borderRadius: 10, padding: 4 }}>
+          <div className="mode-tab-row" style={{ display: "flex", gap: 4, background: "var(--stone2)", borderRadius: 10, padding: 4 }}>
             {[{ id: "cours", label: "Cours" }, { id: "quiz", label: "Quiz" }].map(t => (
               <button key={t.id} onClick={() => setMainTab(t.id)} className="focus-ring" style={{
                 padding: "8px 18px", borderRadius: 7, border: "none", cursor: "pointer",
